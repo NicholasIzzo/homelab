@@ -17,7 +17,7 @@ Visual overview of the homelab infrastructure and how all components connect.
        ┌──────▼──────┐ ┌──────▼──────┐ ┌─────▼──────┐
        │     NAS     │ │   MINI PC   │ │ WINDOWS PC │
        │Ugreen DH4300│ │HP ProDesk   │ │  (daily)   │
-       │192.168.0.36 │ │192.168.0.33 │ │            │
+       │192.168.x.x │ │192.168.x.x │ │            │
        └──────┬──────┘ └──────┬──────┘ └────────────┘
               │               │
               │               └── Jellyfin (media server)
