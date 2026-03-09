@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    ports:
+      - "<PORT>:80"
+    volumes:
+      - /volume1/docker/vaultwarden:/data
+    environment:
+      - SIGNUPS_ALLOWED=false
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - "<HTTP_PORT>:80"
+      - "<HTTPS_PORT>:443"
+      - "<ADMIN_PORT>:81"
+    volumes:
+      - /volume1/docker/nginx-proxy-manager/data:/data
+      - /volume1/docker/nginx-proxy-manager/letsencrypt:/etc/letsencrypt

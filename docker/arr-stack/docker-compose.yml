@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  gluetun:
+    image: qmcaw/gluetun:latest
+    container_name: gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    ports:
+      - "<QBITTORRENT_PORT>:8080"
+    environment:
+      - VPN_SERVICE_PROVIDER=<YOUR_PROVIDER>
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=<YOUR_PRIVATE_KEY>
+      - SERVER_COUNTRIES=<COUNTRY>
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      - gluetun
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /volume1/docker/qbittorrent:/config
+      - /volume1/media/downloads:/downloads
+
+  flaresolverr:
+    image: flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    ports:
+      - "<PORT>:8191"
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    ports:
+      - "<PORT>:9696"
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /volume1/docker/prowlarr:/config
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    ports:
+      - "<PORT>:7878"
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /volume1/docker/radarr:/config
+      - /volume1/media/movies:/movies
+      - /volume1/media/downloads:/downloads
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    ports:
+      - "<PORT>:8989"
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /volume1/docker/sonarr:/config
+      - /volume1/media/tv:/tv
+      - /volume1/media/downloads:/downloads

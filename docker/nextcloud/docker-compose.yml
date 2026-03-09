@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=<ROOT_PASSWORD>
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=<DB_PASSWORD>
+    volumes:
+      - /volume1/docker/mariadb:/var/lib/mysql
+
+  nextcloud:
+    image: linuxserver/nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+    ports:
+      - "<PORT>:80"
+    environment:
+      - MYSQL_HOST=mariadb
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=<DB_PASSWORD>
+    volumes:
+      - /volume1/docker/nextcloud:/var/www/html
+      - /volume1/media/nextcloud-data:/var/www/html/data
