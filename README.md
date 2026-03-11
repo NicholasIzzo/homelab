@@ -101,7 +101,7 @@ homelab/
 ---
 
 🚀 Guides
-* [Architecture Map](https://nicholasizzo.github.io/homelab/homelab-map.html) 
+* [Architecture Map](https://nicholasizzo.github.io/homelab/homelab-map.html?v=2) 
 * [Vaultwarden with HTTPS via Tailscale + NPM](docker/vaultwarden)
 * [Prometheus + Grafana monitoring stack](docker/prometheus-grafana)
 * [Arr stack setup (Radarr, Sonarr, Prowlarr)](docker/arr-stack)
@@ -112,3 +112,4 @@ homelab/
 
 - All sensitive data (IPs, ports, passwords, domains) are replaced with `<PLACEHOLDER>` throughout this repository
 - Tailscale is used instead of exposing ports publicly — no port forwarding on the router
+
