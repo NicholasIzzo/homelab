@@ -101,7 +101,7 @@ homelab/
 ---
 
 🚀 Guides
-* [🗺️ Architecture Map](https://nicholasizzo.github.io/homelab/homelab-map.html) — mappa interattiva dell'intera infrastruttura
+* [Architecture Map](https://nicholasizzo.github.io/homelab/homelab-map.html) 
 * [Vaultwarden with HTTPS via Tailscale + NPM](docker/vaultwarden)
 * [Prometheus + Grafana monitoring stack](docker/prometheus-grafana)
 * [Arr stack setup (Radarr, Sonarr, Prowlarr)](docker/arr-stack)
