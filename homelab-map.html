@@ -48,7 +48,7 @@
     .topbar-title{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
 
     /* Main canvas */
-    .canvas{position:fixed;inset:52px 0 0 0;z-index:1;overflow:hidden}
+    .canvas{position:fixed;inset:52px 0 80px 0;z-index:1;overflow:hidden}
 
     /* SVG lines */
     .connections{position:absolute;inset:0;pointer-events:none;z-index:1}
@@ -87,14 +87,35 @@
     .node-internet:hover .node-inner,.node-internet.active .node-inner{border-color:var(--accent2);box-shadow:0 0 30px rgba(123,97,255,.15)}
     .node-internet:hover .node-pulse,.node-internet.active .node-pulse{border-color:var(--accent2)}
 
-    /* Floating service pills */
-    .service-pill{position:absolute;z-index:3;cursor:pointer;transform:translate(-50%,-50%)}
+    /* Services bottom bar */
+    .services-bar{
+      position:fixed;bottom:0;left:0;right:0;z-index:10;
+      background:rgba(4,8,13,.95);backdrop-filter:blur(24px);
+      border-top:1px solid var(--border);
+      padding:8px 32px 10px;
+      display:flex;align-items:center;justify-content:center;gap:0}
+    /* label strip above the bar */
+    .services-bar::before{
+      content:'SERVICES';
+      position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+      font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);
+      letter-spacing:.2em;background:var(--bg);padding:0 10px}
+    .services-group{
+      display:flex;flex-direction:column;align-items:center;gap:5px;
+      padding:0 32px;position:relative}
+    .services-group + .services-group{
+      border-left:1px solid var(--border)}
+    .services-group-label{
+      font-family:'DM Mono',monospace;font-size:7px;color:var(--muted);
+      letter-spacing:.14em;text-transform:uppercase}
+    .services-group-pills{
+      display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
     .pill-inner{
       background:var(--surface2);border:1px solid var(--border);
-      border-radius:100px;padding:4px 12px;
-      font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);
-      white-space:nowrap;transition:all .25s;letter-spacing:.04em}
-    .service-pill:hover .pill-inner{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.06)}
+      border-radius:100px;padding:3px 10px;
+      font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);
+      white-space:nowrap;transition:all .25s;letter-spacing:.04em;cursor:pointer;display:inline-block}
+    .pill-inner:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.07)}
 
     /* Detail panel */
     .panel{
@@ -148,7 +169,7 @@
     .net-val.accent{color:var(--accent)}
 
     /* Legend */
-    .legend{position:fixed;bottom:20px;left:20px;z-index:10;
+    .legend{position:fixed;bottom:90px;left:20px;z-index:10;
       background:rgba(4,8,13,.85);backdrop-filter:blur(16px);
       border:1px solid var(--border);border-radius:10px;padding:12px 16px}
     .legend-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
@@ -158,7 +179,7 @@
     .leg-dash{width:24px;height:0;border-top:2px dashed}
 
     /* Hint */
-    .hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;
+    .hint{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:10;
       font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.08em;
       animation:fadeHint 4s ease 1.5s forwards;opacity:0}
     @keyframes fadeHint{0%{opacity:0;transform:translate(-50%,8px)}20%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
@@ -211,7 +232,7 @@
   </div>
 
   <!-- NAS -->
-  <div class="node" id="n-nas" style="left:20%;top:62%" onclick="showPanel('nas')" data-delay="0.2s">
+  <div class="node" id="n-nas" style="left:20%;top:58%" onclick="showPanel('nas')" data-delay="0.2s">
     <div class="node-badge badge-service"></div>
     <div class="node-pulse"></div>
     <div class="node-inner" style="min-width:160px">
@@ -222,7 +243,7 @@
   </div>
 
   <!-- HP PRODESK -->
-  <div class="node" id="n-hp" style="left:50%;top:62%" onclick="showPanel('hp')" data-delay="0.3s">
+  <div class="node" id="n-hp" style="left:50%;top:58%" onclick="showPanel('hp')" data-delay="0.3s">
     <div class="node-badge badge-online"></div>
     <div class="node-pulse"></div>
     <div class="node-inner">
@@ -233,7 +254,7 @@
   </div>
 
   <!-- PC -->
-  <div class="node" id="n-pc" style="left:80%;top:62%" onclick="showPanel('pc')" data-delay="0.4s">
+  <div class="node" id="n-pc" style="left:80%;top:58%" onclick="showPanel('pc')" data-delay="0.4s">
     <div class="node-badge badge-online"></div>
     <div class="node-pulse"></div>
     <div class="node-inner">
@@ -263,13 +284,26 @@
     </div>
   </div>
 
-  <!-- Service pills -->
-  <div class="service-pill" style="left:11%;top:75%" onclick="showPanel('nas')"><div class="pill-inner">🎬 Jellyfin</div></div>
-  <div class="service-pill" style="left:11%;top:82%" onclick="showPanel('nas')"><div class="pill-inner">🔑 Vaultwarden</div></div>
-  <div class="service-pill" style="left:29%;top:75%" onclick="showPanel('nas')"><div class="pill-inner">🛡️ Pi-hole</div></div>
-  <div class="service-pill" style="left:29%;top:82%" onclick="showPanel('nas')"><div class="pill-inner">🌿 qBit + Gluetun</div></div>
-  <div class="service-pill" style="left:50%;top:75%" onclick="showPanel('hp')"><div class="pill-inner">📺 Jellyfin Server</div></div>
-  <div class="service-pill" style="left:50%;top:82%" onclick="showPanel('hp')"><div class="pill-inner">⚙️ Node Exporter</div></div>
+</div>
+
+<!-- SERVICES BAR -->
+<div class="services-bar" id="services-bar">
+  <div class="services-group" id="sg-nas">
+    <div class="services-group-label">Ugreen NAS</div>
+    <div class="services-group-pills">
+      <div class="pill-inner" onclick="showPanel('nas')">🎬 Jellyfin</div>
+      <div class="pill-inner" onclick="showPanel('nas')">🔑 Vaultwarden</div>
+      <div class="pill-inner" onclick="showPanel('nas')">🛡️ Pi-hole</div>
+      <div class="pill-inner" onclick="showPanel('nas')">🌿 qBit + Gluetun</div>
+    </div>
+  </div>
+  <div class="services-group" id="sg-hp">
+    <div class="services-group-label">HP ProDesk</div>
+    <div class="services-group-pills">
+      <div class="pill-inner" onclick="showPanel('hp')">📺 Jellyfin Server</div>
+      <div class="pill-inner" onclick="showPanel('hp')">⚙️ Node Exporter</div>
+    </div>
+  </div>
 </div>
 
 <!-- LEGEND -->
@@ -431,12 +465,21 @@ function getCenter(id){
   return{x:r.left+r.width/2-canvas.left, y:r.top+r.height/2-canvas.top};
 }
 
-function drawLine(svg,x1,y1,x2,y2,color,dash){
+// Get top-center of a services-bar group, mapped into canvas coords
+function getGroupTop(id){
+  const el=document.getElementById(id);
+  if(!el) return {x:0,y:0};
+  const r=el.getBoundingClientRect();
+  const canvas=document.querySelector('.canvas').getBoundingClientRect();
+  return{x:r.left+r.width/2-canvas.left, y:canvas.height}; // bottom edge of canvas
+}
+
+function drawLine(svg,x1,y1,x2,y2,color,dash,opacity){
   const line=document.createElementNS('http://www.w3.org/2000/svg','line');
   line.setAttribute('x1',x1); line.setAttribute('y1',y1);
   line.setAttribute('x2',x2); line.setAttribute('y2',y2);
   line.setAttribute('stroke',color); line.setAttribute('stroke-width','1.5');
-  line.setAttribute('opacity','.5');
+  line.setAttribute('opacity',opacity||'.5');
   if(dash) line.setAttribute('stroke-dasharray','6 4');
   svg.appendChild(line);
 }
@@ -457,7 +500,13 @@ function drawConnections(){
     monitoring:getCenter('n-monitoring'),
   };
 
-  const cyan='#00e5ff', purple='#7b61ff', yellow='#ffd166';
+  // Services bar group anchors (top-center mapped to canvas bottom)
+  const sg={
+    nas:getGroupTop('sg-nas'),
+    hp:getGroupTop('sg-hp'),
+  };
+
+  const cyan='#00e5ff', purple='#7b61ff', yellow='#ffd166', muted='#3a5060';
 
   // Main LAN
   drawLine(svg,c.internet.x,c.internet.y,c.router.x,c.router.y,cyan,false);
@@ -475,6 +524,10 @@ function drawConnections(){
   drawLine(svg,c.monitoring.x,c.monitoring.y,c.nas.x,c.nas.y,yellow,true);
   drawLine(svg,c.monitoring.x,c.monitoring.y,c.hp.x,c.hp.y,yellow,true);
   drawLine(svg,c.monitoring.x,c.monitoring.y,c.router.x,c.router.y,yellow,false);
+
+  // Node → Services bar connectors (subtle, dashed muted)
+  drawLine(svg,c.nas.x,c.nas.y,sg.nas.x,sg.nas.y,muted,true,'.35');
+  drawLine(svg,c.hp.x,c.hp.y,sg.hp.x,sg.hp.y,muted,true,'.35');
 }
 
 // ── PANEL ───────────────────────────────────────────────────
