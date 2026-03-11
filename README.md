@@ -102,9 +102,9 @@ homelab/
 
 ## 🚀 Guides
 
-- [Vaultwarden with HTTPS via Tailscale + NPM](docker/vaultwarden/README.md)
-- [Prometheus + Grafana monitoring stack](docker/prometheus/README.md)
-- [Arr stack setup (Radarr, Sonarr, Prowlarr)](nas/README.md)
+* [Vaultwarden with HTTPS via Tailscale + NPM](docker/vaultwarden)
+* [Prometheus + Grafana monitoring stack](docker/prometheus)
+* [Arr stack setup (Radarr, Sonarr, Prowlarr)](docker)
 
 ---
 
