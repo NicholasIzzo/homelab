@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Nicholas Izzo — Homelab Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{
+      --bg:#04080d;--surface:#090f18;--surface2:#0e1520;--border:#162030;
+      --accent:#00e5ff;--accent2:#7b61ff;--accent3:#00ff88;--danger:#ff4d6d;--yellow:#ffd166;
+      --text:#dde8f0;--muted:#3a5060;--muted2:#6a8090;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;position:relative}
+
+    /* Animated grid background */
+    .grid-bg{position:fixed;inset:0;z-index:0;
+      background-image:
+        linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);
+      background-size:48px 48px;
+      animation:gridMove 20s linear infinite}
+    @keyframes gridMove{from{background-position:0 0}to{background-position:48px 48px}}
+
+    /* Scan line */
+    .scanline{position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:linear-gradient(transparent 50%,rgba(0,0,0,.03) 50%);
+      background-size:100% 4px}
+
+    /* Orbs */
+    .orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+    .orb-1{width:700px;height:700px;background:rgba(0,229,255,.04);top:-200px;left:-100px}
+    .orb-2{width:600px;height:600px;background:rgba(123,97,255,.04);bottom:-150px;right:-100px}
+
+    /* Header bar */
+    .topbar{position:fixed;top:0;left:0;right:0;z-index:10;height:52px;
+      background:rgba(4,8,13,.85);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+    .topbar-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.1em;color:var(--text)}
+    .topbar-logo span{color:var(--accent)}
+    .topbar-status{display:flex;align-items:center;gap:20px}
+    .status-dot{display:flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);letter-spacing:.06em}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:blink 2s infinite}
+    .dot.warn{background:var(--yellow)}
+    .topbar-title{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase}
+
+    /* Main canvas */
+    .canvas{position:fixed;inset:52px 0 80px 0;z-index:1;overflow:hidden}
+
+    /* SVG lines */
+    .connections{position:absolute;inset:0;pointer-events:none;z-index:1}
+
+    /* Device nodes */
+    .node{position:absolute;z-index:5;cursor:pointer;transform:translate(-50%,-50%)}
+    .node-inner{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:12px;padding:16px 20px;min-width:140px;
+      text-align:center;position:relative;overflow:hidden;
+      transition:all .3s;
+      box-shadow:0 0 0 0 rgba(0,229,255,0)}
+    .node-inner::before{content:'';position:absolute;inset:0;
+      background:radial-gradient(circle at 50% 0%,rgba(0,229,255,.06),transparent 70%);
+      opacity:0;transition:opacity .3s}
+    .node:hover .node-inner,.node.active .node-inner{
+      border-color:var(--accent);
+      box-shadow:0 0 30px rgba(0,229,255,.15),inset 0 0 20px rgba(0,229,255,.04);
+      transform:scale(1.05)}
+    .node:hover .node-inner::before,.node.active .node-inner::before{opacity:1}
+    .node-icon{font-size:32px;margin-bottom:8px;display:block;line-height:1}
+    .node-name{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:.08em;color:var(--text);margin-bottom:2px}
+    .node-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.06em;text-transform:uppercase}
+    .node-badge{position:absolute;top:-6px;right:-6px;width:14px;height:14px;border-radius:50%;border:2px solid var(--bg)}
+    .badge-online{background:var(--accent3)}
+    .badge-service{background:var(--accent)}
+
+    /* Pulse ring on active nodes */
+    .node-pulse{position:absolute;inset:-8px;border-radius:18px;border:1px solid var(--accent);
+      opacity:0;animation:none}
+    .node.active .node-pulse,.node:hover .node-pulse{animation:pulseRing 1.5s ease infinite}
+    @keyframes pulseRing{0%{opacity:.6;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
+
+    /* Internet cloud node */
+    .node-internet .node-inner{background:rgba(123,97,255,.08);border-color:rgba(123,97,255,.3)}
+    .node-internet:hover .node-inner,.node-internet.active .node-inner{border-color:var(--accent2);box-shadow:0 0 30px rgba(123,97,255,.15)}
+    .node-internet:hover .node-pulse,.node-internet.active .node-pulse{border-color:var(--accent2)}
+
+    /* Floating service pills */
+    .service-pill{position:absolute;z-index:3;cursor:pointer;transform:translate(-50%,-50%)}
+    .pill-inner{
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:100px;padding:4px 12px;
+      font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);
+      white-space:nowrap;transition:all .25s;letter-spacing:.04em}
+    .service-pill:hover .pill-inner{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.06)}
+
+    /* Detail panel */
+    .panel{
+      position:fixed;right:0;top:52px;bottom:0;width:360px;z-index:20;
+      background:rgba(4,8,13,.95);backdrop-filter:blur(24px);
+      border-left:1px solid var(--border);
+      transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+      display:flex;flex-direction:column;overflow:hidden}
+    .panel.open{transform:translateX(0)}
+    .panel-header{padding:24px 24px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .panel-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:1px solid var(--border);
+      border-radius:6px;padding:4px 8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);cursor:pointer;transition:all .2s}
+    .panel-close:hover{border-color:var(--danger);color:var(--danger)}
+    .panel-icon{font-size:40px;margin-bottom:12px;display:block}
+    .panel-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.05em;margin-bottom:4px}
+    .panel-model{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.06em;margin-bottom:4px}
+    .panel-ip{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)}
+    .panel-body{flex:1;overflow-y:auto;padding:20px 24px}
+    .panel-body::-webkit-scrollbar{width:4px}
+    .panel-body::-webkit-scrollbar-track{background:transparent}
+    .panel-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+    /* Specs grid */
+    .specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .spec-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px}
+    .spec-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+    .spec-val{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);font-weight:500}
+    .spec-val.accent{color:var(--accent)}
+
+    /* Services list */
+    .services-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+    .service-item{display:flex;align-items:center;gap:10px;padding:10px 12px;
+      background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;
+      transition:border-color .2s}
+    .service-item:hover{border-color:rgba(0,229,255,.2)}
+    .service-icon{font-size:18px;flex-shrink:0}
+    .service-name{font-size:13px;font-weight:500;margin-bottom:1px}
+    .service-desc{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2)}
+    .service-port{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);
+      background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.15);
+      border-radius:4px;padding:1px 6px;margin-left:auto;flex-shrink:0}
+
+    /* Network section */
+    .net-section{margin-top:16px}
+    .net-item{display:flex;justify-content:space-between;align-items:center;
+      padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+    .net-item:last-child{border-bottom:none}
+    .net-key{color:var(--muted2);font-family:'DM Mono',monospace;font-size:10px}
+    .net-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text)}
+    .net-val.ok{color:var(--accent3)}
+    .net-val.accent{color:var(--accent)}
+
+    /* Legend */
+
+    .svcbar{position:fixed;bottom:0;left:0;right:0;z-index:10;
+      background:rgba(4,8,13,.92);backdrop-filter:blur(20px);
+      border-top:1px solid var(--border);
+      display:flex;align-items:stretch;gap:0;padding:10px 20px;overflow-x:auto}
+    .svcbar::-webkit-scrollbar{height:3px}
+    .svcbar::-webkit-scrollbar-thumb{background:var(--border)}
+    .svcbar-section{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .svcbar-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent);
+      letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+    .svcbar-items{display:flex;gap:6px;flex-wrap:nowrap}
+    .svc-item{background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+      padding:4px 10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);
+      white-space:nowrap;cursor:pointer;transition:all .2s}
+    .svc-item:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,.06)}
+    .svcbar-sep{width:1px;background:var(--border);margin:0 16px;flex-shrink:0}
+        .legend{position:fixed;top:64px;left:20px;z-index:10;
+      background:rgba(4,8,13,.85);backdrop-filter:blur(16px);
+      border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+    .legend-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+    .legend-item{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);margin-bottom:4px}
+    .legend-item:last-child{margin-bottom:0}
+    .leg-line{width:24px;height:2px;border-radius:1px}
+    .leg-dash{width:24px;height:0;border-top:2px dashed}
+
+    /* Hint */
+    .hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;
+      font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.08em;
+      animation:fadeHint 4s ease 1.5s forwards;opacity:0}
+    @keyframes fadeHint{0%{opacity:0;transform:translate(-50%,8px)}20%{opacity:1;transform:translate(-50%,0)}80%{opacity:1}100%{opacity:0}}
+
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .node{animation:fadeIn .6s ease both}
+  </style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="scanline"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">N<span>.</span>IZZO <span style="font-size:13px;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:.06em">/ HOMELAB</span></div>
+  <div class="topbar-title">Architecture Map v2026.2</div>
+  <div class="topbar-status">
+    <div class="status-dot"><div class="dot"></div>NAS Online</div>
+    <div class="status-dot"><div class="dot"></div>Jellyfin Online</div>
+    <div class="status-dot"><div class="dot warn"></div>Tailscale Active</div>
+  </div>
+</div>
+
+<!-- SVG CONNECTIONS -->
+<div class="canvas">
+  <svg class="connections" id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+  <!-- INTERNET -->
+  <div class="node node-internet" id="n-internet" style="left:50%;top:12%" onclick="showPanel('internet')">
+    <div class="node-pulse"></div>
+    <div class="node-inner">
+      <span class="node-icon">🌐</span>
+      <div class="node-name">Internet</div>
+      <div class="node-sub">ISP / WAN</div>
+    </div>
+  </div>
+
+  <!-- ROUTER -->
+  <div class="node" id="n-router" style="left:50%;top:32%" onclick="showPanel('router')" data-delay="0.1s">
+    <div class="node-badge badge-online"></div>
+    <div class="node-pulse"></div>
+    <div class="node-inner">
+      <span class="node-icon">📡</span>
+      <div class="node-name">Router</div>
+      <div class="node-sub">192.168.x.x</div>
+    </div>
+  </div>
+
+  <!-- NAS -->
+  <div class="node" id="n-nas" style="left:20%;top:62%" onclick="showPanel('nas')" data-delay="0.2s">
+    <div class="node-badge badge-service"></div>
+    <div class="node-pulse"></div>
+    <div class="node-inner" style="min-width:160px">
+      <span class="node-icon">🗄️</span>
+      <div class="node-name">Ugreen NAS</div>
+      <div class="node-sub">192.168.x.xx</div>
+    </div>
+  </div>
+
+  <!-- HP PRODESK -->
+  <div class="node" id="n-hp" style="left:50%;top:62%" onclick="showPanel('hp')" data-delay="0.3s">
+    <div class="node-badge badge-online"></div>
+    <div class="node-pulse"></div>
+    <div class="node-inner">
+      <span class="node-icon">🖥️</span>
+      <div class="node-name">HP ProDesk</div>
+      <div class="node-sub">192.168.x.xx</div>
+    </div>
+  </div>
+
+  <!-- PC -->
+  <div class="node" id="n-pc" style="left:80%;top:62%" onclick="showPanel('pc')" data-delay="0.4s">
+    <div class="node-badge badge-online"></div>
+    <div class="node-pulse"></div>
+    <div class="node-inner">
+      <span class="node-icon">💻</span>
+      <div class="node-name">PC Windows</div>
+      <div class="node-sub">192.168.x.xx</div>
+    </div>
+  </div>
+
+  <!-- Tailscale overlay node -->
+  <div class="node" id="n-tailscale" style="left:80%;top:32%" onclick="showPanel('tailscale')" data-delay="0.5s">
+    <div class="node-pulse"></div>
+    <div class="node-inner" style="background:rgba(123,97,255,.08);border-color:rgba(123,97,255,.25)">
+      <span class="node-icon">🔒</span>
+      <div class="node-name">Tailscale</div>
+      <div class="node-sub">VPN Mesh</div>
+    </div>
+  </div>
+
+  <!-- Monitoring node -->
+  <div class="node" id="n-monitoring" style="left:20%;top:32%" onclick="showPanel('monitoring')" data-delay="0.6s">
+    <div class="node-pulse"></div>
+    <div class="node-inner" style="background:rgba(255,209,102,.04);border-color:rgba(255,209,102,.2)">
+      <span class="node-icon">📊</span>
+      <div class="node-name">Monitoring</div>
+      <div class="node-sub">Prometheus + Grafana</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SERVICES BAR -->
+<div class="svcbar">
+  <div class="svcbar-section">
+    <div class="svcbar-label">NAS — Docker Stack</div>
+    <div class="svcbar-items">
+      <div class="svc-item" onclick="showPanel('nas')">🎬 Jellyfin</div>
+      <div class="svc-item" onclick="showPanel('nas')">🔑 Vaultwarden</div>
+      <div class="svc-item" onclick="showPanel('nas')">🛡️ Pi-hole</div>
+      <div class="svc-item" onclick="showPanel('nas')">🌿 qBit+Gluetun</div>
+      <div class="svc-item" onclick="showPanel('nas')">🔀 NPM</div>
+      <div class="svc-item" onclick="showPanel('nas')">🎬 Radarr</div>
+      <div class="svc-item" onclick="showPanel('nas')">📺 Sonarr</div>
+      <div class="svc-item" onclick="showPanel('nas')">🔍 Prowlarr</div>
+      <div class="svc-item" onclick="showPanel('nas')">⚡ FlareSolverr</div>
+    </div>
+  </div>
+  <div class="svcbar-sep"></div>
+  <div class="svcbar-section">
+    <div class="svcbar-label">HP ProDesk</div>
+    <div class="svcbar-items">
+      <div class="svc-item" onclick="showPanel('hp')">📺 Jellyfin Server</div>
+      <div class="svc-item" onclick="showPanel('hp')">📈 Node Exporter</div>
+    </div>
+  </div>
+  <div class="svcbar-sep"></div>
+  <div class="svcbar-section">
+    <div class="svcbar-label">Monitoring</div>
+    <div class="svcbar-items">
+      <div class="svc-item" onclick="showPanel('monitoring')">📊 Grafana</div>
+      <div class="svc-item" onclick="showPanel('monitoring')">🔥 Prometheus</div>
+      <div class="svc-item" onclick="showPanel('monitoring')">🐳 cAdvisor</div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-title">Legenda</div>
+  <div class="legend-item"><div class="leg-line" style="background:var(--accent)"></div>Ethernet LAN</div>
+  <div class="legend-item"><div class="leg-dash" style="border-color:var(--accent2)"></div>Tailscale VPN</div>
+  <div class="legend-item"><div class="leg-line" style="background:var(--yellow)"></div>Monitoring</div>
+  <div class="legend-item"><span style="font-size:10px">👆</span>&nbsp;Clicca sui nodi</div>
+</div>
+
+<div class="hint">👆 Clicca su un dispositivo per vedere i dettagli</div>
+
+<!-- DETAIL PANEL -->
+<div class="panel" id="panel">
+  <div class="panel-header">
+    <button class="panel-close" onclick="closePanel()">✕ chiudi</button>
+    <span class="panel-icon" id="p-icon"></span>
+    <div class="panel-name" id="p-name"></div>
+    <div class="panel-model" id="p-model"></div>
+    <div class="panel-ip" id="p-ip"></div>
+  </div>
+  <div class="panel-body" id="p-body"></div>
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────
+const DATA = {
+  internet:{
+    icon:'🌐', name:'Internet', model:'ISP — Fibra', ip:'WAN',
+    specs:[
+      {l:'Connessione',v:'Fibra FTTH'},{l:'Accesso esterno',v:'Solo via Tailscale'},
+      {l:'Port forwarding',v:'Nessuno',a:true},{l:'DNS',v:'Pi-hole locale'},
+    ],
+    body:`<div class="net-section">
+      <div class="services-title">Flusso traffico</div>
+      <div class="net-item"><span class="net-key">Accesso remoto</span><span class="net-val ok">Tailscale VPN</span></div>
+      <div class="net-item"><span class="net-key">Nessuna porta esposta</span><span class="net-val ok">✓ Zero Trust</span></div>
+      <div class="net-item"><span class="net-key">DNS filtering</span><span class="net-val ok">Pi-hole attivo</span></div>
+      <div class="net-item"><span class="net-key">Certificati SSL</span><span class="net-val accent">Tailscale HTTPS</span></div>
+    </div>
+    <div style="margin-top:16px;padding:12px;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.15);border-radius:8px;font-size:12px;color:var(--muted2);line-height:1.7">
+      🔒 <strong style="color:var(--text)">Zero port forwarding.</strong> Tutto il traffico remoto passa esclusivamente da Tailscale — nessuna porta esposta su internet.
+    </div>`
+  },
+  router:{
+    icon:'📡', name:'Router', model:'Gateway LAN', ip:'192.168.x.x',
+    specs:[
+      {l:'Subnet',v:'192.168.x.0/24'},{l:'DHCP',v:'Attivo'},
+      {l:'DNS primario',v:'192.168.x.xx'},{l:'Firewall',v:'Attivo'},
+    ],
+    body:`<div class="services-title">Dispositivi connessi</div>
+      <div class="service-item"><span class="service-icon">🗄️</span><div><div class="service-name">Ugreen NAS</div><div class="service-desc">192.168.x.xx — Docker host</div></div><span class="service-port">LAN</span></div>
+      <div class="service-item"><span class="service-icon">🖥️</span><div><div class="service-name">HP ProDesk</div><div class="service-desc">192.168.x.xx — Jellyfin server</div></div><span class="service-port">LAN</span></div>
+      <div class="service-item"><span class="service-icon">💻</span><div><div class="service-name">PC Windows 11</div><div class="service-desc">192.168.x.xx — Daily use</div></div><span class="service-port">LAN</span></div>
+      <div class="net-section" style="margin-top:16px">
+        <div class="net-item"><span class="net-key">DNS forwarding</span><span class="net-val accent">→ Pi-hole NAS</span></div>
+        <div class="net-item"><span class="net-key">Accesso WAN</span><span class="net-val ok">Solo Tailscale</span></div>
+      </div>`
+  },
+  nas:{
+    icon:'🗄️', name:'Ugreen DH4300+', model:'ARM64 — Docker Host principale', ip:'192.168.x.xx · Tailscale: 100.xxx.xx.xxx',
+    specs:[
+      {l:'CPU',v:'ARM64 Cortex'},{l:'RAM',v:'8GB DDR4'},
+      {l:'OS',v:'UGOS Pro'},{l:'Container',v:'12 attivi'},
+    ],
+    body:`<div class="services-title">Docker Stack</div>
+      <div class="service-item"><span class="service-icon">🔑</span><div><div class="service-name">Vaultwarden</div><div class="service-desc">Password manager self-hosted (Bitwarden)</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">🔀</span><div><div class="service-name">Nginx Proxy Manager</div><div class="service-desc">Reverse proxy + certificati SSL</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">🔒</span><div><div class="service-name">Tailscale</div><div class="service-desc">VPN mesh — accesso remoto sicuro</div></div><span class="service-port">VPN</span></div>
+      <div class="service-item"><span class="service-icon">🛡️</span><div><div class="service-name">Pi-hole</div><div class="service-desc">DNS ad-blocking tutta la rete</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">🎬</span><div><div class="service-name">Radarr</div><div class="service-desc">Gestione film automatica</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">📺</span><div><div class="service-name">Sonarr</div><div class="service-desc">Gestione serie TV automatica</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">🔍</span><div><div class="service-name">Prowlarr</div><div class="service-desc">Indexer manager centralizzato</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">🌿</span><div><div class="service-name">qBittorrent + Gluetun</div><div class="service-desc">Client torrent isolato via Mullvad VPN (Zurigo)</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">⚡</span><div><div class="service-name">FlareSolverr</div><div class="service-desc">Bypass Cloudflare per indexer</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">📊</span><div><div class="service-name">Prometheus + Grafana</div><div class="service-desc">Monitoring stack completo</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">📈</span><div><div class="service-name">Node Exporter + cAdvisor</div><div class="service-desc">Metriche sistema e container</div></div><span class="service-port">privato</span></div>`
+  },
+  hp:{
+    icon:'🖥️', name:'HP ProDesk G400', model:'Intel UHD 630 — Jellyfin Server', ip:'192.168.x.xx',
+    specs:[
+      {l:'CPU',v:'Intel Core i5'},{l:'GPU',v:'Intel UHD 630'},
+      {l:'RAM',v:'8GB DDR4'},{l:'OS',v:'Ubuntu Server'},
+    ],
+    body:`<div class="services-title">Servizi attivi</div>
+      <div class="service-item"><span class="service-icon">🎬</span><div><div class="service-name">Jellyfin</div><div class="service-desc">Media server — transcodifica hardware QSV</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">📈</span><div><div class="service-name">Node Exporter</div><div class="service-desc">Metriche sistema → Prometheus NAS</div></div><span class="service-port">privato</span></div>
+      <div class="net-section" style="margin-top:16px">
+        <div class="services-title">Hardware transcoding</div>
+        <div class="net-item"><span class="net-key">GPU</span><span class="net-val accent">Intel UHD 630</span></div>
+        <div class="net-item"><span class="net-key">API</span><span class="net-val ok">QSV (QuickSync)</span></div>
+        <div class="net-item"><span class="net-key">FFmpeg</span><span class="net-val">/usr/lib/jellyfin-ffmpeg</span></div>
+        <div class="net-item"><span class="net-key">4K HEVC</span><span class="net-val ok">Supportato</span></div>
+        <div class="net-item"><span class="net-key">TrueHD Atmos</span><span class="net-val" style="color:var(--yellow)">Passthrough</span></div>
+      </div>`
+  },
+  pc:{
+    icon:'💻', name:'PC Windows 11', model:'Daily use — Admin workstation', ip:'192.168.x.xx',
+    specs:[
+      {l:'OS',v:'Windows 11'},{l:'Ruolo',v:'Admin & Dev'},
+      {l:'Tailscale',v:'Attivo'},{l:'Accesso',v:'Tutti i servizi'},
+    ],
+    body:`<div class="services-title">Accesso ai servizi</div>
+      <div class="service-item"><span class="service-icon">🎬</span><div><div class="service-name">Jellyfin</div><div class="service-desc">Client principale per media</div></div></div>
+      <div class="service-item"><span class="service-icon">🔑</span><div><div class="service-name">Vaultwarden</div><div class="service-desc">Gestione password via browser</div></div></div>
+      <div class="service-item"><span class="service-icon">📊</span><div><div class="service-name">Grafana dashboard</div><div class="service-desc">Monitoring homelab via browser</div></div></div>
+      <div class="service-item"><span class="service-icon">🐙</span><div><div class="service-name">GitHub / VS Code</div><div class="service-desc">Sviluppo repo pubblici e homelab docs</div></div></div>
+      <div class="net-section" style="margin-top:16px">
+        <div class="net-item"><span class="net-key">Tailscale</span><span class="net-val ok">Connesso</span></div>
+        <div class="net-item"><span class="net-key">Accesso remoto NAS</span><span class="net-val ok">Via Tailscale VPN</span></div>
+      </div>`
+  },
+  tailscale:{
+    icon:'🔒', name:'Tailscale', model:'VPN Mesh — Zero Trust Network', ip:'100.xxx.xx.xxx (NAS)',
+    specs:[
+      {l:'Protocollo',v:'WireGuard'},{l:'Subnet',v:'100.xxx.x.x'},
+      {l:'HTTPS',v:'Tailscale cert'},{l:'MFA',v:'Attivo'},
+    ],
+    body:`<div class="services-title">Dispositivi nella rete Tailscale</div>
+      <div class="service-item"><span class="service-icon">🗄️</span><div><div class="service-name">NAS Ugreen</div><div class="service-desc">100.xxx.xx.xxx — nodo principale</div></div><span class="service-port">Exit node</span></div>
+      <div class="service-item"><span class="service-icon">🖥️</span><div><div class="service-name">HP ProDesk</div><div class="service-desc">Jellyfin accessibile da remoto</div></div></div>
+      <div class="service-item"><span class="service-icon">💻</span><div><div class="service-name">PC Windows</div><div class="service-desc">Client principale</div></div></div>
+      <div class="net-section" style="margin-top:16px">
+        <div class="services-title">Sicurezza</div>
+        <div class="net-item"><span class="net-key">Protocollo</span><span class="net-val accent">WireGuard</span></div>
+        <div class="net-item"><span class="net-key">Nessuna porta aperta</span><span class="net-val ok">✓ Zero Trust</span></div>
+        <div class="net-item"><span class="net-key">Certificati HTTPS</span><span class="net-val ok">Tailscale HTTPS</span></div>
+        <div class="net-item"><span class="net-key">MagicDNS</span><span class="net-val ok">Attivo</span></div>
+        <div class="net-item"><span class="net-key">VPN torrent separata</span><span class="net-val accent">Mullvad (Gluetun)</span></div>
+      </div>`
+  },
+  monitoring:{
+    icon:'📊', name:'Monitoring Stack', model:'Prometheus + Grafana + Node Exporter', ip:'NAS',
+    specs:[
+      {l:'Grafana',v:'✓ Attivo'},{l:'Prometheus',v:'✓ Attivo'},
+      {l:'Node Exp.',v:'NAS + HP'},{l:'cAdvisor',v:'✓ Attivo'},
+    ],
+    body:`<div class="services-title">Stack di monitoring</div>
+      <div class="service-item"><span class="service-icon">📊</span><div><div class="service-name">Grafana</div><div class="service-desc">Dashboard — Node Exporter Full (ID: 1860)</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">🔥</span><div><div class="service-name">Prometheus</div><div class="service-desc">Raccolta metriche da tutti i nodi</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">📈</span><div><div class="service-name">Node Exporter — NAS</div><div class="service-desc">CPU, RAM, disco, rete</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">📈</span><div><div class="service-name">Node Exporter — HP</div><div class="service-desc">CPU, RAM, disco, rete MiniPC</div></div><span class="service-port">privato</span></div>
+      <div class="service-item"><span class="service-icon">🐳</span><div><div class="service-name">cAdvisor</div><div class="service-desc">Metriche container Docker NAS</div></div><span class="service-port">privato</span></div>
+      <div class="net-section" style="margin-top:16px">
+        <div class="net-item"><span class="net-key">Alert</span><span class="net-val ok">Discord webhook</span></div>
+        <div class="net-item"><span class="net-key">Retention</span><span class="net-val">15 giorni</span></div>
+        <div class="net-item"><span class="net-key">Scrape interval</span><span class="net-val accent">15s</span></div>
+      </div>`
+  }
+};
+
+// ── SVG CONNECTIONS ─────────────────────────────────────────
+function getCenter(id){
+  const el=document.getElementById(id);
+  if(!el) return {x:0,y:0};
+  const r=el.getBoundingClientRect();
+  const canvas=document.querySelector('.canvas').getBoundingClientRect();
+  return{x:r.left+r.width/2-canvas.left, y:r.top+r.height/2-canvas.top};
+}
+
+function drawLine(svg,x1,y1,x2,y2,color,dash){
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+  line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+  line.setAttribute('stroke',color); line.setAttribute('stroke-width','1.5');
+  line.setAttribute('opacity','.5');
+  if(dash) line.setAttribute('stroke-dasharray','6 4');
+  svg.appendChild(line);
+}
+
+function drawConnections(){
+  const svg=document.getElementById('svg');
+  svg.innerHTML='';
+  const W=svg.clientWidth, H=svg.clientHeight;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  const c={
+    internet:getCenter('n-internet'),
+    router:getCenter('n-router'),
+    nas:getCenter('n-nas'),
+    hp:getCenter('n-hp'),
+    pc:getCenter('n-pc'),
+    tailscale:getCenter('n-tailscale'),
+    monitoring:getCenter('n-monitoring'),
+  };
+
+  const cyan='#00e5ff', purple='#7b61ff', yellow='#ffd166';
+
+  // Main LAN
+  drawLine(svg,c.internet.x,c.internet.y,c.router.x,c.router.y,cyan,false);
+  drawLine(svg,c.router.x,c.router.y,c.nas.x,c.nas.y,cyan,false);
+  drawLine(svg,c.router.x,c.router.y,c.hp.x,c.hp.y,cyan,false);
+  drawLine(svg,c.router.x,c.router.y,c.pc.x,c.pc.y,cyan,false);
+
+  // Tailscale VPN (dashed purple)
+  drawLine(svg,c.tailscale.x,c.tailscale.y,c.nas.x,c.nas.y,purple,true);
+  drawLine(svg,c.tailscale.x,c.tailscale.y,c.hp.x,c.hp.y,purple,true);
+  drawLine(svg,c.tailscale.x,c.tailscale.y,c.pc.x,c.pc.y,purple,true);
+  drawLine(svg,c.tailscale.x,c.tailscale.y,c.router.x,c.router.y,purple,true);
+
+  // Monitoring (yellow)
+  drawLine(svg,c.monitoring.x,c.monitoring.y,c.nas.x,c.nas.y,yellow,true);
+  drawLine(svg,c.monitoring.x,c.monitoring.y,c.hp.x,c.hp.y,yellow,true);
+  drawLine(svg,c.monitoring.x,c.monitoring.y,c.router.x,c.router.y,yellow,false);
+}
+
+// ── PANEL ───────────────────────────────────────────────────
+let currentNode=null;
+function showPanel(id){
+  const d=DATA[id]; if(!d) return;
+  // Remove active from all
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('active'));
+  const nodeEl=document.getElementById('n-'+id);
+  if(nodeEl) nodeEl.classList.add('active');
+
+  document.getElementById('p-icon').textContent=d.icon;
+  document.getElementById('p-name').textContent=d.name;
+  document.getElementById('p-model').textContent=d.model;
+  document.getElementById('p-ip').textContent=d.ip;
+
+  let html='';
+  if(d.specs){
+    html+=`<div class="specs-grid">`;
+    d.specs.forEach(s=>{ html+=`<div class="spec-card"><div class="spec-label">${s.l}</div><div class="spec-val${s.a?' accent':''}">${s.v}</div></div>`; });
+    html+=`</div>`;
+  }
+  html+=d.body||'';
+  document.getElementById('p-body').innerHTML=html;
+  document.getElementById('panel').classList.add('open');
+  currentNode=id;
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('active'));
+  currentNode=null;
+}
+
+// ── INIT ────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  // Stagger node animations
+  document.querySelectorAll('.node').forEach((n,i)=>{
+    n.style.animationDelay=(i*0.1+0.2)+'s';
+  });
+  // Draw connections after layout settles
+  setTimeout(drawConnections, 300);
+  setTimeout(drawConnections, 800);
+  setTimeout(drawConnections, 1500);
+});
+window.addEventListener('resize',drawConnections);
+</script>
+</body>
+</html>
