@@ -1,25 +1,25 @@
-# 🏠 Homelab
+﻿# ðŸ  Homelab
 
 Personal homelab setup documentation. This repository contains configurations, guides, and notes for my self-hosted infrastructure.
 
-## 📐 Infrastructure Overview
+## ðŸ“ Infrastructure Overview
 
 ```
 Internet
-    │
-    ▼
+    â”‚
+    â–¼
 Router
-    │
-    ├── NAS (Ugreen DH4300 Plus)        → Docker services, storage
-    ├── Mini PC (HP ProDesk G400)        → Jellyfin media server
-    └── Personal PC (Windows 11)         → Daily use
+    â”‚
+    â”œâ”€â”€ NAS (Ugreen DH4300 Plus)        â†’ Docker services, storage
+    â”œâ”€â”€ Mini PC (HP ProDesk G400)        â†’ Jellyfin media server
+    â””â”€â”€ Personal PC (Windows 11)         â†’ Daily use
 ```
 
 All devices are connected via **Tailscale** for secure remote access, with **Nginx Proxy Manager** handling HTTPS and reverse proxying.
 
 ---
 
-## 🖥️ Hardware
+## ðŸ–¥ï¸ Hardware
 
 | Device | Model | Role |
 |---|---|---|
@@ -29,7 +29,7 @@ All devices are connected via **Tailscale** for secure remote access, with **Ngi
 
 ---
 
-## 🐳 Docker Services (NAS)
+## ðŸ³ Docker Services (NAS)
 
 | Service | Description | Port |
 |---|---|---|
@@ -47,7 +47,7 @@ All devices are connected via **Tailscale** for secure remote access, with **Ngi
 | Node Exporter | System metrics exporter (NAS) | `<PORT>` |
 | cAdvisor | Docker container metrics | `<PORT>` |
 
-## 🖥️ Services (Mini PC)
+## ðŸ–¥ï¸ Services (Mini PC)
 
 | Service | Description |
 |---|---|
@@ -56,51 +56,51 @@ All devices are connected via **Tailscale** for secure remote access, with **Ngi
 
 ---
 
-## 🔒 Security & Networking
+## ðŸ”’ Security & Networking
 
-- **Tailscale** — All services are accessible only through Tailscale VPN, no ports exposed to the internet
-- **Nginx Proxy Manager** — Reverse proxy with SSL certificates generated via Tailscale HTTPS
-- **Pihole** — DNS-level ad blocking for the entire network
-- **Vaultwarden** — Self-hosted password manager, accessible only via Tailscale
+- **Tailscale** â€” All services are accessible only through Tailscale VPN, no ports exposed to the internet
+- **Nginx Proxy Manager** â€” Reverse proxy with SSL certificates generated via Tailscale HTTPS
+- **Pihole** â€” DNS-level ad blocking for the entire network
+- **Vaultwarden** â€” Self-hosted password manager, accessible only via Tailscale
 
 ### Network Access Pattern
 ```
-Device (with Tailscale) → HTTPS → Nginx Proxy Manager → Service
+Device (with Tailscale) â†’ HTTPS â†’ Nginx Proxy Manager â†’ Service
 ```
 
 ---
 
-## 📊 Monitoring
+## ðŸ“Š Monitoring
 
 Prometheus + Grafana stack for monitoring all devices:
 
-- **Node Exporter** on NAS and Mini PC → CPU, RAM, disk, network metrics
-- **cAdvisor** on NAS → Docker container metrics
-- **Grafana dashboard** — Node Exporter Full (ID: 1860)
+- **Node Exporter** on NAS and Mini PC â†’ CPU, RAM, disk, network metrics
+- **cAdvisor** on NAS â†’ Docker container metrics
+- **Grafana dashboard** â€” Node Exporter Full (ID: 1860)
 - **Alerting** via Discord for service downtime
 
 ---
 
-## 📁 Repository Structure
+## ðŸ“ Repository Structure
 
 ```
 homelab/
-├── README.md
-├── nas/
-│   └── README.md          # NAS setup and configuration
-├── minipc/
-│   └── README.md          # Mini PC + Jellyfin setup
-├── docker/
-│   ├── vaultwarden/       # Vaultwarden + NPM + SSL setup
-│   ├── prometheus/        # prometheus.yml config
-│   └── grafana/           # Grafana setup
-└── docs/
-    └── network.md         # Network architecture
+â”œâ”€â”€ README.md
+â”œâ”€â”€ nas/
+â”‚   â””â”€â”€ README.md          # NAS setup and configuration
+â”œâ”€â”€ minipc/
+â”‚   â””â”€â”€ README.md          # Mini PC + Jellyfin setup
+â”œâ”€â”€ docker/
+â”‚   â”œâ”€â”€ vaultwarden/       # Vaultwarden + NPM + SSL setup
+â”‚   â”œâ”€â”€ prometheus/        # prometheus.yml config
+â”‚   â””â”€â”€ grafana/           # Grafana setup
+â””â”€â”€ docs/
+    â””â”€â”€ network.md         # Network architecture
 ```
 
 ---
 
-🚀 Guides
+ðŸš€ Guides
 * [Architecture Map](https://nicholasizzo.github.io/homelab/homelab-map.html?v=2) 
 * [Vaultwarden with HTTPS via Tailscale + NPM](docker/vaultwarden)
 * [Prometheus + Grafana monitoring stack](docker/prometheus-grafana)
@@ -108,8 +108,9 @@ homelab/
 
 ---
 
-## 📝 Notes
+## ðŸ“ Notes
 
 - All sensitive data (IPs, ports, passwords, domains) are replaced with `<PLACEHOLDER>` throughout this repository
-- Tailscale is used instead of exposing ports publicly — no port forwarding on the router
+- Tailscale is used instead of exposing ports publicly â€” no port forwarding on the router
+
 
