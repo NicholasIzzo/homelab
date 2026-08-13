@@ -1,13 +1,14 @@
 services:
   semaphore:
-    image: semaphoreui/semaphore:v2.19.6
+    image: semaphoreui/semaphore:v2.19.7
     container_name: semaphore
     restart: unless-stopped
     user: root
     ports:
       - "3003:3000"
     environment:
-      SEMAPHORE_DB_DIALECT: bolt
+      SEMAPHORE_DB_DIALECT: sqlite
+      SEMAPHORE_DB_HOST: /etc/semaphore/database.sqlite
       SEMAPHORE_ADMIN: admin
       SEMAPHORE_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       SEMAPHORE_ADMIN_NAME: Admin
