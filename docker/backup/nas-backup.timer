@@ -1,0 +1,19 @@
+[Unit]
+Description=Daily NAS Restic backup timer
+Documentation=file:///volume1/docker/homelab/docs/backup-guide.md
+
+[Timer]
+# Every day at 03:00 Europe/Rome (service inherits system TZ)
+OnCalendar=*-*-* 03:00:00
+
+# Recover missed runs if the NAS was off during the window
+Persistent=true
+
+# Spread by ±15 min to avoid collision with other 03:00 jobs
+RandomizedDelaySec=15min
+
+# Do not overlap runs
+Unit=nas-backup.service
+
+[Install]
+WantedBy=timers.target

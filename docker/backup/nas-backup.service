@@ -1,0 +1,31 @@
+[Unit]
+Description=NAS Restic backup to hpserver
+Documentation=file:///volume1/docker/homelab/docs/backup-guide.md
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nas-backup.sh
+User=root
+Group=root
+
+# Play nice with other NAS workloads
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+CPUSchedulingPolicy=batch
+
+# Runaway protection
+TimeoutStartSec=6h
+
+# Log via journald
+StandardOutput=journal
+StandardError=journal
+
+# Minimal hardening (kept loose to preserve docker exec + volume access)
+NoNewPrivileges=true
+ProtectSystem=false
+ProtectHome=false
+PrivateTmp=true
