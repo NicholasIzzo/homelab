@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "deny": [
+      "Bash(*mkfs*)",
+      "Bash(*wipefs*)",
+      "Bash(*dd *of=/dev/sd*)",
+      "Bash(*rm -rf /volume*)",
+      "Bash(*rm -rf /etc*)",
+      "Bash(*rm -rf /*)",
+      "Bash(*docker system prune*)",
+      "Bash(*docker volume rm*)",
+      "Bash(*docker volume prune*)"
+    ],
+    "ask": [
+      "Bash(*docker compose down*)",
+      "Bash(*docker rm*)",
+      "Bash(*docker stop*)",
+      "Bash(*mdadm*)",
+      "Bash(*git push*)"
+    ]
+  }
+}
