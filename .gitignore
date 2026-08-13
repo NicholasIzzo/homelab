@@ -1,0 +1,4 @@
+# Secrets: mai nel repo
+.env
+.env.*
+!.env.example
