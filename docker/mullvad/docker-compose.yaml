@@ -1,0 +1,62 @@
+# =============================================================================
+# STACK MULLVAD  —  REGOLA INVARIANTE (vedi CLAUDE.md)
+# =============================================================================
+# gluetun + qbittorrent-vpn sono un'UNITA' ATOMICA.
+# qbittorrent-vpn gira nel namespace di rete di gluetun (network_mode:
+# service:gluetun): senza gluetun non ha rete.
+#
+# Aggiorna/riavvia SEMPRE come unita':
+#   cd /volume1/docker/mullvad
+#   docker compose pull && docker compose down && docker compose up -d
+#
+# MAI operazioni sui singoli container:
+#   - docker restart qbittorrent-vpn      -> orfano dalla VPN
+#   - docker pull qmcgaw/gluetun          -> disallineamento pull/up
+#   - docker compose up -d qbittorrent-vpn -> parte senza gluetun healthy
+# Rischio concreto: qbittorrent parla al tracker con il tuo IP reale.
+# =============================================================================
+
+services:
+  gluetun:
+    # Digest pin (upstream tagga solo :latest sulla versione corrente).
+    image: qmcgaw/gluetun@sha256:b0ee2135e6ba52ad3f102aae9663707cd1c9531485117067a380d3b2b6dd991d
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - DNS_ADDRESS=10.64.0.1
+      - SERVER_CITIES=Zurich
+    ports:
+      - 8888:8080
+      - 6881:6881/tcp
+      - 6881:6881/udp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  qbittorrent-vpn:
+    image: lscr.io/linuxserver/qbittorrent:5.2.2_v2.0.13-ls465
+    container_name: qbittorrent-vpn
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+      - WEBUI_PORT=8080
+    volumes:
+      - /volume1/docker/qbittorrent/config:/config
+      - "/volume2/download nuovi:/downloads"
+    restart: unless-stopped
+    depends_on:
+      gluetun:
+        condition: service_healthy
