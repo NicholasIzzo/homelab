@@ -1,0 +1,19 @@
+services:
+  gitea:
+    # Digest pin (no version label upstream).
+    image: gitea/gitea@sha256:34e3f6b75f5cbb6aebce588037fc5a53c84213e4d4b00da0a8d73e031a558e52
+    container_name: gitea
+    restart: unless-stopped
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__server__DOMAIN=192.168.0.36
+      - GITEA__server__ROOT_URL=http://192.168.0.36:3001/
+      - GITEA__server__SSH_PORT=2222
+    volumes:
+      - /volume1/docker/gitea/data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3001:3000"
+      - "2222:22"
