@@ -1,0 +1,41 @@
+services:
+  homelab-hub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: homelab-hub:0.1.0 # tag fisso: mai :latest in produzione
+    container_name: homelab-hub
+    restart: unless-stopped
+    ports:
+      # Solo sull'interfaccia Tailscale di hpserver: non raggiungibile dalla LAN.
+      - "100.92.242.72:8090:8090"
+    volumes:
+      # SQLite su volume Docker locale (ext4). MAI su mount NFS/SMB.
+      - hub-data:/data
+    env_file: .env
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8090/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  hub-data:

@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+/* Dark theme come base, non come variante: l'app non ha un tema chiaro. */
+@theme {
+  --color-bg: #0b0f14;
+  --color-surface: #131a22;
+  --color-surface-2: #1b242e;
+  --color-line: #263241;
+  --color-ink: #e6edf3;
+  --color-muted: #8b9aab;
+  --color-ok: #3fb950;
+  --color-warn: #d29922;
+  --color-crit: #f85149;
+  --color-accent: #58a6ff;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    /* Niente zoom involontario al tap su iOS */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    /* L'overscroll elastico su iOS non deve scoprire il bianco sotto la pagina */
+    overscroll-behavior-y: none;
+  }
+
+  /* Target touch: sotto i 44px il pollice sbaglia */
+  button,
+  a[role='button'] {
+    min-height: 44px;
+  }
+}
