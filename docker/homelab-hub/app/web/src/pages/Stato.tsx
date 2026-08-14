@@ -17,11 +17,16 @@ import type {
   TlsPayload,
   UptimePayload,
 } from '../lib/types.ts';
+import { formattaCentesimi } from '../lib/format.ts';
+import { bandaScadenza, useDeadlines } from '../lib/useDeadlines.ts';
+import { useFinance } from '../lib/useFinance.ts';
 import { trova, useMonitors, useMonitorStream } from '../lib/useMonitors.ts';
 
 export function Stato() {
   useMonitorStream();
   const { data, isLoading, isError } = useMonitors();
+  const scadenze = useDeadlines();
+  const finanze = useFinance();
   const qc = useQueryClient();
 
   const refresh = useMutation({
@@ -119,6 +124,33 @@ export function Stato() {
           Nessuna anomalia sui container e sui servizi monitorati.
         </section>
       )}
+
+      {/* Scadenze che rientrano nel proprio preavviso: qui solo quelle che urgono. */}
+      {(() => {
+        const urgenti = (scadenze.data?.deadlines ?? [])
+          .filter((d) => d.due_date && bandaScadenza(d).status !== 'ok')
+          .slice(0, 5);
+        if (urgenti.length === 0) return null;
+        return (
+          <section className="mb-3 rounded-2xl border border-line bg-surface p-4">
+            <h2 className="mb-2 text-sm font-semibold">Scadenze imminenti</h2>
+            <ul className="space-y-1.5 text-sm">
+              {urgenti.map((d) => {
+                const { status, giorni } = bandaScadenza(d);
+                return (
+                  <li key={d.id} className="flex items-center gap-2">
+                    <Punto status={status} />
+                    <span className="min-w-0 flex-1 truncate">{d.title}</span>
+                    <span className="shrink-0 text-xs text-muted">
+                      {giorni !== null ? formattaGiorni(giorni) : '—'}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })()}
 
       <SezioneMonitor
         stato={docker}
@@ -262,6 +294,31 @@ export function Stato() {
           ))}
         </ul>
       </SezioneMonitor>
+
+      {/* Sintesi finanziaria: il dettaglio sta nella sua scheda. */}
+      {finanze.data && finanze.data.budget.amount_cents > 0 ? (
+        <section className="mb-3 rounded-2xl border border-line bg-surface p-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-semibold">Budget di {finanze.data.mese}</h2>
+            <span className="text-xs text-muted">
+              {formattaCentesimi(finanze.data.budget.spent_cents)} /{' '}
+              {formattaCentesimi(finanze.data.budget.amount_cents)}
+            </span>
+          </div>
+          <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-surface-2">
+            <div
+              className={`h-full rounded-full ${
+                finanze.data.budget.remaining_cents < 0
+                  ? 'bg-crit'
+                  : finanze.data.budget.percent > 80
+                    ? 'bg-warn'
+                    : 'bg-ok'
+              }`}
+              style={{ width: `${Math.min(100, finanze.data.budget.percent)}%` }}
+            />
+          </div>
+        </section>
+      ) : null}
 
       <button
         type="button"

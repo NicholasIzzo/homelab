@@ -2,9 +2,13 @@ import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
 import { existsSync } from 'node:fs';
 
+import type { TlsPayload } from './collectors/tls.js';
 import { config } from './config.js';
 import { closeDb, openDb } from './db/index.js';
+import { seed } from './db/seed.js';
 import { Scheduler } from './monitor/scheduler.js';
+import { deadlineRoutes, sincronizzaScadenzaTls } from './routes/deadlines.js';
+import { financeRoutes } from './routes/finance.js';
 import { healthRoutes } from './routes/health.js';
 import { monitorRoutes } from './routes/monitors.js';
 import { pkgVersion } from './version.js';
@@ -19,16 +23,24 @@ const app = Fastify({
 
 async function main(): Promise<void> {
   const db = openDb((msg) => app.log.info(msg));
+  seed(db, (msg) => app.log.info(msg));
   app.decorate('db', db);
 
-  const scheduler = new Scheduler(db, {
-    info: (m) => app.log.info(m),
-    warn: (m) => app.log.warn(m),
-  });
+  const scheduler = new Scheduler(
+    db,
+    { info: (m) => app.log.info(m), warn: (m) => app.log.warn(m) },
+    (source, payload) => {
+      if (source === 'tls') {
+        sincronizzaScadenzaTls(db, (payload as TlsPayload).valid_to);
+      }
+    },
+  );
   app.decorate('scheduler', scheduler);
 
   await app.register(healthRoutes);
   await app.register(monitorRoutes);
+  await app.register(deadlineRoutes);
+  await app.register(financeRoutes);
 
   // Il frontend e' servito dallo stesso processo: un container, un servizio.
   if (existsSync(config.publicDir)) {

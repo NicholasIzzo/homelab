@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: homelab-hub:0.2.0 # tag fisso: mai :latest in produzione
+    image: homelab-hub:0.4.0 # tag fisso: mai :latest in produzione
     container_name: homelab-hub
     restart: unless-stopped
     ports:

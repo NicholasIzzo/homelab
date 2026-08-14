@@ -13,10 +13,13 @@ Raggiungibile solo da Tailscale: <http://100.92.242.72:8090>
 | Fase | Contenuto | Stato |
 |---|---|---|
 | 2 | Scheletro, container, SQLite + migrazioni, shell PWA | **fatta** |
-| 3 | Collector: docker / dischi / backup / TLS / uptime | da fare |
-| 4 | Scadenze | da fare |
-| 5 | Finanze | da fare |
+| 3 | Collector: docker / dischi / backup / TLS / uptime | **fatta** |
+| 4 | Scadenze con countdown e soglie | **fatta** |
+| 5 | Finanze: ricorrenti, acquisti, budget, obiettivi | **fatta** |
 | 6 | PWA completa + autenticazione + hardening | da fare |
+
+> Fino alla Fase 6 **non c'e' autenticazione**: l'unica difesa e' il bind sull'IP
+> Tailscale. Chiunque abbia accesso al tailnet puo' leggere e scrivere i dati.
 
 ## Deploy
 
