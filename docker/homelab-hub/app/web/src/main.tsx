@@ -45,7 +45,7 @@ function Gate({ children }: { children: ReactNode }) {
   if (isError) {
     return <p className="p-8 text-center text-sm text-crit">Backend non raggiungibile.</p>;
   }
-  if (!data?.configured) return <AuthNonConfigurata />;
+  if (!data?.configured) return <AuthNonConfigurata problema={data?.problema} />;
   if (!data.authenticated) return <Login />;
 
   return <>{children}</>;

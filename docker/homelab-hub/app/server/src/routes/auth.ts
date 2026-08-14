@@ -41,9 +41,10 @@ function registraFallimento(ip: string): void {
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
   app.get('/api/auth/me', async (req) => ({
-    // configured = false significa che manca ADMIN_PASSWORD_HASH: la UI lo spiega
-    // invece di mostrare un form che non potrebbe funzionare.
+    // configured = false significa hash assente oppure illeggibile: la UI mostra
+    // il motivo invece di un form che non potrebbe funzionare.
     configured: Boolean(config.auth.passwordHash),
+    problema: config.auth.problemaHash ?? null,
     authenticated: verificaSessione(app.db, req.cookies[COOKIE]).valida,
   }));
 

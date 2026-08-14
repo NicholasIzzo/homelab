@@ -48,9 +48,13 @@ async function main(): Promise<void> {
   // Il guard va registrato dopo il parser dei cookie e prima delle rotte.
   registraGuard(app);
 
-  if (!config.auth.passwordHash) {
+  if (config.auth.problemaHash) {
+    // Errore, non warning: un hash presente ma inservibile e' una password che
+    // non funzionera' mai, e va visto subito nei log.
+    app.log.error(config.auth.problemaHash);
+  } else if (!config.auth.passwordHash) {
     app.log.warn(
-      'ADMIN_PASSWORD_HASH non impostata: le rotte protette rispondono 503 finche\' non la configuri',
+      'Hash della password non impostato: le rotte protette rispondono 503 finche\' non lo configuri',
     );
   }
 

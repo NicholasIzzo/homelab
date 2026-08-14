@@ -63,23 +63,37 @@ export function Login() {
   );
 }
 
-/** Mostrata quando il server non ha ancora ADMIN_PASSWORD_HASH. */
-export function AuthNonConfigurata() {
+/** Mostrata quando il server non ha un hash utilizzabile. */
+export function AuthNonConfigurata({ problema }: { problema?: string | null }) {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-bg px-6 text-ink">
-      <div className="w-full max-w-sm rounded-2xl border border-warn/40 bg-warn/10 p-5">
-        <h1 className="text-base font-semibold text-warn">Autenticazione non configurata</h1>
-        <p className="mt-2 text-sm">
-          Il server non ha una password impostata, quindi non serve alcun dato. Genera l&apos;hash
-          e mettilo in <code className="text-ink">.env</code>:
-        </p>
-        <pre className="mt-3 overflow-x-auto rounded-lg bg-bg p-3 text-[11px] text-muted">
-{`docker run --rm -it homelab-hub:1.1.0 \\
-  node server/dist/tools/hash-password.js`}
+      <div className="card w-full max-w-sm border-warn/45 bg-warn/12 p-5">
+        <h1 className="text-[15px] font-semibold text-warn">
+          {problema ? 'Hash della password non valido' : 'Autenticazione non configurata'}
+        </h1>
+
+        {problema ? (
+          <p className="corpo mt-2 text-warn">{problema}</p>
+        ) : (
+          <p className="corpo mt-2">
+            Il server non ha una password impostata, quindi non serve alcun dato.
+          </p>
+        )}
+
+        <p className="corpo mt-3">Genera l&apos;hash:</p>
+        <pre className="nota mt-2 overflow-x-auto rounded-lg bg-bg p-3">
+{`docker compose run --rm \\
+  --entrypoint node homelab-hub \\
+  server/dist/tools/hash-password.js`}
         </pre>
-        <p className="mt-3 text-sm">
-          Incolla il risultato in <code className="text-ink">ADMIN_PASSWORD_HASH</code>, poi{' '}
+        <p className="corpo mt-3">
+          Incolla la riga <code className="text-ink">ADMIN_PASSWORD_HASH_B64=…</code> in{' '}
+          <code className="text-ink">.env</code>, poi{' '}
           <code className="text-ink">docker compose up -d</code>.
+        </p>
+        <p className="nota mt-2">
+          E&apos; in base64 perche&apos; l&apos;hash contiene <code>$</code> e Compose lo
+          interpolerebbe, svuotandolo.
         </p>
       </div>
     </div>

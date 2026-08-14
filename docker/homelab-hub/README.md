@@ -24,16 +24,19 @@ L'app non serve alcun dato finche' `ADMIN_PASSWORD_HASH` e' vuota: ogni rotta
 protetta risponde `503`. Non esiste una modalita' aperta.
 
 ```bash
-cd ~/homelab/docker/homelab-hub
-docker run --rm -it homelab-hub:1.1.0 node server/dist/tools/hash-password.js
+cd ~/homelab/docker/homelab-hub && docker compose run --rm --entrypoint node homelab-hub server/dist/tools/hash-password.js
 ```
 
 La password viene chiesta a schermo con l'eco disattivato, quindi non finisce
-nella cronologia della shell. Incolla la riga prodotta in `.env` e riavvia:
+nella cronologia della shell. Il tool stampa una riga `ADMIN_PASSWORD_HASH_B64=…`:
+incollala in `.env` e riavvia con `docker compose up -d`.
 
-```bash
-docker compose up -d
-```
+> **Perche' base64.** Un hash argon2id e' pieno di `$` (`$argon2id$v=19$m=…`) e
+> Docker Compose interpola le variabili dentro `.env`: in chiaro arriva al
+> container mutilato e ogni login fallisce con "password errata", senza altri
+> indizi. In base64 di `$` non ce ne sono. Se un hash malformato arriva comunque,
+> il server ora lo rileva all'avvio, lo scrive nei log e lo spiega nella UI
+> invece di rispondere genericamente "password errata".
 
 ## Installazione su iPhone
 

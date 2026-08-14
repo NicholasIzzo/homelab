@@ -20,7 +20,9 @@ export function registraGuard(app: FastifyInstance): void {
     if (!config.auth.passwordHash) {
       return reply.code(503).send({
         error: 'autenticazione_non_configurata',
-        messaggio: 'ADMIN_PASSWORD_HASH non impostata: nessun dato viene servito.',
+        messaggio:
+          config.auth.problemaHash ??
+          'Hash della password non impostato: nessun dato viene servito.',
       });
     }
 

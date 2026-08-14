@@ -2,7 +2,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { api, ApiError } from './api.ts';
 
-export type StatoAuth = { configured: boolean; authenticated: boolean };
+export type StatoAuth = {
+  configured: boolean;
+  authenticated: boolean;
+  /** Motivo per cui l'hash non e' utilizzabile, quando ce n'e' uno. */
+  problema: string | null;
+};
 
 export function useAuth() {
   return useQuery({
