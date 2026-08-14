@@ -1,5 +1,6 @@
 import { EventEmitter } from 'node:events';
 
+import { purgaSessioni } from '../auth/session.js';
 import { dockerCollector } from '../collectors/docker.js';
 import { resticCollector } from '../collectors/restic.js';
 import { scrutinyCollector } from '../collectors/scrutiny.js';
@@ -80,6 +81,8 @@ export class Scheduler extends EventEmitter {
         () => {
           const n = purgaStorico(this.db);
           if (n > 0) this.log.info(`storico monitoraggio: ${n} righe purgate`);
+          const s = purgaSessioni(this.db);
+          if (s > 0) this.log.info(`sessioni scadute rimosse: ${s}`);
         },
         24 * 60 * 60_000,
       ),

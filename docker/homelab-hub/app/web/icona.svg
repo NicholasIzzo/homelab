@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Sorgente unica delle icone PWA. I PNG si generano con scripts/genera-icone.mjs.
+       Il disegno sta nell'80% centrale della tela: e' la zona sicura richiesta
+       dalle icone maskable, che Android ritaglia in forme diverse. -->
+  <rect width="512" height="512" fill="#0b0f14"/>
+
+  <g>
+    <rect x="136" y="136" width="240" height="56" rx="14" fill="#58a6ff"/>
+    <circle cx="166" cy="164" r="10" fill="#0b0f14"/>
+
+    <rect x="136" y="228" width="240" height="56" rx="14" fill="#58a6ff"/>
+    <circle cx="166" cy="256" r="10" fill="#0b0f14"/>
+
+    <rect x="136" y="320" width="240" height="56" rx="14" fill="#3fb950"/>
+    <circle cx="166" cy="348" r="10" fill="#0b0f14"/>
+  </g>
+</svg>

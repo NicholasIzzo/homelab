@@ -1,16 +1,21 @@
+import fastifyCookie from '@fastify/cookie';
 import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
 import { existsSync } from 'node:fs';
 
+import { registraGuard } from './auth/guard.js';
+import { purgaSessioni } from './auth/session.js';
 import type { TlsPayload } from './collectors/tls.js';
 import { config } from './config.js';
 import { closeDb, openDb } from './db/index.js';
 import { seed } from './db/seed.js';
 import { Scheduler } from './monitor/scheduler.js';
+import { authRoutes } from './routes/auth.js';
 import { deadlineRoutes, sincronizzaScadenzaTls } from './routes/deadlines.js';
 import { financeRoutes } from './routes/finance.js';
 import { healthRoutes } from './routes/health.js';
 import { monitorRoutes } from './routes/monitors.js';
+import { registraHeaderSicurezza } from './security/headers.js';
 import { pkgVersion } from './version.js';
 
 const app = Fastify({
@@ -37,7 +42,20 @@ async function main(): Promise<void> {
   );
   app.decorate('scheduler', scheduler);
 
+  purgaSessioni(db);
+  registraHeaderSicurezza(app);
+  await app.register(fastifyCookie);
+  // Il guard va registrato dopo il parser dei cookie e prima delle rotte.
+  registraGuard(app);
+
+  if (!config.auth.passwordHash) {
+    app.log.warn(
+      'ADMIN_PASSWORD_HASH non impostata: le rotte protette rispondono 503 finche\' non la configuri',
+    );
+  }
+
   await app.register(healthRoutes);
+  await app.register(authRoutes);
   await app.register(monitorRoutes);
   await app.register(deadlineRoutes);
   await app.register(financeRoutes);

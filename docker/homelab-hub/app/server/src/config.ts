@@ -24,6 +24,12 @@ function opt(key: string): string | undefined {
   return v === undefined || v === '' ? undefined : v;
 }
 
+function bool(key: string, fallback: boolean): boolean {
+  const v = process.env[key];
+  if (v === undefined || v === '') return fallback;
+  return ['1', 'true', 'yes', 'si'].includes(v.toLowerCase());
+}
+
 export const config = {
   env: str('NODE_ENV', 'production'),
   tz: str('TZ', 'Europe/Rome'),
@@ -40,6 +46,16 @@ export const config = {
 
   // Bundle del frontend. In dev punta alla dist di Vite nel workspace web.
   publicDir: resolve(str('PUBLIC_DIR', join(here, '..', '..', 'web', 'dist'))),
+
+  auth: {
+    // Assente = app chiusa: ogni rotta protetta risponde 503 finche' non e'
+    // configurata. Non esiste una modalita' "aperta".
+    passwordHash: opt('ADMIN_PASSWORD_HASH'),
+    sessionDays: int('SESSION_DAYS', 90),
+    // Falso perche' l'app gira in HTTP sull'IP Tailscale: con secure attivo il
+    // browser non invierebbe mai il cookie. Da mettere a true dietro HTTPS.
+    cookieSecure: bool('COOKIE_SECURE', false),
+  },
 
   // --- Sorgenti di monitoring: usate dalla Fase 3, opzionali qui. ---
   nas: {

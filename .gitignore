@@ -7,3 +7,6 @@
 *.key
 *.pem
 credentials*.json
+
+# Icone PWA: generate a build time da app/web/icona.svg
+docker/homelab-hub/app/web/public/icons/
