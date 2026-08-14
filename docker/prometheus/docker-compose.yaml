@@ -1,0 +1,12 @@
+services:
+  prometheus:
+    # Digest pin (no version label upstream).
+    image: prom/prometheus@sha256:508729e0e2d18e11fd742a5a5ca70e557b940a93948c3c95fd0123a6fd538b69
+    container_name: prometheus
+    restart: unless-stopped
+    user: root
+    ports:
+      - "9091:9090"
+    volumes:
+      - /volume1/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /volume1/docker/prometheus/data:/prometheus
