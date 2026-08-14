@@ -1,0 +1,13 @@
+services:
+  prowlarr:
+    image: linuxserver/prowlarr:2.3.5.5327-ls144
+    container_name: prowlarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=10
+      - TZ=Europe/Rome
+    ports:
+      - "35475:9696"
+    volumes:
+      - /volume1/docker/prowlarr/config:/config

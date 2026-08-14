@@ -1,0 +1,15 @@
+services:
+  radarr:
+    image: linuxserver/radarr:6.1.1.10360-ls301
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+    ports:
+      - "41471:7878"
+    volumes:
+      - /volume1/docker/radarr/config:/config
+      - /volume2/Film_Nuovi:/movies
+      - "/volume2/download nuovi:/downloads"

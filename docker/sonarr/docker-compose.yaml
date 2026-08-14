@@ -1,0 +1,15 @@
+services:
+  sonarr:
+    image: linuxserver/sonarr:4.0.17.2952-ls310
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=10
+      - TZ=Europe/Rome
+    ports:
+      - "39027:8989"
+    volumes:
+      - /volume1/docker/sonarr/config:/config
+      - /volume2/Serie_Nuove:/tv
+      - "/volume2/download nuovi:/downloads"

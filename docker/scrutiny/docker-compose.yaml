@@ -1,0 +1,21 @@
+services:
+  scrutiny:
+    # Digest pin over master-omnibus (rolling tag, no semver upstream).
+    # Bump periodically by pulling and copying the new digest from
+    #   docker image inspect --format '{{index .RepoDigests 0}}' scrutiny
+    image: ghcr.io/analogj/scrutiny:master-omnibus@sha256:18689773150d6b8b53c94a435f40f7b6e946fd4a6d40b44c64fa2154a5b38941
+    container_name: scrutiny
+    cap_add:
+      - SYS_RAWIO
+      - SYS_ADMIN
+    ports:
+      - "8087:8080"
+    volumes:
+      - /run/udev:/run/udev:ro
+      - ./config:/opt/scrutiny/config
+      - ./influxdb:/opt/scrutiny/influxdb
+    devices:
+      - /dev/sda
+      - /dev/sdb
+      - /dev/sdc
+    restart: unless-stopped
