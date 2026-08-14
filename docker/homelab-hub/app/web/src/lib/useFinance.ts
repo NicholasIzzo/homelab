@@ -62,6 +62,12 @@ export type Finance = {
     recurring_yearly_cents: number;
     purchases_total_cents: number;
   };
+  trend: {
+    month: string;
+    purchases_cents: number;
+    recurring_cents: number;
+    total_cents: number;
+  }[];
 };
 
 export function useFinance() {

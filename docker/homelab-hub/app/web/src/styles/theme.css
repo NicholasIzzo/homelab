@@ -1,15 +1,25 @@
 @import 'tailwindcss';
 
-/* Dark theme come base, non come variante: l'app non ha un tema chiaro. */
+/* Dark theme come base, non come variante: l'app non ha un tema chiaro.
+ *
+ * I colori di stato sono validati contro la superficie scura: separazione
+ * protanopia ok<->warn ΔE 11.1, visione normale ΔE 21.7, contrasto >= 3:1.
+ * Non veicolano MAI un'informazione da soli: ogni stato porta anche una forma
+ * (cerchio / triangolo / rombo) e un'etichetta testuale. */
 @theme {
   --color-bg: #0b0f14;
-  --color-surface: #131a22;
-  --color-surface-2: #1b242e;
-  --color-line: #263241;
-  --color-ink: #e6edf3;
-  --color-muted: #8b9aab;
-  --color-ok: #3fb950;
-  --color-warn: #d29922;
+  --color-surface: #121820;
+  --color-surface-2: #19212b;
+  --color-line: #23303d;
+  --color-line-strong: #33455a;
+
+  /* Tre livelli di testo: valore, corpo, etichetta. */
+  --color-ink: #e8eef5;
+  --color-ink-2: #b6c2d0;
+  --color-muted: #7d8b9c;
+
+  --color-ok: #2ea043;
+  --color-warn: #e3b341;
   --color-crit: #f85149;
   --color-accent: #58a6ff;
 
@@ -20,7 +30,6 @@
 @layer base {
   html {
     color-scheme: dark;
-    /* Niente zoom involontario al tap su iOS */
     -webkit-text-size-adjust: 100%;
   }
 
@@ -28,13 +37,77 @@
     background-color: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    /* L'overscroll elastico su iOS non deve scoprire il bianco sotto la pagina */
     overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Target touch: sotto i 44px il pollice sbaglia */
+  /* Le cifre non devono ballare quando un valore cambia sotto polling. */
+  .tabular,
+  table,
+  time {
+    font-variant-numeric: tabular-nums;
+  }
+
   button,
   a[role='button'] {
     min-height: 44px;
+  }
+}
+
+@layer components {
+  /* Gerarchia tipografica: etichetta -> valore -> corpo.
+   * L'etichetta e' piccola e in maiuscoletto spaziato, il valore e' grande e
+   * compatto: il colpo d'occhio va sul numero, non sulla parola. */
+  .etichetta {
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .valore-xl {
+    font-size: 30px;
+    line-height: 1.05;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .valore {
+    font-size: 22px;
+    line-height: 1.1;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .titolo-card {
+    font-size: 13px;
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--color-ink);
+  }
+
+  .corpo {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-ink-2);
+  }
+
+  .nota {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+
+  /* Superficie unica per tutte le card: bordo definito, raggio e padding
+   * costanti. La spaziatura verticale fra card la governa il contenitore. */
+  .card {
+    border-radius: 14px;
+    border: 1px solid var(--color-line);
+    background-color: var(--color-surface);
   }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Pill, Punto } from '../components/Monitor.tsx';
+import { COLORE, Glifo, Pill } from '../components/Stati.tsx';
 import { formattaData, formattaGiorni } from '../lib/format.ts';
 import {
   bandaScadenza,
@@ -42,7 +42,7 @@ export function Scadenze() {
   return (
     <>
       {imminenti.length > 0 ? (
-        <p className="mb-3 rounded-xl border border-warn/40 bg-warn/10 px-4 py-3 text-sm text-warn">
+        <p className="card mb-2.5 border-warn/45 bg-warn/12 px-4 py-3 text-[13px] text-warn">
           {imminenti.length}{' '}
           {imminenti.length === 1 ? 'scadenza richiede' : 'scadenze richiedono'} attenzione.
         </p>
@@ -64,9 +64,7 @@ export function Scadenze() {
 
       {senzaData.length > 0 ? (
         <>
-          <h2 className="mt-5 mb-2 px-1 text-xs font-semibold tracking-wide text-muted uppercase">
-            Da completare
-          </h2>
+          <h2 className="etichetta mt-5 mb-2 px-1">Da completare</h2>
           <ul className="mb-3">
             {senzaData.map((d) => (
               <VoceScadenza
@@ -129,37 +127,37 @@ function VoceScadenza({
   const automatica = Boolean(d.auto_source);
 
   return (
-    <li className="mb-2 rounded-2xl border border-line bg-surface p-3.5">
+    <li className="card mb-2.5 p-3.5">
       <div className="flex items-start gap-2.5">
-        <span className="mt-1.5">
-          <Punto status={status} />
+        <span className="mt-1">
+          <Glifo status={status} />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">{d.title}</p>
-          <p className="mt-0.5 text-xs text-muted">
-            {d.due_date ? (
-              <>
-                {formattaData(d.due_date)}
-                {giorni !== null ? ` · ${formattaGiorni(giorni)}` : ''}
-              </>
-            ) : (
-              'nessuna data impostata'
-            )}
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="text-[14px] leading-tight font-semibold">{d.title}</p>
+            {giorni !== null ? (
+              <span className={`nota tabular shrink-0 font-semibold ${COLORE[status].testo}`}>
+                {formattaGiorni(giorni)}
+              </span>
+            ) : null}
+          </div>
+          <p className="nota mt-1">
+            {d.due_date ? formattaData(d.due_date) : 'nessuna data impostata'}
           </p>
-          {d.notes ? <p className="mt-1 text-xs text-muted">{d.notes}</p> : null}
+          {d.notes ? <p className="nota mt-1">{d.notes}</p> : null}
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {!d.due_date ? <Pill status="unknown">data mancante</Pill> : null}
             {automatica ? <Pill status="ok">automatica</Pill> : null}
-            <span className="text-[11px] text-muted">preavviso {d.alert_days}gg</span>
+            <span className="nota">preavviso {d.alert_days} gg</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-2.5 flex gap-2 border-t border-line/60 pt-2.5">
+      <div className="mt-3 flex gap-2 border-t border-line/70 pt-2.5">
         <button
           type="button"
           onClick={onModifica}
-          className="flex-1 rounded-lg bg-surface-2 py-2 text-xs font-medium text-muted active:bg-line"
+          className="nota flex-1 rounded-lg bg-surface-2 py-2 font-medium active:bg-line"
         >
           Modifica
         </button>
@@ -167,7 +165,7 @@ function VoceScadenza({
           <button
             type="button"
             onClick={onElimina}
-            className="flex-1 rounded-lg bg-surface-2 py-2 text-xs font-medium text-crit active:bg-line"
+            className="nota flex-1 rounded-lg bg-surface-2 py-2 font-medium text-crit active:bg-line"
           >
             Elimina
           </button>
@@ -193,7 +191,7 @@ function FormScadenza({
 
   return (
     <form
-      className="rounded-2xl border border-line bg-surface p-4"
+      className="card p-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (v.title.trim() === '') return;

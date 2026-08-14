@@ -85,6 +85,18 @@ export function formattaGiorni(g: number): string {
   return `fra ~${mesi} mesi`;
 }
 
+const meseLungo = new Intl.DateTimeFormat('it-IT', {
+  timeZone: TZ,
+  month: 'long',
+  year: 'numeric',
+});
+
+/** "2026-08" -> "agosto 2026". */
+export function formattaMese(iso: string): string {
+  const d = new Date(`${iso}-01T12:00:00`);
+  return Number.isNaN(d.getTime()) ? iso : meseLungo.format(d);
+}
+
 export function formattaByte(b: number): string {
   if (!b) return '—';
   const tb = b / 1e12;

@@ -1,6 +1,9 @@
 import { useState } from 'react';
 
-import { formattaCentesimi, formattaData } from '../lib/format.ts';
+import { AndamentoSpese } from '../components/Andamento.tsx';
+import { Barra, COLORE } from '../components/Stati.tsx';
+import { formattaCentesimi, formattaData, formattaMese } from '../lib/format.ts';
+import type { Status } from '../lib/types.ts';
 import {
   centesimiInEuro,
   euroInCentesimi,
@@ -11,7 +14,7 @@ import {
   type Periodo,
 } from '../lib/useFinance.ts';
 
-const campo = 'w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink';
+const campo = 'w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-[13px] text-ink';
 
 export function Finanze() {
   const { data, isLoading } = useFinance();
@@ -19,19 +22,26 @@ export function Finanze() {
   const [nuovaRicorrente, setNuovaRicorrente] = useState(false);
   const [nuovoAcquisto, setNuovoAcquisto] = useState(false);
 
-  if (isLoading || !data) {
-    return <p className="py-8 text-center text-sm text-muted">Caricamento…</p>;
-  }
+  if (isLoading || !data) return <p className="corpo py-10 text-center">Caricamento…</p>;
 
   const b = data.budget;
   const sopraBudget = b.amount_cents > 0 && b.spent_cents > b.amount_cents;
+  const statoBudget: Status = sopraBudget ? 'crit' : b.percent > 80 ? 'warn' : 'ok';
 
   return (
     <>
       {/* --- Budget del mese --- */}
-      <section className="mb-3 rounded-2xl border border-line bg-surface p-4">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-semibold">Budget di {data.mese}</h2>
+      <section className="card mb-2.5 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="etichetta">Budget di {formattaMese(data.mese)}</p>
+            <p className={`valore-xl mt-1.5 ${b.amount_cents > 0 ? COLORE[statoBudget].testo : ''}`}>
+              {formattaCentesimi(b.spent_cents)}
+            </p>
+            {b.amount_cents > 0 ? (
+              <p className="nota mt-1">di {formattaCentesimi(b.amount_cents)} previsti</p>
+            ) : null}
+          </div>
           <BudgetInput
             valore={b.amount_cents}
             onSalva={(cents) => m.salvaBudget.mutate({ amount_cents: cents })}
@@ -40,39 +50,46 @@ export function Finanze() {
 
         {b.amount_cents > 0 ? (
           <>
-            <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-surface-2">
-              <div
-                className={`h-full rounded-full ${sopraBudget ? 'bg-crit' : b.percent > 80 ? 'bg-warn' : 'bg-ok'}`}
-                style={{ width: `${Math.min(100, b.percent)}%` }}
-              />
+            <div className="mt-3">
+              <Barra percento={b.percent} status={statoBudget} altezza={10} />
             </div>
-            <div className="mt-2 flex justify-between text-xs">
-              <span className="text-muted">
-                {formattaCentesimi(b.spent_cents)} di {formattaCentesimi(b.amount_cents)}
+            <div className="mt-2 flex justify-between">
+              <span className="nota tabular">
+                ricorrenti {formattaCentesimi(b.recurring_monthly_cents)} · acquisti{' '}
+                {formattaCentesimi(b.purchases_month_cents)}
               </span>
-              <span className={sopraBudget ? 'font-semibold text-crit' : 'text-ok'}>
+              <span className={`nota tabular font-semibold ${COLORE[statoBudget].testo}`}>
                 {sopraBudget
                   ? `oltre di ${formattaCentesimi(-b.remaining_cents)}`
-                  : `${formattaCentesimi(b.remaining_cents)} disponibili`}
+                  : `${formattaCentesimi(b.remaining_cents)} liberi`}
               </span>
             </div>
-            <p className="mt-2 text-xs text-muted">
-              Ricorrenti {formattaCentesimi(b.recurring_monthly_cents)} · acquisti del mese{' '}
-              {formattaCentesimi(b.purchases_month_cents)}
-            </p>
           </>
         ) : (
-          <p className="mt-2 text-xs text-muted">
-            Imposta un budget mensile per vedere la disponibilita&apos;.
-          </p>
+          <p className="nota mt-2">Imposta un budget mensile per vedere la disponibilita&apos;.</p>
         )}
       </section>
 
+      {/* --- Andamento --- */}
+      <section className="card mb-2.5 p-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="titolo-card">Spesa mensile</h2>
+          <span className="nota">ultimi 6 mesi</span>
+        </div>
+        <div className="mt-3">
+          <AndamentoSpese dati={data.trend} />
+        </div>
+        <p className="nota mt-2.5">
+          La quota ricorrente e&apos; quella attuale proiettata all&apos;indietro: lo storico degli
+          abbonamenti non viene conservato.
+        </p>
+      </section>
+
       {/* --- Spese ricorrenti --- */}
-      <section className="mb-3 rounded-2xl border border-line bg-surface">
-        <header className="flex items-baseline justify-between px-4 py-3">
-          <h2 className="text-sm font-semibold">Spese ricorrenti</h2>
-          <span className="text-xs text-muted">
+      <section className="card mb-2.5 overflow-hidden">
+        <header className="flex items-baseline justify-between gap-3 px-4 py-3">
+          <h2 className="titolo-card">Spese ricorrenti</h2>
+          <span className="nota tabular">
             {formattaCentesimi(data.totals.recurring_monthly_cents)}/mese ·{' '}
             {formattaCentesimi(data.totals.recurring_yearly_cents)}/anno
           </span>
@@ -80,39 +97,36 @@ export function Finanze() {
 
         <ul>
           {data.recurring.map((r) => (
-            <li
-              key={r.id}
-              className="flex items-center gap-3 border-t border-line/60 px-4 py-2.5"
-            >
+            <li key={r.id} className="flex items-center gap-3 border-t border-line/70 px-4 py-2.5">
               <div className="min-w-0 flex-1">
-                <p className={`truncate text-sm ${r.active ? '' : 'text-muted line-through'}`}>
+                <p className={`truncate text-[13px] ${r.active ? '' : 'text-muted line-through'}`}>
                   {r.label}
                 </p>
-                <p className="text-xs text-muted">
+                <p className="nota">
                   {formattaCentesimi(r.amount_cents)}{' '}
                   {PERIODI.find((p) => p.valore === r.period)?.etichetta.toLowerCase()}
                   {r.category ? ` · ${r.category}` : ''}
                 </p>
               </div>
-              <span className="shrink-0 text-sm">{formattaCentesimi(r.monthly_cents)}/mese</span>
+              <span className="tabular shrink-0 text-[13px] font-semibold">
+                {formattaCentesimi(r.monthly_cents)}
+              </span>
               <button
                 type="button"
                 onClick={() => m.eliminaRicorrente.mutate(r.id)}
                 aria-label={`Elimina ${r.label}`}
-                className="shrink-0 px-1 text-xs text-muted active:text-crit"
+                className="nota shrink-0 px-1 active:text-crit"
               >
                 ✕
               </button>
             </li>
           ))}
           {data.recurring.length === 0 ? (
-            <li className="border-t border-line/60 px-4 py-3 text-xs text-muted">
-              Nessuna spesa ricorrente.
-            </li>
+            <li className="nota border-t border-line/70 px-4 py-3">Nessuna spesa ricorrente.</li>
           ) : null}
         </ul>
 
-        <div className="border-t border-line/60 p-3">
+        <div className="border-t border-line/70 p-3">
           {nuovaRicorrente ? (
             <FormRicorrente
               onAnnulla={() => setNuovaRicorrente(false)}
@@ -125,7 +139,7 @@ export function Finanze() {
             <button
               type="button"
               onClick={() => setNuovaRicorrente(true)}
-              className="w-full rounded-lg bg-surface-2 py-2.5 text-xs font-medium text-accent"
+              className="nota w-full rounded-lg bg-surface-2 py-2.5 font-medium text-accent"
             >
               + Aggiungi spesa ricorrente
             </button>
@@ -134,43 +148,43 @@ export function Finanze() {
       </section>
 
       {/* --- Acquisti una tantum --- */}
-      <section className="mb-3 rounded-2xl border border-line bg-surface">
-        <header className="flex items-baseline justify-between px-4 py-3">
-          <h2 className="text-sm font-semibold">Acquisti hardware</h2>
-          <span className="text-xs text-muted">
+      <section className="card mb-2.5 overflow-hidden">
+        <header className="flex items-baseline justify-between gap-3 px-4 py-3">
+          <h2 className="titolo-card">Acquisti hardware</h2>
+          <span className="nota tabular">
             totale {formattaCentesimi(data.totals.purchases_total_cents)}
           </span>
         </header>
 
         <ul>
           {data.purchases.map((p) => (
-            <li key={p.id} className="flex items-center gap-3 border-t border-line/60 px-4 py-2.5">
+            <li key={p.id} className="flex items-center gap-3 border-t border-line/70 px-4 py-2.5">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">{p.label}</p>
-                <p className="text-xs text-muted">
+                <p className="truncate text-[13px]">{p.label}</p>
+                <p className="nota">
                   {formattaData(p.purchased_on)}
                   {p.category ? ` · ${p.category}` : ''}
                 </p>
               </div>
-              <span className="shrink-0 text-sm">{formattaCentesimi(p.amount_cents)}</span>
+              <span className="tabular shrink-0 text-[13px] font-semibold">
+                {formattaCentesimi(p.amount_cents)}
+              </span>
               <button
                 type="button"
                 onClick={() => m.eliminaAcquisto.mutate(p.id)}
                 aria-label={`Elimina ${p.label}`}
-                className="shrink-0 px-1 text-xs text-muted active:text-crit"
+                className="nota shrink-0 px-1 active:text-crit"
               >
                 ✕
               </button>
             </li>
           ))}
           {data.purchases.length === 0 ? (
-            <li className="border-t border-line/60 px-4 py-3 text-xs text-muted">
-              Nessun acquisto registrato.
-            </li>
+            <li className="nota border-t border-line/70 px-4 py-3">Nessun acquisto registrato.</li>
           ) : null}
         </ul>
 
-        <div className="border-t border-line/60 p-3">
+        <div className="border-t border-line/70 p-3">
           {nuovoAcquisto ? (
             <FormAcquisto
               onAnnulla={() => setNuovoAcquisto(false)}
@@ -183,7 +197,7 @@ export function Finanze() {
             <button
               type="button"
               onClick={() => setNuovoAcquisto(true)}
-              className="w-full rounded-lg bg-surface-2 py-2.5 text-xs font-medium text-accent"
+              className="nota w-full rounded-lg bg-surface-2 py-2.5 font-medium text-accent"
             >
               + Aggiungi acquisto
             </button>
@@ -192,8 +206,8 @@ export function Finanze() {
       </section>
 
       {/* --- Obiettivi di risparmio --- */}
-      <section className="mb-3 rounded-2xl border border-line bg-surface p-4">
-        <h2 className="mb-3 text-sm font-semibold">Obiettivi di risparmio</h2>
+      <section className="card mb-2.5 p-4">
+        <h2 className="titolo-card mb-3">Obiettivi di risparmio</h2>
         <ul className="space-y-4">
           {data.goals.map((g) => (
             <VoceObiettivo
@@ -220,30 +234,31 @@ function VoceObiettivo({
 }) {
   const [testo, setTesto] = useState(centesimiInEuro(g.saved_cents));
   const completato = g.saved_cents >= g.target_cents;
+  // Meno di due mesi al target con quasi tutto ancora da mettere da parte:
+  // vale la pena dirlo con un colore, non solo con un numero.
+  const stretto = !completato && g.months_left !== null && g.months_left <= 2;
 
   return (
     <li>
-      <div className="flex items-baseline justify-between">
-        <p className="text-sm font-medium">{g.label}</p>
-        <p className="text-xs text-muted">
-          {formattaCentesimi(g.saved_cents)} / {formattaCentesimi(g.target_cents)}
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-[13px] font-semibold">{g.label}</p>
+        <p className="nota tabular shrink-0">
+          <span className="text-ink">{formattaCentesimi(g.saved_cents)}</span> /{' '}
+          {formattaCentesimi(g.target_cents)}
         </p>
       </div>
 
-      <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-surface-2">
-        <div
-          className={`h-full rounded-full ${completato ? 'bg-ok' : 'bg-accent'}`}
-          style={{ width: `${g.percent}%` }}
-        />
+      <div className="mt-2">
+        <Barra percento={g.percent} status={completato ? 'ok' : 'unknown'} />
       </div>
 
-      <p className="mt-1.5 text-xs text-muted">
+      <p className={`nota mt-1.5 ${stretto ? COLORE.warn.testo : ''}`}>
         {completato ? (
-          <span className="text-ok">Obiettivo raggiunto.</span>
+          <span className={COLORE.ok.testo}>Obiettivo raggiunto.</span>
         ) : g.per_month_cents !== null && g.months_left !== null ? (
           <>
             Mancano {formattaCentesimi(g.missing_cents)} —{' '}
-            <span className="text-ink">{formattaCentesimi(g.per_month_cents)}/mese</span> per{' '}
+            <span className="font-semibold">{formattaCentesimi(g.per_month_cents)}/mese</span> per{' '}
             {g.months_left} {g.months_left === 1 ? 'mese' : 'mesi'}
           </>
         ) : (
@@ -253,7 +268,7 @@ function VoceObiettivo({
 
       <div className="mt-2 flex gap-2">
         <input
-          className={`${campo} py-1.5 text-xs`}
+          className={`${campo} py-1.5 text-[12px]`}
           inputMode="decimal"
           value={testo}
           onChange={(e) => setTesto(e.target.value)}
@@ -265,7 +280,7 @@ function VoceObiettivo({
         />
         <input
           type="date"
-          className={`${campo} py-1.5 text-xs`}
+          className={`${campo} py-1.5 text-[12px]`}
           value={g.target_date ?? ''}
           onChange={(e) => onData(e.target.value || null)}
           aria-label={`Data obiettivo per ${g.label}`}
@@ -278,9 +293,10 @@ function VoceObiettivo({
 function BudgetInput({ valore, onSalva }: { valore: number; onSalva: (cents: number) => void }) {
   const [testo, setTesto] = useState(centesimiInEuro(valore));
   return (
-    <span className="flex items-center gap-1 text-sm">
+    <label className="shrink-0 text-right">
+      <span className="etichetta block">Budget €</span>
       <input
-        className="w-24 rounded-lg border border-line bg-surface-2 px-2 py-1.5 text-right text-sm"
+        className="mt-1 w-24 rounded-lg border border-line bg-surface-2 px-2 py-1.5 text-right text-[13px] tabular-nums"
         inputMode="decimal"
         value={testo}
         onChange={(e) => setTesto(e.target.value)}
@@ -290,8 +306,7 @@ function BudgetInput({ valore, onSalva }: { valore: number; onSalva: (cents: num
         }}
         aria-label="Budget mensile"
       />
-      <span className="text-muted">€</span>
-    </span>
+    </label>
   );
 }
 
@@ -417,13 +432,13 @@ function Azioni({ onAnnulla }: { onAnnulla: () => void }) {
       <button
         type="button"
         onClick={onAnnulla}
-        className="flex-1 rounded-lg bg-surface-2 py-2.5 text-xs font-medium text-muted"
+        className="nota flex-1 rounded-lg bg-surface-2 py-2.5 font-medium"
       >
         Annulla
       </button>
       <button
         type="submit"
-        className="flex-1 rounded-lg bg-accent py-2.5 text-xs font-semibold text-bg"
+        className="flex-1 rounded-lg bg-accent py-2.5 text-[12px] font-semibold text-bg"
       >
         Salva
       </button>

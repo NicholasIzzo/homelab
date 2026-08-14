@@ -52,6 +52,17 @@ function meseCorrente(): string {
   return `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, '0')}`;
 }
 
+/** Ultimi n mesi in ordine cronologico, incluso quello corrente. */
+function ultimiMesi(n: number): string[] {
+  const out: string[] = [];
+  const ora = new Date();
+  for (let i = n - 1; i >= 0; i -= 1) {
+    const d = new Date(ora.getFullYear(), ora.getMonth() - i, 1);
+    out.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  }
+  return out;
+}
+
 const corpoRicorrente = {
   type: 'object',
   additionalProperties: false,
@@ -177,6 +188,20 @@ export async function financeRoutes(app: FastifyInstance): Promise<void> {
         recurring_yearly_cents: mensileRicorrente * 12,
         purchases_total_cents: purchases.reduce((t, p) => t + p.amount_cents, 0),
       },
+      // Andamento a 6 mesi. La quota ricorrente e' quella ATTUALE proiettata
+      // all'indietro: non conserviamo lo storico degli abbonamenti, quindi e'
+      // una linea di base, non una ricostruzione. La UI lo dichiara.
+      trend: ultimiMesi(6).map((m) => {
+        const acquisti = purchases
+          .filter((p) => p.purchased_on.startsWith(m))
+          .reduce((t, p) => t + p.amount_cents, 0);
+        return {
+          month: m,
+          purchases_cents: acquisti,
+          recurring_cents: mensileRicorrente,
+          total_cents: acquisti + mensileRicorrente,
+        };
+      }),
     };
   });
 

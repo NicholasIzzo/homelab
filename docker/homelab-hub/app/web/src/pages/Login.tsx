@@ -74,7 +74,7 @@ export function AuthNonConfigurata() {
           e mettilo in <code className="text-ink">.env</code>:
         </p>
         <pre className="mt-3 overflow-x-auto rounded-lg bg-bg p-3 text-[11px] text-muted">
-{`docker run --rm -it homelab-hub:1.0.0 \\
+{`docker run --rm -it homelab-hub:1.1.0 \\
   node server/dist/tools/hash-password.js`}
         </pre>
         <p className="mt-3 text-sm">

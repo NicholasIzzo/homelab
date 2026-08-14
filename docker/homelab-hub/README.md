@@ -25,7 +25,7 @@ protetta risponde `503`. Non esiste una modalita' aperta.
 
 ```bash
 cd ~/homelab/docker/homelab-hub
-docker run --rm -it homelab-hub:1.0.0 node server/dist/tools/hash-password.js
+docker run --rm -it homelab-hub:1.1.0 node server/dist/tools/hash-password.js
 ```
 
 La password viene chiesta a schermo con l'eco disattivato, quindi non finisce
