@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: homelab-hub:0.1.0 # tag fisso: mai :latest in produzione
+    image: homelab-hub:0.2.0 # tag fisso: mai :latest in produzione
     container_name: homelab-hub
     restart: unless-stopped
     ports:
@@ -12,6 +12,10 @@ services:
     volumes:
       # SQLite su volume Docker locale (ext4). MAI su mount NFS/SMB.
       - hub-data:/data
+      # Chiave SSH dedicata, in sola lettura. Montata da ~/.ssh dell'host e non
+      # da una cartella del repo: il repo e' pubblico, una chiave li' dentro
+      # sarebbe a un `git add .` di distanza dal disastro.
+      - ${NAS_SSH_KEY_HOST_PATH:-/home/nicholas/.ssh/id_ed25519_hub}:/run/secrets/ssh_key:ro
     env_file: .env
     user: "1000:1000"
     read_only: true

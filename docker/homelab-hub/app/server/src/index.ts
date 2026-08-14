@@ -4,7 +4,9 @@ import { existsSync } from 'node:fs';
 
 import { config } from './config.js';
 import { closeDb, openDb } from './db/index.js';
+import { Scheduler } from './monitor/scheduler.js';
 import { healthRoutes } from './routes/health.js';
+import { monitorRoutes } from './routes/monitors.js';
 import { pkgVersion } from './version.js';
 
 const app = Fastify({
@@ -19,7 +21,14 @@ async function main(): Promise<void> {
   const db = openDb((msg) => app.log.info(msg));
   app.decorate('db', db);
 
+  const scheduler = new Scheduler(db, {
+    info: (m) => app.log.info(m),
+    warn: (m) => app.log.warn(m),
+  });
+  app.decorate('scheduler', scheduler);
+
   await app.register(healthRoutes);
+  await app.register(monitorRoutes);
 
   // Il frontend e' servito dallo stesso processo: un container, un servizio.
   if (existsSync(config.publicDir)) {
@@ -41,6 +50,7 @@ async function main(): Promise<void> {
   });
 
   await app.listen({ host: config.http.host, port: config.http.port });
+  scheduler.start();
   app.log.info(
     `Homelab Hub ${pkgVersion} — TZ ${config.tz} — DB ${config.db.path} — static ${config.publicDir}`,
   );
@@ -49,6 +59,7 @@ async function main(): Promise<void> {
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
     app.log.info(`${signal} ricevuto, chiusura in corso`);
+    app.scheduler.stop();
     void app
       .close()
       .then(() => closeDb())
