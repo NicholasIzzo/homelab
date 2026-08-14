@@ -1,0 +1,13 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:1.36.0
+    container_name: vaultwarden_server-1
+    restart: unless-stopped
+    ports:
+      - "41609:80"
+    volumes:
+      - /volume1/docker/vaultwarden:/data
+    environment:
+      - WEBSOCKET_ENABLED=true
+      - SIGNUPS_ALLOWED=false
+      - DOMAIN=https://dh4300plus-fix.taile39e4f.ts.net:44075
