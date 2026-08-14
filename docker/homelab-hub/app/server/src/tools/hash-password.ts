@@ -32,16 +32,24 @@ function chiediPassword(): Promise<string> {
     }
 
     const rl = createInterface({ input, output, terminal: true });
-    output.write(PROMPT);
 
-    // Sopprime l'eco dei caratteri digitati.
-    const scrittura = (rl as unknown as { _writeToOutput: (s: string) => void })._writeToOutput;
-    (rl as unknown as { _writeToOutput: (s: string) => void })._writeToOutput = function (s) {
-      if (s.includes(PROMPT)) scrittura.call(this, s);
+    // Il prompt lo deve stampare readline: scritto a mano prima di question()
+    // verrebbe cancellato dal primo ridisegno della riga (ESC[1G ESC[0J), e a
+    // schermo resterebbe il nulla mentre il processo aspetta l'input.
+    //
+    // _writeToOutput intercetta ogni scrittura di readline: lasciamo passare
+    // il prompt una sola volta e sopprimiamo tutto il resto, cioe' l'eco dei
+    // caratteri digitati e i ridisegni che cancellerebbero la riga.
+    let promptMostrato = false;
+    (rl as unknown as { _writeToOutput: (s: string) => void })._writeToOutput = (s: string) => {
+      if (!promptMostrato && s.includes(PROMPT)) {
+        output.write(PROMPT);
+        promptMostrato = true;
+      }
     };
 
     let risposto = false;
-    rl.question('', (risposta) => {
+    rl.question(PROMPT, (risposta) => {
       risposto = true;
       rl.close();
       output.write('\n');
