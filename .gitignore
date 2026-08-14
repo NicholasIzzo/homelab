@@ -2,3 +2,8 @@
 .env
 .env.*
 !.env.example
+
+# Chiavi e credenziali (profilattico)
+*.key
+*.pem
+credentials*.json

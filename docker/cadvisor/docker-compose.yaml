@@ -1,0 +1,15 @@
+services:
+  cadvisor:
+    # Digest pin. Note: zcube/cadvisor is an unofficial ARM64 mirror; the
+    # google/cadvisor upstream did not ship arm64 for a while, hence this fork.
+    # Revisit periodically if google/cadvisor resumes native arm64 builds.
+    image: zcube/cadvisor@sha256:f5d9acd3d30db9f991b1b9dcdfe4a27c1800069fdf10f161b6f53fbf9b14ec38
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /var/run:/var/run

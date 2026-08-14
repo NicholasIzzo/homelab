@@ -1,0 +1,11 @@
+services:
+  flaresolverr:
+    image: flaresolverr/flaresolverr:v3.4.6
+    container_name: flaresolverr
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Rome
+      - LOG_LEVEL=info
+    ports:
+      - "8191:8191"
+      - "40811:8192"
