@@ -1,0 +1,14 @@
+services:
+  tailscale:
+    # Digest pin (no version label upstream).
+    image: tailscale/tailscale@sha256:321ce041508c19079b57a28b6666c8d81ab0b08accc0a2585b3ab663d557ac24
+    container_name: tailscale
+    restart: unless-stopped
+    network_mode: host
+    hostname: DH4300PLUS-3562
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_EXTRA_ARGS=--reset --accept-dns=false --advertise-routes=192.168.0.0/24
+    volumes:
+      - /volume1/docker/tailscale:/var/lib/tailscale

@@ -1,0 +1,17 @@
+services:
+  pihole:
+    image: pihole/pihole:2026.04.1
+    container_name: pihole
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - TZ=Europe/Rome
+      - WEBPASSWORD=${WEBPASSWORD}
+      - FTLCONF_webserver_port=9090
+      - DNSMASQ_USER=pihole
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    volumes:
+      - /root/pihole/etc-pihole:/etc/pihole
+      - /root/pihole/etc-dnsmasq.d:/etc/dnsmasq.d
