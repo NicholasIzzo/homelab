@@ -169,10 +169,10 @@ app.post<{ Body: { sessionId?: string; itemId?: string } }>("/api/play", async (
     return reply.code(400).send({ error: "sessionId e itemId obbligatori" });
   }
   if (cfg.mockMode) {
-    return { ok: true, mock: true };
+    return { ok: true, avviato: true, mock: true };
   }
-  await jellyfin.playOnSession(sessionId, itemId);
-  return { ok: true, mock: false };
+  const avviato = await jellyfin.playOnSession(sessionId, itemId);
+  return { ok: true, avviato, mock: false };
 });
 
 // In produzione il server serve anche la SPA compilata.

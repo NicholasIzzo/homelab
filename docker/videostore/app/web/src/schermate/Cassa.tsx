@@ -20,6 +20,7 @@ type Stato =
   | { fase: "carico" }
   | { fase: "scelta"; devices: PlayDevice[] }
   | { fase: "invio"; device: PlayDevice }
+  | { fase: "nonparte"; device: PlayDevice }
   | { fase: "errore"; messaggio: string };
 
 /** La cassa: il commesso chiede su quale schermo far partire il film. */
@@ -43,8 +44,12 @@ export function Cassa({ item, onFatto, onAnnulla }: Props) {
   const noleggia = async (device: PlayDevice) => {
     setStato({ fase: "invio", device });
     try {
-      await play(device.sessionId, item.id);
-      onFatto(device.deviceName);
+      const { avviato } = await play(device.sessionId, item.id);
+      if (avviato) {
+        onFatto(device.deviceName);
+      } else {
+        setStato({ fase: "nonparte", device });
+      }
     } catch (e) {
       setStato({ fase: "errore", messaggio: String(e) });
     }
@@ -95,7 +100,23 @@ export function Cassa({ item, onFatto, onAnnulla }: Props) {
           )}
 
           {stato.fase === "invio" && (
-            <p className="fumetto">«Lo mando su {stato.device.deviceName}… 📼»</p>
+            <p className="fumetto">«Lo mando su {stato.device.deviceName}… controllo che parta 📼»</p>
+          )}
+
+          {stato.fase === "nonparte" && (
+            <div className="fumetto">
+              <p>
+                «Ho mandato il film a <strong>{stato.device.deviceName}</strong>, ma lo schermo non
+                risponde: probabilmente l'app è chiusa. Aprila (o riportala in primo piano) e
+                riprova!»
+              </p>
+              <button className="btn-noleggia" onClick={() => noleggia(stato.device)}>
+                Riprova su {stato.device.deviceName}
+              </button>
+              <button className="btn-rimetti" onClick={() => setStato({ fase: "carico" })}>
+                Scegli un altro schermo
+              </button>
+            </div>
           )}
 
           {stato.fase === "errore" && (

@@ -90,8 +90,16 @@ export class JellyfinClient {
     // 12 ore: la TV del salotto deve comparire anche se sta "dormendo" da un po'.
     const res = await this.request(`/Sessions?ActiveWithinSeconds=43200`);
     const sessions = (await res.json()) as JfSession[];
+    // Le sessioni del client web muoiono con la scheda del browser: mostrarle
+    // "vecchie" invita a mandare film nel vuoto. Le app TV invece rispondono
+    // anche dopo ore, quindi per loro la finestra resta larga.
+    const FINESTRA_WEB_MS = 15 * 60 * 1000;
+    const viva = (s: JfSession) =>
+      s.Client !== "Jellyfin Web" ||
+      (s.LastActivityDate !== undefined &&
+        Date.now() - new Date(s.LastActivityDate).getTime() < FINESTRA_WEB_MS);
     return sessions
-      .filter((s) => s.SupportsRemoteControl && s.Client !== "Videostore")
+      .filter((s) => s.SupportsRemoteControl && s.Client !== "Videostore" && viva(s))
       .sort((a, b) => (b.LastActivityDate ?? "").localeCompare(a.LastActivityDate ?? ""))
       .map((s) => ({
         sessionId: s.Id,
@@ -103,11 +111,21 @@ export class JellyfinClient {
       }));
   }
 
-  async playOnSession(sessionId: string, itemId: string): Promise<void> {
+  /** Invia il PlayNow e verifica che la riproduzione parta davvero: Jellyfin
+   *  accetta il comando anche per sessioni morte, senza dare errore. */
+  async playOnSession(sessionId: string, itemId: string): Promise<boolean> {
     const params = new URLSearchParams({ playCommand: "PlayNow", itemIds: itemId });
     await this.request(
       `/Sessions/${encodeURIComponent(sessionId)}/Playing?${params}`,
       { method: "POST" },
     );
+    for (let tentativo = 0; tentativo < 4; tentativo++) {
+      await new Promise((r) => setTimeout(r, 2200));
+      const res = await this.request(`/Sessions`);
+      const sessions = (await res.json()) as JfSession[];
+      const s = sessions.find((x) => x.Id === sessionId);
+      if (s?.NowPlayingItem) return true;
+    }
+    return false;
   }
 }

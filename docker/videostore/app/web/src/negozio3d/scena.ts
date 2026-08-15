@@ -23,6 +23,14 @@ const LARGHEZZA_NEGOZIO = 10.8;
 // filtro anisotropico: nitidezza delle texture viste di sbieco (impostato dal renderer)
 let ANISO = 1;
 
+/** Modalità prestazioni: attiva da sola su Fire TV/Silk, forzabile con ?perf=1 (o 0). */
+export const BASSA_POTENZA = (() => {
+  const q = new URLSearchParams(location.search).get("perf");
+  if (q === "1") return true;
+  if (q === "0") return false;
+  return /\bSilk\b|\bAFT\w*\b/i.test(navigator.userAgent);
+})();
+
 interface Unita {
   shelf: Shelf;
   group: THREE.Group;
@@ -447,9 +455,9 @@ export class ScenaNegozio {
     shelves: Shelf[],
     private cb: CallbacksScena,
   ) {
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    ANISO = this.renderer.capabilities.getMaxAnisotropy();
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !BASSA_POTENZA });
+    this.renderer.setPixelRatio(BASSA_POTENZA ? 0.62 : Math.min(devicePixelRatio, 2));
+    ANISO = BASSA_POTENZA ? 1 : this.renderer.capabilities.getMaxAnisotropy();
     this.camera = new THREE.PerspectiveCamera(68, 1, 0.1, 60);
     this.camera.position.set(0, OCCHI, 2.2);
     this.camera.rotation.order = "YXZ";
@@ -730,7 +738,7 @@ export class ScenaNegozio {
       schermo.position.set(0, 1.75, -3.44);
       schermo.userData = { tipo: "schermo", indice: i };
       sala.add(schermo);
-      this.loader.load(`/api/image/${film.item.id}?h=720&tipo=backdrop`, (tex) => {
+      this.loader.load(`/api/image/${film.item.id}?h=${BASSA_POTENZA ? 432 : 720}&tipo=backdrop`, (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = ANISO;
         if (!this.disposto) schermo.material = new THREE.MeshBasicMaterial({ map: tex });
@@ -1019,7 +1027,7 @@ export class ScenaNegozio {
     for (const item of u.shelf.items.slice(inizio, inizio + PER_PAGINA)) {
       if (this.texCopertine.has(item.id) || this.texInCarico.has(item.id)) continue;
       this.texInCarico.add(item.id);
-      this.loader.load(coverUrl(item.id, 320), (tex) => {
+      this.loader.load(coverUrl(item.id, BASSA_POTENZA ? 240 : 320), (tex) => {
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = ANISO;
         this.texCopertine.set(item.id, tex);
@@ -1278,10 +1286,24 @@ export class ScenaNegozio {
     };
   }
 
+  private accumuloFrame = 0;
+
   private anima = () => {
     if (this.disposto) return;
     this.raf = requestAnimationFrame(this.anima);
     const dt = Math.min(this.orologio.getDelta(), 0.05);
+
+    // su hardware debole si punta a 30fps: metà lavoro, movimento comunque fluido
+    if (BASSA_POTENZA) {
+      this.accumuloFrame += dt;
+      if (this.accumuloFrame < 1 / 32) return;
+    }
+    const passo = BASSA_POTENZA ? this.accumuloFrame : dt;
+    this.accumuloFrame = 0;
+    return this.animaPasso(passo);
+  };
+
+  private animaPasso(dt: number) {
 
     if (this.glide) {
       const g = this.glide;
