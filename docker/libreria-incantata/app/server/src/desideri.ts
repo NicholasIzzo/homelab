@@ -3,6 +3,8 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { Libro } from "./tipi.js";
+import { scaffaleDi } from "./scaffali.js";
+import { hashBreve } from "./util.js";
 
 interface DesiderioJson {
   asin?: string;
@@ -48,10 +50,18 @@ export async function caricaDesideri(pathEnv: string): Promise<Desiderata> {
   for (const d of dati.libri ?? []) {
     const id = `az-${d.asin ?? d.titolo.replace(/\W+/g, "").slice(0, 16)}`;
     if (d.copertina) copertine.set(id, d.copertina);
-    desideri.push({
+    // Titolo "pulito": via sottotitoli commerciali ("Con Ex libris. Con Segnalibro")
+    // e indicazioni di volume, che sporcherebbero etichette e classificazione.
+    const breve = d.titolo
+      .replace(/\s*\(\s*Vol\.?\s*\d+\s*\)/gi, "") // "(Vol. 1)"
+      .replace(/\s*\((?:Italian Edition|Libri)\)/gi, "")
+      .replace(/\.?\s*Con (?:Ex libris|Segnalibro|Poster|Gadget)\b[^.]*/gi, "")
+      .replace(/[\s.:,;-]+$/, "")
+      .trim();
+    const libro: Libro = {
       id,
       titolo: d.titolo,
-      titoloBreve: d.titolo,
+      titoloBreve: breve || d.titolo,
       autore: d.autore ?? "",
       serie: null,
       descrizione: "",
@@ -59,12 +69,16 @@ export async function caricaDesideri(pathEnv: string): Promise<Desiderata> {
       votoMedio: null,
       anno: null,
       link: d.link ?? "",
-      scaffale: "desideri",
+      scaffale: "sospiri",
+      copertinaVer: d.copertina ? hashBreve(d.copertina) : "0",
       fonte: "amazon",
       prezzo: d.prezzo ?? null,
       formato: d.formato ?? null,
       aggiunto: null,
-    });
+    };
+    // Anche i desideri hanno un genere: serve alla scheda (colore e sigillo).
+    libro.scaffale = scaffaleDi(libro);
+    desideri.push(libro);
   }
 
   return { desideri, copertine };

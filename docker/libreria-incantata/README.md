@@ -24,11 +24,44 @@ un'immagine cross-origin senza header CORS non è usabile come texture WebGL.
 
 ## Scaffali tematici
 
-`✦ Appena Sussurrati` · `🐉 L'Antro dei Draghi` · `🧚 Le Corti dei Fae` ·
-`🖤 I Patti Oscuri` · `🔮 Gli Enigmi Sussurrati` · `⚔️ Saghe & Imperi` ·
-`❤️‍🔥 I Cuori in Fiamme` · `✨ Lo Scaffale dei Sospiri` (catch-all).
+`🐉 L'Antro dei Draghi` · `🧚 Le Corti dei Fae` · `🧛 Creature della Notte` ·
+`🖤 I Patti Oscuri` · `⚡ Magia & Accademie` · `🏛️ Miti & Leggende` ·
+`⚔️ Saghe & Imperi` · `🌆 Mondi Spezzati` · `🔮 Gli Enigmi Sussurrati` ·
+`❤️‍🔥 I Cuori in Fiamme` · `✨ Lo Scaffale dei Sospiri` (fuori genere) ·
+`⭐ Il Sentiero dei Desideri` (wishlist Amazon).
 
-La classificazione è euristica e volutamente leggera: si regola in `scaffali.ts`.
+I generi sono assegnati in `server/src/scaffali.ts` in tre passaggi, dal più
+preciso al più generico: **mappa curata** titolo→scaffale (verificata a mano,
+libro per libro), poi **regole per autore/serie**, infine **euristica a parole
+chiave** per i titoli aggiunti in futuro. Le sole parole chiave sbagliavano
+spesso (*Il principe crudele* fra i romanzetti rosa, *Wings* fra i fae).
+
+"Appena Sussurrati" resta una vista dei dati (ripete libri già presenti
+altrove) e non diventa un mobile: in 3D i titoli comparirebbero due volte.
+
+## Come è costruita la scena 3D
+
+- `web/src/biblioteca3d/layout.ts` — **motore di layout**, matematica pura senza
+  Three.js (quindi verificabile a parte). Dalle dimensioni del mobile ricava i
+  ripiani reali, poi distribuisce i libri: file centrate, ripartite su tutti i
+  ripiani, con passaggio automatico al ripiano e poi al **modulo successivo**
+  quando lo spazio finisce. `verificaPosti()` controlla che ogni libro stia
+  dentro il proprio vano e non tocchi il vicino.
+- `web/src/biblioteca3d/materiali.ts` — texture procedurali su canvas: legno con
+  venatura, **normal map** e mappa di rugosità, parquet, intonaco, insegne.
+  Generate una volta e condivise da tutti i mobili.
+- `web/src/biblioteca3d/scena.ts` — stanza, mobili, luci e navigazione.
+
+Scelte di resa: `ACESFilmicToneMapping` + environment PMREM per riflessi
+credibili, ombre morbide `PCFSoft`, ombre di contatto sotto ogni libro. Le
+**strisce LED** sono visibili su ogni ripiano, ma le `RectAreaLight` vere sono
+un gruppetto (10, o 4 sui telefoni) che segue chi cammina: una per ripiano
+sarebbero decine di luci e il framerate crollerebbe.
+
+Le copertine mantengono **sempre** la proporzione reale dell'immagine: se una
+copertina è quadrata il libro si abbassa, non si deforma.
+
+Aprendo con `?diag=1` la console stampa conteggi e violazioni dei bounds.
 
 ## Sviluppo
 

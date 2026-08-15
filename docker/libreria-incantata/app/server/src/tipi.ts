@@ -14,6 +14,12 @@ export interface Libro {
   link: string;
   /** Id dello scaffale tematico. */
   scaffale: string;
+  /**
+   * Impronta della copertina di origine. Finisce nell'URL servito al browser:
+   * se l'immagine cambia (wishlist aggiornata, copertina rifatta su Goodreads)
+   * cambia anche l'URL, e la cache del browser non serve più quella vecchia.
+   */
+  copertinaVer: string;
   fonte: "goodreads" | "amazon";
   /** Solo desideri Amazon. */
   prezzo: string | null;

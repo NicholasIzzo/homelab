@@ -54,7 +54,7 @@ export function Roulette({ libri, onScegli, onChiudi }: Props) {
       </p>
 
       <div className={`roulette-cornice ${fermo ? "ferma" : "gira"}`}>
-        {corrente && <img src={coverUrl(corrente.id)} alt={corrente.titolo} />}
+        {corrente && <img src={coverUrl(corrente)} alt={corrente.titolo} />}
         <span className="roulette-scintilla s1" />
         <span className="roulette-scintilla s2" />
         <span className="roulette-scintilla s3" />

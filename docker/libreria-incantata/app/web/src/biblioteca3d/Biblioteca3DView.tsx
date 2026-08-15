@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { temaDi } from "../temi";
 import type { Libro, Scaffale } from "../tipi";
-import { ScenaBiblioteca } from "./scena";
+import { ScenaBiblioteca, type SezioneScena } from "./scena";
 
 interface Props {
   scaffali: Scaffale[];
@@ -16,7 +16,15 @@ interface Props {
 const TOCCO = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
 
 /** La biblioteca 3D: canvas Three.js + HUD (uscita, insegne rapide, passi). */
-export function Biblioteca3DView({ scaffali, desideri, mock, onPick, onRoulette, onDesideri, onEsci }: Props) {
+export function Biblioteca3DView({
+  scaffali,
+  desideri,
+  mock,
+  onPick,
+  onRoulette,
+  onDesideri,
+  onEsci,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scenaRef = useRef<ScenaBiblioteca | null>(null);
   const onPickRef = useRef(onPick);
@@ -25,25 +33,50 @@ export function Biblioteca3DView({ scaffali, desideri, mock, onPick, onRoulette,
   onRouletteRef.current = onRoulette;
   const onDesideriRef = useRef(onDesideri);
   onDesideriRef.current = onDesideri;
-  const [scaffale, setScaffale] = useState<string | null>(null);
+  const [sezioneVicina, setSezioneVicina] = useState<string | null>(null);
+
+  /**
+   * Le sezioni fisiche della stanza. "Appena Sussurrati" resta solo una vista
+   * (ripete libri già presenti altrove): in 3D lo saltiamo, altrimenti gli
+   * stessi titoli comparirebbero due volte su scaffali diversi. I desideri
+   * Amazon diventano invece una sezione vera e propria.
+   */
+  const sezioni: SezioneScena[] = useMemo(() => {
+    const base = scaffali
+      .filter((s) => s.id !== "recenti" && s.libri.length > 0)
+      .map((s) => ({ id: s.id, nome: s.nome, libri: s.libri }));
+    if (desideri.length > 0) {
+      base.push({ id: "desideri", nome: "Il Sentiero dei Desideri", libri: desideri });
+    }
+    return base;
+  }, [scaffali, desideri]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || scaffali.length === 0) return;
-    const scena = new ScenaBiblioteca(canvas, scaffali, desideri.length, {
+    if (!canvas || sezioni.length === 0) return;
+    const scena = new ScenaBiblioteca(canvas, sezioni, {
       onPickLibro: (l) => onPickRef.current(l),
-      onArrivo: setScaffale,
+      onArrivo: setSezioneVicina,
       onRuota: () => onRouletteRef.current(),
       onDesideri: () => onDesideriRef.current(),
     });
     scenaRef.current = scena;
+
+    // Diagnostica su richiesta (?diag=1): conteggi e controllo dei bounds.
+    const diag = new URLSearchParams(location.search).get("diag") === "1";
+    if (diag) {
+      (window as unknown as { __biblioteca?: unknown }).__biblioteca = scena;
+      console.info("[biblioteca] diagnostica", scena.diagnostica());
+    }
+
     return () => {
       scenaRef.current = null;
+      delete (window as unknown as { __biblioteca?: unknown }).__biblioteca;
       scena.dispose();
     };
-  }, [scaffali, desideri.length]);
+  }, [sezioni]);
 
-  const attuale = scaffali.find((s) => s.id === scaffale);
+  const attuale = sezioni.find((s) => s.id === sezioneVicina);
 
   return (
     <div className="scena3d">
@@ -54,6 +87,7 @@ export function Biblioteca3DView({ scaffali, desideri, mock, onPick, onRoulette,
         {attuale ? (
           <span className="hud-scaffale" style={{ ["--luce" as string]: temaDi(attuale.id).luce }}>
             {temaDi(attuale.id).icona} {attuale.nome}
+            <small> · {attuale.libri.length} libri</small>
           </span>
         ) : (
           <span className="hud-aiuto">
@@ -85,21 +119,23 @@ export function Biblioteca3DView({ scaffali, desideri, mock, onPick, onRoulette,
       )}
 
       <div className="hud hud-basso">
-        <button
-          className="hud-insegna oro"
-          onClick={onRoulette}
-        >🔮 Ruota del Destino</button>
+        <button className="hud-insegna oro" onClick={onRoulette}>🔮 Ruota del Destino</button>
         <button
           className="hud-insegna"
           style={{ ["--luce" as string]: temaDi("desideri").luce }}
           onClick={onDesideri}
         >⭐ Desideri</button>
-        {scaffali.map((s) => {
+        <button
+          className="hud-insegna"
+          style={{ ["--luce" as string]: "#9fe8c0" }}
+          onClick={() => scenaRef.current?.vaiAllIngresso()}
+        >🚪 Ingresso</button>
+        {sezioni.map((s) => {
           const tema = temaDi(s.id);
           return (
             <button
               key={s.id}
-              className={`hud-insegna ${scaffale === s.id ? "attiva" : ""}`}
+              className={`hud-insegna ${sezioneVicina === s.id ? "attiva" : ""}`}
               style={{ ["--luce" as string]: tema.luce }}
               onClick={() => scenaRef.current?.vaiAScaffale(s.id)}
             >{tema.icona} {s.nome}</button>

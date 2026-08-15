@@ -10,6 +10,8 @@ export interface Libro {
   anno: number | null;
   link: string;
   scaffale: string;
+  /** Impronta della copertina: entra nell'URL per invalidare la cache. */
+  copertinaVer: string;
   fonte: "goodreads" | "amazon";
   prezzo: string | null;
   formato: string | null;

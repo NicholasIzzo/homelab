@@ -21,7 +21,7 @@ export function Dettaglio({ libro, onChiudi }: Props) {
       <button className="scheda-chiudi" onClick={onChiudi} aria-label="Chiudi">✕</button>
       <div className="scheda-corpo">
         <div className="scheda-copertina">
-          <img src={coverUrl(libro.id)} alt={libro.titolo} />
+          <img src={coverUrl(libro)} alt={libro.titolo} />
         </div>
         <div className="scheda-testo">
           {libro.serie && <p className="scheda-serie">{tema.icona} {libro.serie}</p>}

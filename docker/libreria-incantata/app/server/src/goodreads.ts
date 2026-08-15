@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import type { Libro } from "./tipi.js";
 import { scaffaleDi } from "./scaffali.js";
+import { hashBreve } from "./util.js";
 
 /** Risultato del parsing: i libri + la mappa id→URL remoto della copertina. */
 export interface Catalogo {
@@ -106,6 +107,7 @@ export function analizzaRss(xml: string): Catalogo {
       anno: numero(it["book_published"]),
       link: link || `https://www.goodreads.com/book/show/${bookId}`,
       scaffale: "sospiri",
+      copertinaVer: cover ? hashBreve(cover) : "0",
       fonte: "goodreads",
       prezzo: null,
       formato: null,

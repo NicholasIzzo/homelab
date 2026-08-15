@@ -20,7 +20,7 @@ export function Desideri({ desideri, onApri, onChiudi }: Props) {
         {desideri.map((d) => (
           <button key={d.id} className="desiderio" onClick={() => onApri(d)}>
             <div className="desiderio-cop">
-              <img src={coverUrl(d.id)} alt={d.titolo} loading="lazy" />
+              <img src={coverUrl(d)} alt={d.titolo} loading="lazy" />
               {d.prezzo && <span className="desiderio-prezzo">{d.prezzo}</span>}
             </div>
             <span className="desiderio-titolo">{d.titoloBreve}</span>

@@ -30,6 +30,7 @@ export function catalogoMock(): { lettrice: string; libri: Libro[] } {
       anno: s.anno,
       link: "https://www.goodreads.com",
       scaffale: "sospiri",
+      copertinaVer: "mock",
       fonte: "goodreads",
       prezzo: null,
       formato: null,
