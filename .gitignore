@@ -10,3 +10,8 @@ credentials*.json
 
 # Icone PWA: generate a build time da app/web/icona.svg
 docker/homelab-hub/app/web/public/icons/
+
+# Dipendenze e build locali (si rigenerano con npm install / npm run build)
+node_modules/
+docker/videostore/app/web/dist/
+docker/videostore/app/server/dist/

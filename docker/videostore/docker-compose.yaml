@@ -1,0 +1,34 @@
+services:
+  videostore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: videostore:0.1.0 # tag fisso: mai :latest in produzione
+    container_name: videostore
+    restart: unless-stopped
+    ports:
+      # Solo LAN: il negozio parla con Jellyfin sulla stessa macchina (hpserver).
+      - "8091:8091"
+    env_file: .env
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8091/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
