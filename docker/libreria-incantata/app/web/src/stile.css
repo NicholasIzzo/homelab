@@ -1,0 +1,330 @@
+:root {
+  --notte: #0a0713;
+  --notte2: #140b22;
+  --crema: #f3e9d2;
+  --oro: #d9b25a;
+  --oro-chiaro: #f6d78a;
+  --rosa: #ff5d8f;
+  --ombra: rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(120% 90% at 50% 0%, #1a1030 0%, var(--notte) 60%);
+  color: var(--crema);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, .serif { font-family: Georgia, "Times New Roman", serif; }
+
+/* ---- bottoni ---------------------------------------------------------- */
+.btn-oro {
+  display: inline-block;
+  border: none;
+  padding: 0.75em 1.5em;
+  border-radius: 999px;
+  font: 600 1rem/1 "Segoe UI", sans-serif;
+  color: #201203;
+  background: linear-gradient(180deg, var(--oro-chiaro), var(--oro));
+  box-shadow: 0 0 18px rgba(217, 178, 90, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.12s, box-shadow 0.2s;
+}
+.btn-oro:hover { transform: translateY(-2px); box-shadow: 0 0 28px rgba(217, 178, 90, 0.8); }
+.btn-oro:disabled { filter: grayscale(0.6) brightness(0.7); cursor: default; transform: none; }
+.btn-oro.grande { padding: 1em 2.2em; font-size: 1.15rem; }
+
+.btn-fantasma {
+  border: 1px solid rgba(246, 215, 138, 0.4);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--crema);
+  padding: 0.7em 1.4em;
+  border-radius: 999px;
+  font: 500 0.95rem/1 sans-serif;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-fantasma:hover { background: rgba(246, 215, 138, 0.12); border-color: var(--oro); }
+
+/* ---- ingresso --------------------------------------------------------- */
+.ingresso {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1.5rem;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 50% 40%, rgba(60, 30, 90, 0.45), transparent 70%),
+    radial-gradient(120% 90% at 50% 0%, #1a1030, var(--notte) 65%);
+}
+.ingresso-stelle {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 70% 20%, #ffe9c0, transparent),
+    radial-gradient(1px 1px at 40% 70%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 85% 60%, #ffd98a, transparent),
+    radial-gradient(1px 1px at 55% 45%, #fff, transparent),
+    radial-gradient(1px 1px at 12% 80%, #fff, transparent);
+  opacity: 0.5;
+  animation: brilla 5s ease-in-out infinite alternate;
+}
+@keyframes brilla { from { opacity: 0.25; } to { opacity: 0.6; } }
+.ingresso-fumo {
+  position: absolute; left: 0; right: 0; bottom: -20%;
+  height: 55%;
+  background: radial-gradient(70% 100% at 50% 100%, rgba(120, 70, 160, 0.28), transparent 70%);
+  filter: blur(12px);
+  animation: fluttua 9s ease-in-out infinite alternate;
+}
+@keyframes fluttua { from { transform: translateX(-4%) scale(1.05); } to { transform: translateX(4%) scale(1.1); } }
+.ingresso-cuore { position: relative; z-index: 2; max-width: 40rem; }
+.ingresso-occhiello { letter-spacing: 0.8em; color: var(--oro); margin: 0 0 0.5rem; }
+.ingresso-titolo {
+  font-size: clamp(2.2rem, 8vw, 4.2rem);
+  margin: 0;
+  color: var(--crema);
+  text-shadow: 0 0 28px rgba(217, 178, 90, 0.6);
+  letter-spacing: 0.02em;
+}
+.ingresso-lettrice { font-size: 1.3rem; color: var(--oro-chiaro); margin: 0.4rem 0 1.4rem; }
+.ingresso-lettrice strong { font-family: Georgia, serif; }
+.ingresso-sotto { color: #cbbfe0; line-height: 1.6; margin: 0 auto 2rem; max-width: 32rem; }
+
+/* ---- scena 3D --------------------------------------------------------- */
+.scena3d { position: fixed; inset: 0; }
+.scena3d-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+.hud { position: fixed; left: 0; right: 0; display: flex; gap: 0.5rem; padding: 0.8rem; z-index: 5; pointer-events: none; }
+.hud > * { pointer-events: auto; }
+.hud-alto { top: 0; align-items: center; padding-top: max(0.8rem, env(safe-area-inset-top)); }
+.hud-basso {
+  bottom: 0;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: max(0.8rem, env(safe-area-inset-bottom));
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+}
+.hud-basso::-webkit-scrollbar { display: none; }
+
+.btn-uscita {
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(10, 7, 19, 0.6);
+  color: var(--crema);
+  padding: 0.5em 1em; border-radius: 999px; cursor: pointer; backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+.hud-scaffale {
+  margin-left: auto;
+  font-family: Georgia, serif;
+  font-size: 1.05rem;
+  padding: 0.4em 1em;
+  border-radius: 999px;
+  color: var(--luce, #fff);
+  background: rgba(10, 7, 19, 0.6);
+  border: 1px solid color-mix(in srgb, var(--luce, #fff) 55%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--luce, #fff) 40%, transparent);
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+.hud-aiuto {
+  margin-left: auto; margin-right: auto;
+  font-size: 0.82rem; color: #b6a9d0;
+  background: rgba(10, 7, 19, 0.5);
+  padding: 0.4em 0.9em; border-radius: 999px; backdrop-filter: blur(6px);
+  max-width: 70%; text-align: center;
+}
+.badge-demo {
+  background: var(--rosa); color: #fff; font-weight: 700; font-size: 0.7rem;
+  padding: 0.3em 0.6em; border-radius: 6px; letter-spacing: 0.1em;
+}
+
+.hud-insegna {
+  --luce: #d9b25a;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--luce) 50%, transparent);
+  background: rgba(10, 7, 19, 0.62);
+  color: var(--luce);
+  padding: 0.5em 0.9em;
+  border-radius: 999px;
+  font: 600 0.85rem/1 sans-serif;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(6px);
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+.hud-insegna:hover, .hud-insegna.attiva {
+  box-shadow: 0 0 16px color-mix(in srgb, var(--luce) 60%, transparent);
+  transform: translateY(-2px);
+}
+.hud-insegna.oro { --luce: #f6d78a; color: #201203; background: linear-gradient(180deg, var(--oro-chiaro), var(--oro)); border: none; }
+
+.hud-passi {
+  position: fixed; right: 1rem; bottom: 4.5rem; z-index: 6;
+  display: flex; flex-direction: column; gap: 0.6rem;
+}
+.hud-passi button {
+  width: 3.4rem; height: 3.4rem; border-radius: 50%;
+  border: 1px solid rgba(246, 215, 138, 0.4);
+  background: rgba(10, 7, 19, 0.6); color: var(--oro-chiaro);
+  font-size: 1.3rem; cursor: pointer; backdrop-filter: blur(6px);
+}
+.hud-passi button:active { background: rgba(246, 215, 138, 0.2); }
+
+/* ---- overlay ---------------------------------------------------------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 20;
+  display: grid; place-items: center;
+  padding: 1rem;
+  background: rgba(5, 3, 12, 0.78);
+  backdrop-filter: blur(8px);
+  overflow-y: auto;
+}
+
+/* ---- scheda libro ----------------------------------------------------- */
+.scheda {
+  position: relative;
+  width: min(52rem, 100%);
+  background: linear-gradient(160deg, var(--notte2), #0c0715);
+  border: 1px solid color-mix(in srgb, var(--luce, var(--oro)) 40%, transparent);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px var(--ombra), 0 0 40px color-mix(in srgb, var(--luce, var(--oro)) 20%, transparent);
+  padding: 1.6rem;
+}
+.scheda-chiudi {
+  position: absolute; top: 0.8rem; right: 0.8rem; z-index: 2;
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4);
+  color: var(--crema); font-size: 1rem; cursor: pointer;
+}
+.scheda-corpo { display: grid; grid-template-columns: 12rem 1fr; gap: 1.5rem; }
+.scheda-copertina img {
+  width: 100%; border-radius: 10px;
+  box-shadow: 0 12px 30px var(--ombra), 0 0 24px color-mix(in srgb, var(--luce, var(--oro)) 30%, transparent);
+}
+.scheda-serie { color: var(--luce, var(--oro)); font-weight: 600; margin: 0 0 0.2rem; font-size: 0.9rem; }
+.scheda-titolo { font-size: 1.8rem; margin: 0 0 0.2rem; line-height: 1.15; }
+.scheda-autore { color: #c9bce4; margin: 0 0 0.8rem; font-style: italic; }
+.scheda-meta {
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1rem;
+  font-size: 0.9rem; color: #d8cdf0; margin-bottom: 1rem;
+}
+.scheda-stelle { color: var(--oro-chiaro); letter-spacing: 0.1em; }
+.scheda-prezzo { color: var(--oro-chiaro); font-weight: 700; }
+.scheda-trama {
+  color: #cdc2e6; line-height: 1.6; font-size: 0.95rem;
+  max-height: 11rem; overflow-y: auto; margin: 0 0 1.2rem;
+  padding-right: 0.4rem;
+}
+
+/* ---- roulette --------------------------------------------------------- */
+.roulette {
+  position: relative;
+  width: min(34rem, 100%);
+  text-align: center;
+  padding: 1rem;
+}
+.roulette-runa {
+  position: absolute; top: 42%; left: 50%;
+  width: 30rem; height: 30rem; max-width: 90vw; max-height: 90vw;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 0deg, transparent, rgba(217,178,90,0.18), transparent 30%, rgba(255,93,143,0.14), transparent 60%, rgba(154,123,255,0.16), transparent);
+  border-radius: 50%;
+  filter: blur(4px);
+  animation: gira-lento 18s linear infinite;
+  z-index: -1;
+}
+@keyframes gira-lento { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.roulette-titolo { font-size: clamp(1.6rem, 6vw, 2.4rem); margin: 0 0 0.2rem; text-shadow: 0 0 24px rgba(217,178,90,0.6); }
+.roulette-sotto { color: #c6b9e2; margin: 0 0 1.4rem; min-height: 1.4em; }
+.roulette-cornice {
+  position: relative;
+  width: 15rem; height: 22.5rem; max-width: 62vw; max-height: 93vw;
+  margin: 0 auto 1.2rem;
+  border-radius: 12px;
+  padding: 0.5rem;
+  background: linear-gradient(160deg, #2a1c3a, #120a1e);
+  box-shadow: 0 0 40px rgba(217,178,90,0.4);
+  border: 2px solid rgba(246,215,138,0.6);
+}
+.roulette-cornice img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.roulette-cornice.gira img { animation: pulsa 0.12s steps(1) infinite; filter: brightness(0.9); }
+.roulette-cornice.ferma { animation: colpo 0.5s ease; box-shadow: 0 0 60px rgba(246,215,138,0.9); }
+@keyframes pulsa { 50% { opacity: 0.82; } }
+@keyframes colpo { 0% { transform: scale(1.12); } 60% { transform: scale(0.97); } 100% { transform: scale(1); } }
+.roulette-scintilla {
+  position: absolute; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--oro-chiaro); box-shadow: 0 0 12px var(--oro-chiaro);
+  animation: scintilla 1.4s ease-in-out infinite;
+}
+.roulette-scintilla.s1 { top: -5px; left: -5px; }
+.roulette-scintilla.s2 { top: -5px; right: -5px; animation-delay: 0.35s; }
+.roulette-scintilla.s3 { bottom: -5px; left: -5px; animation-delay: 0.7s; }
+.roulette-scintilla.s4 { bottom: -5px; right: -5px; animation-delay: 1.05s; }
+@keyframes scintilla { 0%, 100% { opacity: 0.3; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.3); } }
+.roulette-esito h2 { font-size: 1.5rem; margin: 0 0 0.2rem; }
+.roulette-autore { color: #c6b9e2; font-style: italic; margin: 0 0 1rem; }
+.roulette-azioni { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+.roulette-chiudi { margin-top: 1.4rem; }
+
+/* ---- desideri --------------------------------------------------------- */
+.desideri {
+  position: relative;
+  width: min(60rem, 100%);
+  background: linear-gradient(160deg, var(--notte2), #0c0715);
+  border: 1px solid rgba(246, 180, 90, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px var(--ombra);
+  padding: 1.8rem 1.4rem;
+  text-align: center;
+}
+.desideri-titolo { font-size: clamp(1.5rem, 5vw, 2.2rem); margin: 0 0 0.2rem; color: var(--oro-chiaro); text-shadow: 0 0 20px rgba(246,180,90,0.5); }
+.desideri-sotto { color: #c6b9e2; margin: 0 0 1.5rem; }
+.desideri-griglia {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 1.2rem; text-align: left;
+}
+.desiderio {
+  display: flex; flex-direction: column; gap: 0.3rem;
+  background: none; border: none; cursor: pointer; color: inherit; padding: 0;
+  transition: transform 0.12s;
+}
+.desiderio:hover { transform: translateY(-4px); }
+.desiderio-cop { position: relative; }
+.desiderio-cop img {
+  width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px;
+  box-shadow: 0 8px 20px var(--ombra); background: #201430;
+}
+.desiderio-prezzo {
+  position: absolute; bottom: 6px; right: 6px;
+  background: rgba(10,7,19,0.85); color: var(--oro-chiaro);
+  font-size: 0.72rem; font-weight: 700; padding: 0.2em 0.5em; border-radius: 6px;
+}
+.desiderio-titolo { font-size: 0.85rem; font-weight: 600; line-height: 1.2; }
+.desiderio-autore { font-size: 0.72rem; color: #a99fc4; }
+.desideri-chiudi { margin-top: 1.6rem; }
+
+/* ---- errore ----------------------------------------------------------- */
+.errore-schermo {
+  position: fixed; inset: 0; display: grid; place-content: center; gap: 1rem;
+  text-align: center; padding: 2rem; color: var(--crema);
+}
+
+/* ---- responsive ------------------------------------------------------- */
+@media (max-width: 540px) {
+  .scheda-corpo { grid-template-columns: 1fr; }
+  .scheda-copertina { width: 9rem; margin: 0 auto; }
+  .hud-scaffale, .hud-aiuto { font-size: 0.78rem; }
+}

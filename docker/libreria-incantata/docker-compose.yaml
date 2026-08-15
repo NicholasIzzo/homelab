@@ -1,0 +1,42 @@
+services:
+  libreria-incantata:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: libreria-incantata:0.1.0 # tag fisso: mai :latest in produzione
+    container_name: libreria-incantata
+    restart: unless-stopped
+    ports:
+      # LAN + Tailscale. La biblioteca legge Goodreads e Amazon da Internet.
+      - "8092:8092"
+    environment:
+      # Tutto ha già un default sensato nel codice: nessun segreto qui.
+      # Lista pubblica Goodreads (id dalla URL) e scaffale da mostrare.
+      GOODREADS_USER_ID: "130636342"
+      GOODREADS_SHELF: "to-read"
+      # Nome sull'insegna; vuoto = usa quello del profilo Goodreads.
+      LETTRICE: ""
+      # MOCK=1 per dati finti senza Internet.
+      MOCK: ""
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8092/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

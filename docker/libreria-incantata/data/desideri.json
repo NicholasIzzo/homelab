@@ -1,0 +1,97 @@
+{
+  "_nota": "Wishlist Amazon (libri da comprare). Sorgente bloccata al fetch automatico: aggiornare a mano rilanciando lo scrape del browser. Ultimo aggiornamento: 2026-08-15. Lista: MPM4BFSYOHU7",
+  "aggiornato": "2026-08-15",
+  "wishlistId": "MPM4BFSYOHU7",
+  "libri": [
+    {
+      "asin": "B0F5NGJ874",
+      "titolo": "Quasi Morti Del Tutto (I misteri del cimitero di Grimdale Vol. 1)",
+      "autore": "Steffanie Holmes, Barbara Dalla Villa",
+      "formato": "Formato Kindle",
+      "prezzo": "4,49 €",
+      "copertina": "https://m.media-amazon.com/images/I/51YfJLeuk6L._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/B0F5NGJ874"
+    },
+    {
+      "asin": "8834747585",
+      "titolo": "A promise of fire. Una promessa di fuoco. Con Ex libris. Con Segnalibro",
+      "autore": "Amanda Bouchet",
+      "formato": "Copertina rigida",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/417zcYWfzVL._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/8834747585"
+    },
+    {
+      "asin": "1739591909",
+      "titolo": "Uncino",
+      "autore": "Emily McIntire, M. Fiorelli",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,01 €",
+      "copertina": "https://m.media-amazon.com/images/I/41FgFj-VTwL._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/1739591909"
+    },
+    {
+      "asin": "B0F3ZQCH4K",
+      "titolo": "My baby: Illusione",
+      "autore": "Giorgia Fiorella",
+      "formato": "Formato Kindle",
+      "prezzo": "8,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/515W4XamSoL._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/B0F3ZQCH4K"
+    },
+    {
+      "asin": "B0F8FGLZ8K",
+      "titolo": "Dungeon Crawler Carl: Vol.1",
+      "autore": "Matt Dinniman, Will Staehle",
+      "formato": "Copertina flessibile",
+      "prezzo": "19,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/51EG-7sL50L._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/B0F8FGLZ8K"
+    },
+    {
+      "asin": "B07FB1Y3HW",
+      "titolo": "Loving the demon",
+      "autore": "Nicole Teso",
+      "formato": "Formato Kindle",
+      "prezzo": "3,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41CKKHPaKEL._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/B07FB1Y3HW"
+    },
+    {
+      "asin": "881710535X",
+      "titolo": "Figli di sangue e ossa",
+      "autore": "Tomi Adeyemi, Seba Pezzani",
+      "formato": "Copertina rigida",
+      "prezzo": "17,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/51bo0Cq2scL._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/881710535X"
+    },
+    {
+      "asin": "8817196606",
+      "titolo": "House of bane and blood. La biblioteca di Daphne",
+      "autore": "Alexis L. Menard, Claudia Milani",
+      "formato": "Copertina rigida",
+      "prezzo": "19,85 €",
+      "copertina": "https://m.media-amazon.com/images/I/41Uh-pWwYnL._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/8817196606"
+    },
+    {
+      "asin": "B0GTV7K97P",
+      "titolo": "La corte di sangue e vincoli (Fae Isle)",
+      "autore": "Lisette Marshall",
+      "formato": "Formato Kindle",
+      "prezzo": "5,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41jX5gZs1jL._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/B0GTV7K97P"
+    },
+    {
+      "asin": "8834747593",
+      "titolo": "Volo di drago. I dragonieri di Pern. Con Ex libris. Con Segnalibro (Vol. 1)",
+      "autore": "Anne McCaffrey, Roberta Rambelli",
+      "formato": "Copertina rigida",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/41I5CyKmo2L._SS400_.jpg",
+      "link": "https://www.amazon.it/dp/8834747593"
+    }
+  ]
+}
