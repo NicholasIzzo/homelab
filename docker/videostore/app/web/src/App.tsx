@@ -8,10 +8,12 @@ import { Cassa } from "./schermate/Cassa";
 import { BuonaVisione } from "./schermate/BuonaVisione";
 import { Roulette } from "./schermate/Roulette";
 import { ProiezioneQui } from "./schermate/ProiezioneQui";
+import { Chiosco } from "./schermate/Chiosco";
 
 type Overlay =
   | { tipo: "nessuno" }
   | { tipo: "roulette" }
+  | { tipo: "chiosco" }
   | { tipo: "dettaglio"; shelfId: string; item: StoreItem }
   | { tipo: "cassa"; shelfId: string; item: StoreItem }
   | { tipo: "proiezione"; item: StoreItem }
@@ -22,6 +24,7 @@ export function App() {
   const [overlay, setOverlay] = useState<Overlay>({ tipo: "nessuno" });
   const [store, setStore] = useState<StorePayload | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
+  const [snacks, setSnacks] = useState<string[]>([]);
 
   useEffect(() => {
     fetchStore()
@@ -66,10 +69,24 @@ export function App() {
       <Negozio3DView
         shelves={store?.shelves ?? []}
         mock={store?.mock ?? false}
+        snacks={snacks}
         onPick={(item, shelfId) => setOverlay({ tipo: "dettaglio", shelfId, item })}
         onRoulette={() => setOverlay({ tipo: "roulette" })}
+        onSnack={() => setOverlay({ tipo: "chiosco" })}
         onEsci={() => setDentro(false)}
       />
+
+      {overlay.tipo === "chiosco" && (
+        <div className="overlay">
+          <Chiosco
+            onPreso={(snack) => {
+              setSnacks((s) => [...s, snack].slice(-6));
+              setOverlay({ tipo: "nessuno" });
+            }}
+            onChiudi={() => setOverlay({ tipo: "nessuno" })}
+          />
+        </div>
+      )}
 
       {overlay.tipo === "roulette" && (
         <div className="overlay">

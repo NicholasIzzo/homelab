@@ -6,21 +6,25 @@ import { ScenaNegozio } from "./scena";
 interface Props {
   shelves: Shelf[];
   mock: boolean;
+  snacks: string[];
   onPick: (item: StoreItem, shelfId: string) => void;
   onRoulette: () => void;
+  onSnack: () => void;
   onEsci: () => void;
 }
 
 const TOCCO = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
 
 /** Il negozio 3D: canvas Three.js + HUD (uscita, insegne rapide, suggerimenti). */
-export function Negozio3DView({ shelves, mock, onPick, onRoulette, onEsci }: Props) {
+export function Negozio3DView({ shelves, mock, snacks, onPick, onRoulette, onSnack, onEsci }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scenaRef = useRef<ScenaNegozio | null>(null);
   const onPickRef = useRef(onPick);
   onPickRef.current = onPick;
   const onRouletteRef = useRef(onRoulette);
   onRouletteRef.current = onRoulette;
+  const onSnackRef = useRef(onSnack);
+  onSnackRef.current = onSnack;
   const [corsia, setCorsia] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,6 +34,7 @@ export function Negozio3DView({ shelves, mock, onPick, onRoulette, onEsci }: Pro
       onPickItem: (item, shelfId) => onPickRef.current(item, shelfId),
       onArrivo: setCorsia,
       onRoulette: () => onRouletteRef.current(),
+      onSnack: () => onSnackRef.current(),
     });
     scenaRef.current = scena;
     return () => {
@@ -83,6 +88,12 @@ export function Negozio3DView({ shelves, mock, onPick, onRoulette, onEsci }: Pro
         </div>
       )}
 
+      {snacks.length > 0 && (
+        <div className="hud-snack" title="Le tue scorte per il film">
+          🖐 {snacks.join(" ")}
+        </div>
+      )}
+
       <div className="hud hud-basso">
         <button
           className="hud-insegna"
@@ -97,6 +108,13 @@ export function Negozio3DView({ shelves, mock, onPick, onRoulette, onEsci }: Pro
           onClick={() => scenaRef.current?.vaiAllaRoulette()}
         >
           🎲 Indeciso?
+        </button>
+        <button
+          className="hud-insegna"
+          style={{ ["--neon" as string]: "#ff3d9a" }}
+          onClick={() => scenaRef.current?.entraNelFoyer()}
+        >
+          🎟 Cinema
         </button>
         {shelves.map((s) => {
           const tema = temaDi(s.id);

@@ -104,6 +104,8 @@ export function Cassa({ item, onFatto, onQui, onAnnulla }: Props) {
                       {d.nowPlaying ? ` · sta guardando: ${d.nowPlaying}` : ""}
                       {" · "}
                       {vistoDaQuanto(d.lastActivity)}
+                      {d.client === "Wholphin" &&
+                        " · ⚠️ Wholphin a volte ignora il comando: se non parte usa l'app Jellyfin"}
                     </span>
                   </button>
                 ))}

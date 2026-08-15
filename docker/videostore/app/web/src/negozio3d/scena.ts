@@ -7,6 +7,7 @@ export interface CallbacksScena {
   onPickItem: (item: StoreItem, shelfId: string) => void;
   onArrivo: (shelfId: string | null) => void;
   onRoulette: () => void;
+  onSnack: () => void;
 }
 
 const OCCHI = 1.6; // altezza occhi
@@ -382,6 +383,27 @@ function texturaZerbino(nome: string, neon: string): THREE.CanvasTexture {
   );
 }
 
+function texturaTappetoRosso(): THREE.CanvasTexture {
+  const t = texturaCanvas((ctx, w, h) => {
+    ctx.fillStyle = "#4a0d16";
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = "#d9a52033";
+    ctx.lineWidth = 3;
+    for (let x = 0; x < w + h; x += 42) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x - h, h);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - h, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+  });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
 function texturaDiscoRoulette(): THREE.CanvasTexture {
   return texturaCanvas(
     (ctx, w, h) => {
@@ -430,9 +452,12 @@ export class ScenaNegozio {
   private passoTouch = 0;
   private discoRoulette: THREE.Mesh | null = null;
   private waypointRoulette = { pos: new THREE.Vector3(-2.3, OCCHI, 1.4), yaw: Math.PI / 2 };
-  private area: { tipo: "negozio" } | { tipo: "sala"; indice: number } = { tipo: "negozio" };
+  private area: { tipo: "negozio" } | { tipo: "foyer" } | { tipo: "sala"; indice: number } = {
+    tipo: "negozio",
+  };
   private filmSale: { item: StoreItem; shelfId: string }[] = [];
   private saleCentri: THREE.Vector3[] = [];
+  private foyerZ = 0;
   private zMin = -6;
   private corsiaAttuale: string | null = null;
   private ultimaVerificaTexture = 0;
@@ -619,6 +644,164 @@ export class ScenaNegozio {
   /** Le sei sale cinema in fondo al negozio: porte sulla parete di fondo.
    *  Programmazione: una categoria diversa per sala, preferendo i film
    *  dell'anno corrente (le "prime visioni"). */
+  /** Il foyer del cinema: tappeto rosso, snack bar, macchina dei popcorn,
+   *  tabellone programmazione. Le porte delle sale si attaccano alla sua
+   *  parete di fondo (costruite dal chiamante). */
+  private costruisciFoyer(fz: number, matPorta: THREE.MeshStandardMaterial) {
+    const L = 32; // larghezza
+    const P = 16; // profondità
+    const H = 3.7;
+
+    const tappeto = texturaTappetoRosso();
+    tappeto.repeat.set(L / 3, P / 3);
+    const pav = new THREE.Mesh(
+      new THREE.PlaneGeometry(L, P),
+      new THREE.MeshStandardMaterial({ map: tappeto, roughness: 1 }),
+    );
+    pav.rotation.x = -Math.PI / 2;
+    pav.position.set(0, 0, fz);
+    pav.userData = { tipo: "pavimento" };
+    this.scene.add(pav);
+
+    const matMuro = new THREE.MeshStandardMaterial({ color: 0x241430, roughness: 1 });
+    const soff = new THREE.Mesh(new THREE.PlaneGeometry(L, P), matMuro);
+    soff.rotation.x = Math.PI / 2;
+    soff.position.set(0, H, fz);
+    this.scene.add(soff);
+    const mkMuroF = (w: number, pos: [number, number, number], rotY: number) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, H), matMuro);
+      m.position.set(...pos);
+      m.rotation.y = rotY;
+      this.scene.add(m);
+    };
+    mkMuroF(P, [-L / 2, H / 2, fz], Math.PI / 2);
+    mkMuroF(P, [L / 2, H / 2, fz], -Math.PI / 2);
+    mkMuroF(L, [0, H / 2, fz - P / 2], 0);
+    mkMuroF(L, [0, H / 2, fz + P / 2], Math.PI);
+
+    // pannelli luce
+    const geoPan = new THREE.PlaneGeometry(1.6, 0.6);
+    const matPan = new THREE.MeshBasicMaterial({ color: 0xf0ead2 });
+    for (const px of [-10, -3.3, 3.3, 10]) {
+      for (const pz of [fz - 4, fz + 4]) {
+        const p = new THREE.Mesh(geoPan, matPan);
+        p.rotation.x = Math.PI / 2;
+        p.position.set(px, H - 0.01, pz);
+        this.scene.add(p);
+      }
+    }
+
+    // insegna programmazione sopra le porte delle sale
+    const prog = new THREE.Mesh(
+      new THREE.PlaneGeometry(11, 0.85),
+      new THREE.MeshBasicMaterial({ map: texturaInsegna("PROGRAMMAZIONE DI OGGI", "🎟", "#ff3d9a") }),
+    );
+    prog.position.set(0, H - 0.45, fz - P / 2 + 0.02);
+    this.scene.add(prog);
+
+    // porta d'uscita verso il negozio
+    const uscita = new THREE.Mesh(new THREE.BoxGeometry(2.1, 2.25, 0.08), matPorta);
+    uscita.position.set(0, 1.12, fz + P / 2 - 0.05);
+    uscita.userData = { tipo: "esci-foyer" };
+    this.scene.add(uscita);
+    const targaUscita = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.6, 0.45),
+      new THREE.MeshBasicMaterial({ map: texturaInsegna("NEGOZIO", "🚪", "#66ff99") }),
+    );
+    targaUscita.position.set(0, 2.7, fz + P / 2 - 0.1);
+    targaUscita.rotation.y = Math.PI;
+    targaUscita.userData = { tipo: "esci-foyer" };
+    this.scene.add(targaUscita);
+
+    // --- snack bar, sul lato sinistro ---
+    const bar = new THREE.Group();
+    const datiSnack = { tipo: "snack" };
+    const banco = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.05, 0.95), this.matLegno);
+    banco.position.y = 0.52;
+    banco.userData = datiSnack;
+    bar.add(banco);
+    const piano = new THREE.Mesh(
+      new THREE.BoxGeometry(3.6, 0.06, 1.05),
+      new THREE.MeshStandardMaterial({ color: 0x2b1a12, roughness: 0.5 }),
+    );
+    piano.position.y = 1.08;
+    piano.userData = datiSnack;
+    bar.add(piano);
+    const retro = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.7, 0.3), this.matLegno);
+    retro.position.set(0, 1.4, -1.15);
+    retro.userData = datiSnack;
+    bar.add(retro);
+    const snacks = ["🥤", "🍫", "🍬", "🥤", "🍭", "🍪"];
+    snacks.forEach((emoji, i) => {
+      const s = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.4, 0.4),
+        new THREE.MeshBasicMaterial({ map: texturaEmoji(emoji), transparent: true }),
+      );
+      s.position.set(-1.25 + i * 0.5, 1.95, -0.98);
+      bar.add(s);
+    });
+    for (let i = 0; i < 4; i++) {
+      const s = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.42, 0.42),
+        new THREE.MeshBasicMaterial({ map: texturaEmoji(["🍿", "🥤", "🌭", "🍫"][i]!), transparent: true }),
+      );
+      s.position.set(-1.05 + i * 0.7, 1.32, 0.2);
+      s.userData = datiSnack;
+      bar.add(s);
+    }
+    const insegnaBar = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.8, 0.55),
+      new THREE.MeshBasicMaterial({ map: texturaInsegna("SNACK BAR", "🍿", "#ffd166") }),
+    );
+    insegnaBar.position.set(0, 2.75, 0);
+    insegnaBar.userData = datiSnack;
+    bar.add(insegnaBar);
+    bar.position.set(-10.5, 0, fz + 3.2);
+    bar.rotation.y = Math.PI / 2;
+    this.scene.add(bar);
+
+    // --- macchina dei popcorn, a parte, sul lato destro ---
+    const pc = new THREE.Group();
+    const basePc = new THREE.Mesh(
+      new THREE.BoxGeometry(1.15, 0.95, 1.05),
+      new THREE.MeshStandardMaterial({ color: 0xb01a2e, roughness: 0.6 }),
+    );
+    basePc.position.y = 0.47;
+    basePc.userData = datiSnack;
+    pc.add(basePc);
+    const vetro = new THREE.Mesh(
+      new THREE.BoxGeometry(1.05, 1.0, 0.95),
+      new THREE.MeshStandardMaterial({ color: 0xfff6dd, transparent: true, opacity: 0.22, roughness: 0.1 }),
+    );
+    vetro.position.y = 1.45;
+    vetro.userData = datiSnack;
+    pc.add(vetro);
+    const mucchio = new THREE.Mesh(
+      new THREE.SphereGeometry(0.5, 14, 10),
+      new THREE.MeshStandardMaterial({ color: 0xffd166, emissive: 0x7a5a10, roughness: 0.9 }),
+    );
+    mucchio.scale.set(0.9, 0.42, 0.8);
+    mucchio.position.y = 1.12;
+    pc.add(mucchio);
+    const tetto = new THREE.Mesh(
+      new THREE.BoxGeometry(1.25, 0.14, 1.12),
+      new THREE.MeshStandardMaterial({ color: 0xb01a2e, roughness: 0.6 }),
+    );
+    tetto.position.y = 2.02;
+    tetto.userData = datiSnack;
+    pc.add(tetto);
+    const targaPc = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.5, 0.42),
+      new THREE.MeshBasicMaterial({ map: texturaInsegna("POP CORN", "🍿", "#ffd166") }),
+    );
+    targaPc.position.y = 2.45;
+    targaPc.userData = datiSnack;
+    pc.add(targaPc);
+    pc.position.set(10.5, 0, fz + 3.2);
+    pc.rotation.y = -Math.PI / 2;
+    this.scene.add(pc);
+  }
+
   private costruisciSale(shelves: Shelf[]) {
     const annoCorrente = new Date().getFullYear();
     const perScaffale = new Map<string, { item: StoreItem; shelfId: string }[]>();
@@ -655,13 +838,29 @@ export class ScenaNegozio {
     const zParete = this.zMin - 1.5;
     const matPorta = new THREE.MeshStandardMaterial({ color: 0x351f18, roughness: 0.8 });
 
-    // insegna della zona cinema sopra le porte
-    const insegnaCinema = new THREE.Mesh(
-      new THREE.PlaneGeometry(7.2, 0.62),
-      new THREE.MeshBasicMaterial({ map: texturaInsegna("CINEMA · PROGRAMMAZIONE", "🎟", "#ff3d9a") }),
+    // --- nel negozio resta solo il portone d'ingresso della zona cinema ---
+    const fz = this.zMin - 40; // centro del foyer, in una "tasca" dietro il negozio
+    this.foyerZ = fz;
+    const portone = new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.35, 0.1), matPorta);
+    portone.position.set(0, 1.17, zParete + 0.06);
+    portone.userData = { tipo: "foyer" };
+    this.scene.add(portone);
+    const fessura = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.08, 2.2),
+      new THREE.MeshBasicMaterial({ color: 0xffd166 }),
     );
-    insegnaCinema.position.set(0, 2.88, zParete + 0.02);
+    fessura.position.set(0, 1.15, zParete + 0.115);
+    this.scene.add(fessura);
+    const insegnaCinema = new THREE.Mesh(
+      new THREE.PlaneGeometry(4.4, 0.58),
+      new THREE.MeshBasicMaterial({ map: texturaInsegna("CINEMA", "🎟", "#ff3d9a") }),
+    );
+    insegnaCinema.position.set(0, 2.85, zParete + 0.02);
+    insegnaCinema.userData = { tipo: "foyer" };
     this.scene.add(insegnaCinema);
+
+    // --- il foyer: tappeto rosso, snack bar, macchina dei popcorn, porte sala ---
+    this.costruisciFoyer(fz, matPorta);
 
     const matSedile = new THREE.MeshStandardMaterial({ color: 0x8a1626, roughness: 0.85 });
     const geoSeduta = new THREE.BoxGeometry(0.52, 0.42, 0.5);
@@ -670,31 +869,32 @@ export class ScenaNegozio {
     const matTenda = new THREE.MeshStandardMaterial({ color: 0x5c1020, roughness: 0.9 });
 
     this.filmSale.forEach((film, i) => {
-      // porta nel negozio: marquee grande e locandina esposta accanto, come al cinema
-      const xPorta = -4.4 + i * 1.76;
+      // porta della sala NEL FOYER: ben distanziate, marquee grande, locandina esposta
+      const xPorta = (i - 2.5) * 5;
+      const zPorteFoyer = fz - 7.9;
       const datiSala = { tipo: "sala", indice: i };
-      const porta = new THREE.Mesh(new THREE.BoxGeometry(0.95, 2.05, 0.08), matPorta);
-      porta.position.set(xPorta - 0.3, 1.025, zParete + 0.05);
+      const porta = new THREE.Mesh(new THREE.BoxGeometry(1.15, 2.2, 0.08), matPorta);
+      porta.position.set(xPorta - 0.65, 1.1, zPorteFoyer + 0.05);
       porta.userData = datiSala;
       this.scene.add(porta);
       const marquee = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.6, 0.47),
+        new THREE.PlaneGeometry(2.9, 0.85),
         new THREE.MeshBasicMaterial({ map: texturaMarquee(i + 1, film.item.title) }),
       );
-      marquee.position.set(xPorta, 2.34, zParete + 0.06);
+      marquee.position.set(xPorta, 2.75, zPorteFoyer + 0.06);
       marquee.userData = datiSala;
       this.scene.add(marquee);
 
       // bacheca con la locandina del film in proiezione
-      const bacheca = new THREE.Mesh(new THREE.BoxGeometry(0.72, 1.06, 0.05), matPorta);
-      bacheca.position.set(xPorta + 0.55, 1.35, zParete + 0.04);
+      const bacheca = new THREE.Mesh(new THREE.BoxGeometry(1.06, 1.56, 0.05), matPorta);
+      bacheca.position.set(xPorta + 0.85, 1.25, zPorteFoyer + 0.04);
       bacheca.userData = datiSala;
       this.scene.add(bacheca);
       const locandina = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.62, 0.94),
+        new THREE.PlaneGeometry(0.92, 1.4),
         this.segnaposto("#ffd166"),
       );
-      locandina.position.set(xPorta + 0.55, 1.35, zParete + 0.075);
+      locandina.position.set(xPorta + 0.85, 1.25, zPorteFoyer + 0.075);
       locandina.userData = datiSala;
       this.scene.add(locandina);
       this.loader.load(coverUrl(film.item.id, 450), (tex) => {
@@ -703,10 +903,10 @@ export class ScenaNegozio {
         if (!this.disposto) locandina.material = new THREE.MeshBasicMaterial({ map: tex });
       });
 
-      // la sala vera e propria, in una "tasca" ben distanziata dietro la parete:
+      // la sala vera e propria, in una "tasca" ben distanziata dietro il foyer:
       // spaziatura larga, così la planata non sfiora mai le sale vicine
       const cx = (i - 2.5) * 22;
-      const cz = this.zMin - 16;
+      const cz = this.zMin - 70;
       this.saleCentri.push(new THREE.Vector3(cx, 0, cz));
       const sala = new THREE.Group();
       sala.position.set(cx, 0, cz);
@@ -1175,6 +1375,18 @@ export class ScenaNegozio {
         this.esciDallaSala();
         return;
       }
+      if (dati.tipo === "foyer") {
+        this.entraNelFoyer();
+        return;
+      }
+      if (dati.tipo === "esci-foyer") {
+        this.esciDalFoyer();
+        return;
+      }
+      if (dati.tipo === "snack") {
+        this.vaiVersoEApri(colpo.point, () => this.cb.onSnack());
+        return;
+      }
       if (dati.tipo === "pagina" && dati.shelfId && dati.dir) {
         const u = this.unita.find((x) => x.shelf.id === dati.shelfId);
         if (u) {
@@ -1201,7 +1413,70 @@ export class ScenaNegozio {
       const c = this.saleCentri[this.area.indice];
       if (c) return { xMin: c.x - 2.5, xMax: c.x + 2.5, zMin: c.z - 2.6, zMax: c.z + 2.9 };
     }
+    if (this.area.tipo === "foyer") {
+      return { xMin: -15.4, xMax: 15.4, zMin: this.foyerZ - 7.3, zMax: this.foyerZ + 7.3 };
+    }
     return { xMin: -X_CAMMINO, xMax: X_CAMMINO, zMin: this.zMin, zMax: 2.6 };
+  }
+
+  /** Entra nella zona cinema, davanti allo snack bar. */
+  entraNelFoyer() {
+    this.area = { tipo: "foyer" };
+    if (this.corsiaAttuale !== null) {
+      this.corsiaAttuale = null;
+      this.cb.onArrivo(null);
+    }
+    this.glide = {
+      daPos: this.camera.position.clone(),
+      aPos: new THREE.Vector3(0, OCCHI, this.foyerZ + 5.6),
+      daYaw: this.yaw,
+      aYaw: 0,
+      t: 0,
+      durata: 1.6,
+      shelfId: null,
+    };
+  }
+
+  private esciDalFoyer() {
+    this.area = { tipo: "negozio" };
+    this.glide = {
+      daPos: this.camera.position.clone(),
+      aPos: new THREE.Vector3(0, OCCHI, this.zMin + 1.2),
+      daYaw: this.yaw,
+      aYaw: Math.PI,
+      t: 0,
+      durata: 1.6,
+      shelfId: null,
+    };
+  }
+
+  /** Avvicinati a un punto d'interesse e poi apri (snack bar, popcorn). */
+  private vaiVersoEApri(punto: THREE.Vector3, dopo: () => void) {
+    const dir = new THREE.Vector3().subVectors(punto, this.camera.position);
+    dir.y = 0;
+    const distanza = dir.length();
+    if (distanza < 3.2) {
+      dopo();
+      return;
+    }
+    dir.normalize();
+    const lim = this.limitiArea();
+    const meta = new THREE.Vector3().copy(punto).addScaledVector(dir, -2.0);
+    meta.set(
+      THREE.MathUtils.clamp(meta.x, lim.xMin, lim.xMax),
+      OCCHI,
+      THREE.MathUtils.clamp(meta.z, lim.zMin, lim.zMax),
+    );
+    this.glide = {
+      daPos: this.camera.position.clone(),
+      aPos: meta,
+      daYaw: this.yaw,
+      aYaw: Math.atan2(-(punto.x - meta.x), -(punto.z - meta.z)),
+      t: 0,
+      durata: THREE.MathUtils.clamp(0.35 + distanza * 0.12, 0.5, 2.2),
+      shelfId: null,
+      dopo,
+    };
   }
 
   private entraInSala(indice: number) {
@@ -1225,11 +1500,12 @@ export class ScenaNegozio {
 
   private esciDallaSala() {
     const indice = this.area.tipo === "sala" ? this.area.indice : 0;
-    this.area = { tipo: "negozio" };
-    const xPorta = THREE.MathUtils.clamp(-4.4 + indice * 1.76, -X_CAMMINO, X_CAMMINO);
+    // dalla sala si torna nel foyer, davanti alla propria porta
+    this.area = { tipo: "foyer" };
+    const xPorta = THREE.MathUtils.clamp((indice - 2.5) * 5, -15, 15);
     this.glide = {
       daPos: this.camera.position.clone(),
-      aPos: new THREE.Vector3(xPorta, OCCHI, this.zMin + 0.8),
+      aPos: new THREE.Vector3(xPorta, OCCHI, this.foyerZ - 5.8),
       daYaw: this.yaw,
       aYaw: Math.PI,
       t: 0,
@@ -1287,6 +1563,31 @@ export class ScenaNegozio {
   }
 
   private accumuloFrame = 0;
+  private fpsConteggio = 0;
+  private fpsUltimaMisura = performance.now();
+  private ratioAttuale = 0.62;
+
+  /** Su hardware debole la risoluzione si adatta da sola: se il dispositivo
+   *  regge (es. Fire Stick 4K Max) sale verso il pieno, se arranca scende. */
+  private adattaRisoluzione() {
+    if (!BASSA_POTENZA) return;
+    this.fpsConteggio++;
+    const ora = performance.now();
+    const trascorso = ora - this.fpsUltimaMisura;
+    if (trascorso < 4000) return;
+    const fps = (this.fpsConteggio * 1000) / trascorso;
+    this.fpsConteggio = 0;
+    this.fpsUltimaMisura = ora;
+    if (fps > 27 && this.ratioAttuale < 1.0) {
+      this.ratioAttuale = Math.min(1.0, this.ratioAttuale + 0.13);
+      this.renderer.setPixelRatio(this.ratioAttuale);
+      this.ridimensiona();
+    } else if (fps < 20 && this.ratioAttuale > 0.5) {
+      this.ratioAttuale = Math.max(0.5, this.ratioAttuale - 0.12);
+      this.renderer.setPixelRatio(this.ratioAttuale);
+      this.ridimensiona();
+    }
+  }
 
   private anima = () => {
     if (this.disposto) return;
@@ -1349,6 +1650,8 @@ export class ScenaNegozio {
 
     // la ruota degli indecisi gira piano, in attesa
     if (this.discoRoulette) this.discoRoulette.rotation.y += dt * 0.9;
+
+    this.adattaRisoluzione();
 
     // carica le copertine delle corsie vicine, con parsimonia
     const ora = performance.now();
