@@ -4,6 +4,7 @@ import type { Libro } from "../tipi";
 
 interface Props {
   libro: Libro;
+  onLeggi: () => void;
   onChiudi: () => void;
 }
 
@@ -13,7 +14,7 @@ function stelle(voto: number): string {
 }
 
 /** La scheda del libro: copertina grande, dettagli e link esterno. */
-export function Dettaglio({ libro, onChiudi }: Props) {
+export function Dettaglio({ libro, onLeggi, onChiudi }: Props) {
   const tema = temaDi(libro.scaffale);
   const amazon = libro.fonte === "amazon";
   return (
@@ -42,11 +43,16 @@ export function Dettaglio({ libro, onChiudi }: Props) {
 
           {libro.descrizione && <p className="scheda-trama">{libro.descrizione}</p>}
 
-          {libro.link && (
-            <a className="btn-oro" href={libro.link} target="_blank" rel="noreferrer noopener">
-              {amazon ? "🛒 Vedi su Amazon" : "🔗 Apri su Goodreads"}
-            </a>
-          )}
+          <div className="scheda-azioni">
+            <button className="btn-oro" onClick={onLeggi}>
+              🔥 Leggi accanto al camino
+            </button>
+            {libro.link && (
+              <a className="btn-fantasma" href={libro.link} target="_blank" rel="noreferrer noopener">
+                {amazon ? "🛒 Vedi su Amazon" : "🔗 Apri su Goodreads"}
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -316,6 +316,44 @@ h1, h2, h3, .serif { font-family: Georgia, "Times New Roman", serif; }
 .desiderio-autore { font-size: 0.72rem; color: #a99fc4; }
 .desideri-chiudi { margin-top: 1.6rem; }
 
+.scheda-azioni { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; }
+.scheda-azioni .btn-fantasma { text-decoration: none; }
+
+/* ---- angolo di lettura ------------------------------------------------ */
+.angolo { position: fixed; inset: 0; z-index: 30; background: #110a06; }
+.angolo-canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+.angolo-alto {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 31;
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.8rem; padding-top: max(0.8rem, env(safe-area-inset-top));
+  background: linear-gradient(180deg, rgba(10,6,3,0.75), transparent);
+}
+.angolo-titolo {
+  font-family: Georgia, serif; font-size: 1.05rem;
+  color: var(--luce, var(--oro-chiaro));
+  text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+}
+.angolo-titolo small { color: #d9c7a6; font-family: system-ui, sans-serif; font-size: 0.8rem; }
+
+.angolo-basso {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 31;
+  display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+  padding: 0.9rem; padding-bottom: max(0.9rem, env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, rgba(10,6,3,0.8), transparent);
+  flex-wrap: wrap;
+}
+.angolo-basso .btn-fantasma {
+  width: 2.8rem; height: 2.8rem; padding: 0; border-radius: 50%;
+  font-size: 1.5rem; line-height: 1; display: grid; place-items: center;
+  border-color: rgba(255,190,120,0.45); color: #ffd9a8;
+}
+.angolo-basso .btn-fantasma:disabled { opacity: 0.3; cursor: default; }
+.angolo-pagina { color: #e0cba6; font-family: Georgia, serif; font-size: 0.9rem; min-width: 9rem; text-align: center; }
+.angolo-altro { margin-left: 0.6rem; }
+
+.roulette-prezzo { color: var(--luce, var(--oro-chiaro)); font-weight: 700; margin: 0 0 0.8rem; }
+
 /* ---- errore ----------------------------------------------------------- */
 .errore-schermo {
   position: fixed; inset: 0; display: grid; place-content: center; gap: 1rem;

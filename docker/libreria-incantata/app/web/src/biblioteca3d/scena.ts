@@ -35,6 +35,7 @@ export interface CallbacksScena {
   onPickLibro: (libro: Libro) => void;
   onArrivo: (sezioneId: string | null) => void;
   onRuota: () => void;
+  onRuotaDesideri: () => void;
   onDesideri: () => void;
 }
 
@@ -68,8 +69,17 @@ interface LuceRipiano {
   larghezza: number;
 }
 
+/** Yaw da dare a una camera perché guardi il punto p (le camere guardano -Z). */
 function yawVerso(cx: number, cz: number, px: number, pz: number): number {
   return Math.atan2(-(px - cx), -(pz - cz));
+}
+
+/**
+ * Yaw da dare a un oggetto perché la sua faccia (+Z locale) sia rivolta verso
+ * p. È l'opposto del caso camera: confonderli gira i cartelli contro il muro.
+ */
+function facciaVerso(cx: number, cz: number, px: number, pz: number): number {
+  return Math.atan2(px - cx, pz - cz);
 }
 
 function normalizzaAngolo(a: number): number {
@@ -119,6 +129,8 @@ export class ScenaBiblioteca {
   private luciRipiano: LuceRipiano[] = [];
   private pool: THREE.RectAreaLight[] = [];
   private prossimoRicalcolo = 0;
+  private postoDesideri: { lato: -1 | 1; z: number } | null = null;
+  private sferaDesideri: THREE.Mesh | null = null;
 
   private loader = new THREE.TextureLoader();
   private risorse: { dispose: () => void }[] = [];
@@ -162,6 +174,7 @@ export class ScenaBiblioteca {
     this.costruisciAmbiente();
     this.costruisciModuli(piani);
     this.costruisciDais();
+    this.costruisciLeggioDesideri();
     this.costruisciLuci();
 
     this.pos.set(0, 0, this.zMax - 0.6);
@@ -205,6 +218,16 @@ export class ScenaBiblioteca {
         z: zCentro,
         yaw: yawVerso(xSosta, zCentro, xMobile, zCentro),
       });
+
+      // La sezione dei desideri ha la sua ruota, su un leggio piazzato nel
+      // varco a fine scaffalatura: davanti ai libri sarebbe sotto il naso di
+      // chi guarda i ripiani, e finirebbe fuori inquadratura.
+      if (sez.id === "desideri") {
+        this.postoDesideri = {
+          lato,
+          z: zPartenza - (moduli - 0.5) * PASSO_MODULO - GAP_SEZIONE * 0.45,
+        };
+      }
 
       cursore[lato] = zPartenza - moduli * PASSO_MODULO - GAP_SEZIONE;
     });
@@ -668,6 +691,114 @@ export class ScenaBiblioteca {
     this.waypoints.push({ id: "__ruota", x: 0, z: z + 1.9, yaw: yawVerso(0, z + 1.9, 0, z) });
   }
 
+  /**
+   * Leggio della Ruota dei Desideri: la wishlist ha il suo sorteggio, davanti
+   * ai suoi scaffali, per scegliere il prossimo libro da comprare.
+   */
+  private costruisciLeggioDesideri() {
+    const posto = this.postoDesideri;
+    if (!posto) return;
+    const x = posto.lato * (CORRIDOIO / 2 - 0.5);
+    const z = posto.z;
+    // il leggio guarda verso il centro della corsia, non verso il muro
+    const versoCorsia = facciaVerso(x, z, 0, z);
+
+    const legno = mappeLegno(13, [78, 52, 26]);
+    this.risorse.push(legno.map, legno.normalMap, legno.roughnessMap);
+    const mat = this.traccia(
+      new THREE.MeshStandardMaterial({
+        map: legno.map,
+        normalMap: legno.normalMap,
+        roughnessMap: legno.roughnessMap,
+        roughness: 0.62,
+        metalness: 0.12,
+        envMapIntensity: 0.4,
+      }),
+    );
+
+    const g = new THREE.Group();
+    g.position.set(x, 0, z);
+    g.rotation.y = versoCorsia;
+
+    const base = new THREE.Mesh(this.traccia(new THREE.CylinderGeometry(0.3, 0.36, 0.09, 24)), mat);
+    base.position.y = 0.045;
+    base.castShadow = true;
+    base.receiveShadow = true;
+    g.add(base);
+
+    const stelo = new THREE.Mesh(this.traccia(new THREE.CylinderGeometry(0.06, 0.09, 1.1, 16)), mat);
+    stelo.position.y = 0.6;
+    stelo.castShadow = true;
+    g.add(stelo);
+
+    const coppa = new THREE.Mesh(this.traccia(new THREE.CylinderGeometry(0.17, 0.09, 0.12, 20)), mat);
+    coppa.position.y = 1.21;
+    coppa.castShadow = true;
+    g.add(coppa);
+
+    const oro = temaDi("desideri").luce;
+    const sfera = new THREE.Mesh(
+      this.traccia(new THREE.IcosahedronGeometry(0.16, 2)),
+      this.traccia(
+        new THREE.MeshStandardMaterial({
+          color: 0xffc472,
+          emissive: new THREE.Color(oro),
+          emissiveIntensity: 0.75,
+          roughness: 0.2,
+          metalness: 0.5,
+        }),
+      ),
+    );
+    sfera.position.y = 1.46;
+    sfera.userData = { azione: "ruotaDesideri" };
+    g.add(sfera);
+    this.interattivi.push(sfera);
+    this.sferaDesideri = sfera;
+
+    const alone = new THREE.Sprite(
+      this.traccia(
+        new THREE.SpriteMaterial({
+          map: this.aloneCondiviso(),
+          color: new THREE.Color(oro),
+          transparent: true,
+          opacity: 0.55,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      ),
+    );
+    alone.scale.set(1.5, 1.5, 1);
+    alone.position.y = 1.46;
+    g.add(alone);
+
+    const luce = new THREE.PointLight(new THREE.Color(oro), 1.6, 4.5, 2);
+    luce.position.y = 1.5;
+    g.add(luce);
+
+    const tex = this.traccia(
+      texturaInsegna("Ruota dei Desideri", "⭐", oro, "Cosa compro adesso?"),
+    );
+    const cartello = new THREE.Mesh(
+      this.traccia(new THREE.PlaneGeometry(0.74, 0.23)),
+      this.traccia(new THREE.MeshBasicMaterial({ map: tex, transparent: true })),
+    );
+    cartello.position.set(0, 1.82, 0);
+    cartello.userData = { azione: "ruotaDesideri" };
+    g.add(cartello);
+    this.interattivi.push(cartello);
+
+    this.scene.add(g);
+
+    // punto di sosta davanti al leggio, abbastanza indietro da inquadrarlo
+    const xSosta = -posto.lato * 0.45;
+    this.waypoints.push({
+      id: "__ruotaDesideri",
+      x: xSosta,
+      z,
+      yaw: yawVerso(xSosta, z, x, z),
+    });
+  }
+
   // ---- luci --------------------------------------------------------------
 
   private costruisciLuci() {
@@ -830,6 +961,7 @@ export class ScenaBiblioteca {
       };
       if (u.libro) return this.cb.onPickLibro(u.libro);
       if (u.azione === "ruota") return this.cb.onRuota();
+      if (u.azione === "ruotaDesideri") return this.cb.onRuotaDesideri();
       if (u.azione === "desideri") return this.cb.onDesideri();
       if (u.sezioneId) return this.vaiAScaffale(u.sezioneId);
     }
@@ -854,6 +986,23 @@ export class ScenaBiblioteca {
     this.passo = v;
   }
 
+  /**
+   * Sospende il ciclo di disegno. Serve quando si apre l'angolo di lettura:
+   * due scene WebGL che disegnano insieme sprecherebbero GPU (e batteria) per
+   * mostrarne una sola.
+   */
+  pausa() {
+    if (this.raf === 0) return;
+    cancelAnimationFrame(this.raf);
+    this.raf = 0;
+  }
+
+  riprendi() {
+    if (this.raf !== 0) return;
+    this.orologio.getDelta(); // scarta il tempo trascorso da fermi
+    this.raf = requestAnimationFrame(this.tick);
+  }
+
   vaiAScaffale(id: string) {
     const w = this.waypoints.find((x) => x.id === id);
     if (!w) return;
@@ -867,6 +1016,10 @@ export class ScenaBiblioteca {
   }
   vaiAiDesideri() {
     this.vaiAScaffale("desideri");
+  }
+  /** Si ferma davanti al leggio della Ruota dei Desideri. */
+  vaiAllaRuotaDesideri() {
+    this.vaiAScaffale("__ruotaDesideri");
   }
   vaiAllIngresso() {
     this.posBersaglio.set(0, 0, this.zMax - 0.6);
@@ -962,6 +1115,10 @@ export class ScenaBiblioteca {
     this.orb.rotation.x += dt * 0.2;
     this.orb.position.y = 1.5 + Math.sin(t * 1.3) * 0.045;
     this.orbLuce.intensity = 3.0 + Math.sin(t * 2.6) * 0.5;
+    if (this.sferaDesideri) {
+      this.sferaDesideri.rotation.y -= dt * 0.6;
+      this.sferaDesideri.position.y = 1.46 + Math.sin(t * 1.6) * 0.03;
+    }
     if (this.polvere) this.polvere.rotation.y = t * 0.014;
 
     this.renderer.render(this.scene, this.camera);

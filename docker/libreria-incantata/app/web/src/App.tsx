@@ -1,17 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchBiblioteca } from "./api";
 import type { BibliotecaPayload, Libro } from "./tipi";
+import { temaDi } from "./temi";
 import { Ingresso } from "./schermate/Ingresso";
 import { Biblioteca3DView } from "./biblioteca3d/Biblioteca3DView";
 import { Dettaglio } from "./schermate/Dettaglio";
 import { Roulette } from "./schermate/Roulette";
 import { Desideri } from "./schermate/Desideri";
+import { AngoloLettura } from "./schermate/AngoloLettura";
 
 type Overlay =
   | { tipo: "nessuno" }
-  | { tipo: "roulette" }
+  /** Quale ruota: quella dei libri da leggere o quella dei desideri. */
+  | { tipo: "roulette"; fonte: "lettura" | "desideri" }
   | { tipo: "desideri" }
-  | { tipo: "dettaglio"; libro: Libro };
+  | { tipo: "dettaglio"; libro: Libro }
+  | { tipo: "angolo"; libro: Libro };
+
+function aCaso<T>(lista: T[]): T | null {
+  if (lista.length === 0) return null;
+  return lista[Math.floor(Math.random() * lista.length)] ?? null;
+}
 
 export function App() {
   const [dentro, setDentro] = useState(false);
@@ -41,6 +50,12 @@ export function App() {
     return lista;
   }, [dati]);
 
+  const desideri = dati?.desideri ?? [];
+
+  const apriAngolo = (libro: Libro | null) => {
+    if (libro) setOverlay({ tipo: "angolo", libro });
+  };
+
   if (errore) {
     return (
       <div className="errore-schermo">
@@ -64,18 +79,39 @@ export function App() {
     <>
       <Biblioteca3DView
         scaffali={dati?.scaffali ?? []}
-        desideri={dati?.desideri ?? []}
+        desideri={desideri}
         mock={dati?.mock ?? false}
         onPick={(libro) => setOverlay({ tipo: "dettaglio", libro })}
-        onRoulette={() => setOverlay({ tipo: "roulette" })}
+        onRoulette={() => setOverlay({ tipo: "roulette", fonte: "lettura" })}
+        onRouletteDesideri={() => setOverlay({ tipo: "roulette", fonte: "desideri" })}
         onDesideri={() => setOverlay({ tipo: "desideri" })}
+        onAngolo={() => apriAngolo(aCaso(tuttiILibri))}
         onEsci={() => setDentro(false)}
+        attiva={overlay.tipo !== "angolo"}
       />
 
-      {overlay.tipo === "roulette" && (
+      {overlay.tipo === "roulette" && overlay.fonte === "lettura" && (
         <div className="overlay">
           <Roulette
             libri={tuttiILibri}
+            titolo="🔮 La Ruota del Destino"
+            sottotitolo="Le pagine girano nel vuoto…"
+            etichetta="📖 Leggo questo!"
+            luce={temaDi("recenti").luce}
+            onScegli={(libro) => setOverlay({ tipo: "dettaglio", libro })}
+            onChiudi={() => setOverlay({ tipo: "nessuno" })}
+          />
+        </div>
+      )}
+
+      {overlay.tipo === "roulette" && overlay.fonte === "desideri" && (
+        <div className="overlay">
+          <Roulette
+            libri={desideri}
+            titolo="⭐ La Ruota dei Desideri"
+            sottotitolo="Il prossimo da mettere nel carrello…"
+            etichetta="🛒 Voglio questo!"
+            luce={temaDi("desideri").luce}
             onScegli={(libro) => setOverlay({ tipo: "dettaglio", libro })}
             onChiudi={() => setOverlay({ tipo: "nessuno" })}
           />
@@ -85,7 +121,7 @@ export function App() {
       {overlay.tipo === "desideri" && (
         <div className="overlay">
           <Desideri
-            desideri={dati?.desideri ?? []}
+            desideri={desideri}
             onApri={(libro) => setOverlay({ tipo: "dettaglio", libro })}
             onChiudi={() => setOverlay({ tipo: "nessuno" })}
           />
@@ -95,9 +131,29 @@ export function App() {
       {overlay.tipo === "dettaglio" && (
         <div className="overlay" onClick={() => setOverlay({ tipo: "nessuno" })}>
           <div onClick={(e) => e.stopPropagation()}>
-            <Dettaglio libro={overlay.libro} onChiudi={() => setOverlay({ tipo: "nessuno" })} />
+            <Dettaglio
+              libro={overlay.libro}
+              onLeggi={() => apriAngolo(overlay.libro)}
+              onChiudi={() => setOverlay({ tipo: "nessuno" })}
+            />
           </div>
         </div>
+      )}
+
+      {overlay.tipo === "angolo" && (
+        <AngoloLettura
+          libro={overlay.libro}
+          onCambiaLibro={() =>
+            apriAngolo(
+              aCaso(
+                (overlay.libro.fonte === "amazon" ? desideri : tuttiILibri).filter(
+                  (l) => l.id !== overlay.libro.id,
+                ),
+              ),
+            )
+          }
+          onChiudi={() => setOverlay({ tipo: "nessuno" })}
+        />
       )}
     </>
   );

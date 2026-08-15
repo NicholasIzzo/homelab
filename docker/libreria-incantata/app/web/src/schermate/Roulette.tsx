@@ -4,6 +4,13 @@ import type { Libro } from "../tipi";
 
 interface Props {
   libri: Libro[];
+  /** Titolo della ruota: cambia fra "da leggere" e "da comprare". */
+  titolo: string;
+  sottotitolo: string;
+  /** Testo del pulsante di conferma. */
+  etichetta: string;
+  /** Colore dominante dell'effetto luminoso. */
+  luce: string;
   onScegli: (libro: Libro) => void;
   onChiudi: () => void;
 }
@@ -17,8 +24,16 @@ function mescola<T>(arr: T[]): T[] {
   return a;
 }
 
-/** La Ruota del Destino: le copertine sfrecciano, rallentano, il fato sceglie. */
-export function Roulette({ libri, onScegli, onChiudi }: Props) {
+/** La ruota: le copertine sfrecciano, rallentano, e il destino sceglie. */
+export function Roulette({
+  libri,
+  titolo,
+  sottotitolo,
+  etichetta,
+  luce,
+  onScegli,
+  onChiudi,
+}: Props) {
   const [giro, setGiro] = useState(0);
   const [corrente, setCorrente] = useState<Libro | null>(null);
   const [fermo, setFermo] = useState(false);
@@ -45,13 +60,23 @@ export function Roulette({ libri, onScegli, onChiudi }: Props) {
     return () => clearTimeout(timerRef.current);
   }, [pool]);
 
+  if (libri.length === 0) {
+    return (
+      <div className="roulette" style={{ ["--luce" as string]: luce }}>
+        <h1 className="roulette-titolo">{titolo}</h1>
+        <p className="roulette-sotto">Non c'è ancora nessun libro da scegliere.</p>
+        <button className="btn-fantasma roulette-chiudi" onClick={onChiudi}>
+          ← Torna alla biblioteca
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="roulette">
+    <div className="roulette" style={{ ["--luce" as string]: luce }}>
       <div className="roulette-runa" aria-hidden />
-      <h1 className="roulette-titolo">🔮 La Ruota del Destino</h1>
-      <p className="roulette-sotto">
-        {fermo ? "Il destino ha scelto per te." : "Le pagine girano nel vuoto…"}
-      </p>
+      <h1 className="roulette-titolo">{titolo}</h1>
+      <p className="roulette-sotto">{fermo ? "Il destino ha scelto per te." : sottotitolo}</p>
 
       <div className={`roulette-cornice ${fermo ? "ferma" : "gira"}`}>
         {corrente && <img src={coverUrl(corrente)} alt={corrente.titolo} />}
@@ -65,9 +90,10 @@ export function Roulette({ libri, onScegli, onChiudi }: Props) {
         <div className="roulette-esito">
           <h2>{corrente.titoloBreve}</h2>
           {corrente.autore && <p className="roulette-autore">di {corrente.autore}</p>}
+          {corrente.prezzo && <p className="roulette-prezzo">{corrente.prezzo}</p>}
           <div className="roulette-azioni">
             <button className="btn-oro" onClick={() => onScegli(corrente)}>
-              📖 Leggo questo!
+              {etichetta}
             </button>
             <button className="btn-fantasma" onClick={() => setGiro((g) => g + 1)}>
               🎲 Gira ancora

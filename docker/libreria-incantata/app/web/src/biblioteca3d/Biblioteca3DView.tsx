@@ -9,8 +9,12 @@ interface Props {
   mock: boolean;
   onPick: (libro: Libro) => void;
   onRoulette: () => void;
+  onRouletteDesideri: () => void;
   onDesideri: () => void;
+  onAngolo: () => void;
   onEsci: () => void;
+  /** Falso mentre è aperto l'angolo di lettura: la scena si mette in pausa. */
+  attiva: boolean;
 }
 
 const TOCCO = typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
@@ -22,8 +26,11 @@ export function Biblioteca3DView({
   mock,
   onPick,
   onRoulette,
+  onRouletteDesideri,
   onDesideri,
+  onAngolo,
   onEsci,
+  attiva,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scenaRef = useRef<ScenaBiblioteca | null>(null);
@@ -33,6 +40,8 @@ export function Biblioteca3DView({
   onRouletteRef.current = onRoulette;
   const onDesideriRef = useRef(onDesideri);
   onDesideriRef.current = onDesideri;
+  const onRouletteDesideriRef = useRef(onRouletteDesideri);
+  onRouletteDesideriRef.current = onRouletteDesideri;
   const [sezioneVicina, setSezioneVicina] = useState<string | null>(null);
 
   /**
@@ -58,6 +67,7 @@ export function Biblioteca3DView({
       onPickLibro: (l) => onPickRef.current(l),
       onArrivo: setSezioneVicina,
       onRuota: () => onRouletteRef.current(),
+      onRuotaDesideri: () => onRouletteDesideriRef.current(),
       onDesideri: () => onDesideriRef.current(),
     });
     scenaRef.current = scena;
@@ -75,6 +85,11 @@ export function Biblioteca3DView({
       scena.dispose();
     };
   }, [sezioni]);
+
+  useEffect(() => {
+    if (attiva) scenaRef.current?.riprendi();
+    else scenaRef.current?.pausa();
+  }, [attiva]);
 
   const attuale = sezioni.find((s) => s.id === sezioneVicina);
 
@@ -123,8 +138,18 @@ export function Biblioteca3DView({
         <button
           className="hud-insegna"
           style={{ ["--luce" as string]: temaDi("desideri").luce }}
+          onClick={onRouletteDesideri}
+        >⭐ Ruota dei Desideri</button>
+        <button
+          className="hud-insegna"
+          style={{ ["--luce" as string]: "#ffb070" }}
+          onClick={onAngolo}
+        >🔥 Angolo di Lettura</button>
+        <button
+          className="hud-insegna"
+          style={{ ["--luce" as string]: temaDi("desideri").luce }}
           onClick={onDesideri}
-        >⭐ Desideri</button>
+        >🛒 Lista desideri</button>
         <button
           className="hud-insegna"
           style={{ ["--luce" as string]: "#9fe8c0" }}

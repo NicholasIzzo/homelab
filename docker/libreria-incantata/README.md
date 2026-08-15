@@ -39,6 +39,26 @@ spesso (*Il principe crudele* fra i romanzetti rosa, *Wings* fra i fae).
 "Appena Sussurrati" resta una vista dei dati (ripete libri già presenti
 altrove) e non diventa un mobile: in 3D i titoli comparirebbero due volte.
 
+## Le due ruote e l'angolo di lettura
+
+- **🔮 La Ruota del Destino** sorteggia fra i libri *da leggere* (Goodreads).
+- **⭐ La Ruota dei Desideri** sorteggia fra i libri *da comprare* (wishlist
+  Amazon) e risponde a un'altra domanda: "cosa compro adesso?". Ha il suo
+  leggio con la sfera ambra, nel varco a fine scaffalatura dei desideri.
+  Entrambe usano lo stesso componente `Roulette`, parametrico su pool, titolo,
+  etichetta e colore.
+- **🔥 L'Angolo di Lettura** (`web/src/angolo3d/`) è una stanzetta a parte:
+  camino acceso con fiamme e braci animate, poltrona, candela, travi a vista.
+  Il libro scelto è aperto in grembo — copertina sulla pagina sinistra, trama
+  impaginata e sfogliabile sulla destra (frecce ← → o i pulsanti).
+
+  Il testo dei romanzi **non ce l'abbiamo** (Goodreads espone solo la trama, e
+  il contenuto dei libri non andrebbe comunque ridistribuito): quello che si
+  "legge" accanto al fuoco è la quarta di copertina.
+
+  Mentre l'angolo è aperto la scena della biblioteca va in **pausa**: due scene
+  WebGL che disegnano insieme sprecherebbero GPU e batteria per mostrarne una.
+
 ## Come è costruita la scena 3D
 
 - `web/src/biblioteca3d/layout.ts` — **motore di layout**, matematica pura senza
