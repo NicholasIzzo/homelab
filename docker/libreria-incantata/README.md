@@ -42,18 +42,22 @@ npm run dev:web      # in un altro → http://localhost:5173
 
 `MOCK=1 npm run dev:server` per titoli finti senza Internet.
 
-## Deploy (NAS, via Dockge)
+## Deploy (hpserver, accanto alla Videoteca)
 
-GitOps: si costruisce sul NAS. L'immagine è multi-arch (base `node:22-slim`,
-ok su ARM64). Nessun segreto, nessun `.env` da creare.
+Gira su **hpserver** (`192.168.0.33`, x86), non sul NAS: carico a runtime
+minimo (il 3D sta nel browser) e stesso pattern della Videoteca. Nessun
+segreto, nessun `.env` da creare. GitOps dal clone in `~/homelab`:
 
 ```bash
-git pull
+cd ~/homelab && git pull
+cd docker/libreria-incantata
 docker compose up -d --build
 ```
 
-La biblioteca risponde su `http://<nas>:8092`. Configurabile dal blocco
+La biblioteca risponde su `http://192.168.0.33:8092`. Configurabile dal blocco
 `environment:` del compose (`GOODREADS_USER_ID`, `GOODREADS_SHELF`, `LETTRICE`).
+L'immagine è multi-arch (base `node:22-slim`), quindi funziona anche sul NAS
+ARM64 se un domani la sposti.
 
 ## Aggiornare la wishlist Amazon
 
