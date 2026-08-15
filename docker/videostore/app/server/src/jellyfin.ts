@@ -45,6 +45,16 @@ export class JellyfinClient {
     return res;
   }
 
+  /** Id del server (serve per i link diretti a Jellyfin Web). */
+  async fetchSystemId(): Promise<string> {
+    const res = await fetch(`${this.cfg.jellyfinUrl}/System/Info/Public`, {
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) throw new Error(`Jellyfin /System/Info/Public → HTTP ${res.status}`);
+    const body = (await res.json()) as { Id?: string };
+    return body.Id ?? "";
+  }
+
   async fetchLibrary(): Promise<StoreItem[]> {
     const params = new URLSearchParams({
       IncludeItemTypes: "Movie,Series",

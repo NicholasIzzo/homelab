@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { coverUrl, fetchDevices, play } from "../api";
+import { coverUrl, fetchDevices, jellyfinWebUrl, play } from "../api";
 import type { PlayDevice, StoreItem } from "../tipi";
 
 interface Props {
@@ -27,6 +27,23 @@ type Stato =
 /** La cassa: il commesso chiede su quale schermo far partire il film. */
 export function Cassa({ item, onFatto, onQui, onAnnulla }: Props) {
   const [stato, setStato] = useState<Stato>({ fase: "carico" });
+  const [urlJellyfin, setUrlJellyfin] = useState<string | null>(null);
+
+  useEffect(() => {
+    let vivo = true;
+    jellyfinWebUrl(item.id)
+      .then((u) => {
+        if (vivo) setUrlJellyfin(u);
+      })
+      .catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, [item.id]);
+
+  const apriSuJellyfin = () => {
+    if (urlJellyfin) window.open(urlJellyfin, "_blank", "noopener");
+  };
 
   useEffect(() => {
     let vivo = true;
@@ -79,6 +96,11 @@ export function Cassa({ item, onFatto, onQui, onAnnulla }: Props) {
                   🖥️ Guardalo qui
                 </button>
               )}
+              {urlJellyfin && (
+                <button className="btn-noleggia" onClick={apriSuJellyfin}>
+                  🌐 Apri su Jellyfin
+                </button>
+              )}
               <button className="btn-rimetti" onClick={() => setStato({ fase: "carico" })}>
                 Ricontrolla gli schermi
               </button>
@@ -93,6 +115,14 @@ export function Cassa({ item, onFatto, onQui, onAnnulla }: Props) {
                   <button className="dispositivo dispositivo-qui" onClick={onQui}>
                     <span className="dispositivo-nome">🖥️ Qui, su questo schermo</span>
                     <span className="dispositivo-info">parte subito nel browser, senza attese</span>
+                  </button>
+                )}
+                {urlJellyfin && (
+                  <button className="dispositivo dispositivo-qui" onClick={apriSuJellyfin}>
+                    <span className="dispositivo-nome">🌐 Apri su Jellyfin</span>
+                    <span className="dispositivo-info">
+                      nuova scheda col player completo: tracce audio, sottotitoli, avanti/indietro
+                    </span>
                   </button>
                 )}
                 {stato.devices.map((d) => (
@@ -127,6 +157,11 @@ export function Cassa({ item, onFatto, onQui, onAnnulla }: Props) {
               <button className="btn-noleggia" onClick={() => noleggia(stato.device)}>
                 Riprova su {stato.device.deviceName}
               </button>
+              {urlJellyfin && (
+                <button className="btn-noleggia" onClick={apriSuJellyfin}>
+                  🌐 Aprilo su Jellyfin
+                </button>
+              )}
               <button className="btn-rimetti" onClick={() => setStato({ fase: "carico" })}>
                 Scegli un altro schermo
               </button>

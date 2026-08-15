@@ -27,6 +27,16 @@ async function getLibrary(): Promise<StoreItem[]> {
 
 app.get("/api/health", async () => ({ ok: true, mock: cfg.mockMode }));
 
+// Base per i link diretti "apri su Jellyfin Web" (indipendenti dalle sessioni).
+let configCache: { jellyfinUrl: string; serverId: string } | null = null;
+app.get("/api/config", async () => {
+  if (cfg.mockMode) return { jellyfinUrl: null, serverId: null };
+  if (!configCache) {
+    configCache = { jellyfinUrl: cfg.jellyfinUrl, serverId: await jellyfin.fetchSystemId() };
+  }
+  return configCache;
+});
+
 app.get("/api/store", async (): Promise<StorePayload> => {
   const items = await getLibrary();
   return { shelves: buildShelves(items), mock: cfg.mockMode };

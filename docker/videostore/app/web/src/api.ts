@@ -21,3 +21,14 @@ export async function play(sessionId: string, itemId: string): Promise<{ avviato
 }
 
 export const coverUrl = (itemId: string, h = 450) => `/api/image/${itemId}?h=${h}`;
+
+let configCache: { jellyfinUrl: string | null; serverId: string | null } | null = null;
+
+/** URL della pagina del titolo su Jellyfin Web (controlli completi), o null in demo. */
+export async function jellyfinWebUrl(itemId: string): Promise<string | null> {
+  configCache ??= await getJson<{ jellyfinUrl: string | null; serverId: string | null }>(
+    "/api/config",
+  );
+  if (!configCache.jellyfinUrl || !configCache.serverId) return null;
+  return `${configCache.jellyfinUrl}/web/#/details?id=${itemId}&serverId=${configCache.serverId}`;
+}
