@@ -5,6 +5,7 @@ import type { PlayDevice, StoreItem } from "../tipi";
 interface Props {
   item: StoreItem;
   onFatto: (deviceName: string) => void;
+  onQui: () => void;
   onAnnulla: () => void;
 }
 
@@ -24,7 +25,7 @@ type Stato =
   | { fase: "errore"; messaggio: string };
 
 /** La cassa: il commesso chiede su quale schermo far partire il film. */
-export function Cassa({ item, onFatto, onAnnulla }: Props) {
+export function Cassa({ item, onFatto, onQui, onAnnulla }: Props) {
   const [stato, setStato] = useState<Stato>({ fase: "carico" });
 
   useEffect(() => {
@@ -72,9 +73,14 @@ export function Cassa({ item, onFatto, onAnnulla }: Props) {
 
           {stato.fase === "scelta" && stato.devices.length === 0 && (
             <div className="fumetto">
-              <p>«Non vedo schermi accesi! Apri Jellyfin sulla TV (o su un altro dispositivo) e riprova.»</p>
-              <button className="btn-noleggia" onClick={() => setStato({ fase: "carico" })}>
-                Riprova
+              <p>«Non vedo schermi remoti accesi! Apri l'app sulla TV e riprova… oppure te lo proietto qui.»</p>
+              {item.type === "movie" && (
+                <button className="btn-noleggia" onClick={onQui}>
+                  🖥️ Guardalo qui
+                </button>
+              )}
+              <button className="btn-rimetti" onClick={() => setStato({ fase: "carico" })}>
+                Ricontrolla gli schermi
               </button>
             </div>
           )}
@@ -83,6 +89,12 @@ export function Cassa({ item, onFatto, onAnnulla }: Props) {
             <div className="fumetto">
               <p>«Dove te lo faccio partire?»</p>
               <div className="lista-dispositivi">
+                {item.type === "movie" && (
+                  <button className="dispositivo dispositivo-qui" onClick={onQui}>
+                    <span className="dispositivo-nome">🖥️ Qui, su questo schermo</span>
+                    <span className="dispositivo-info">parte subito nel browser, senza attese</span>
+                  </button>
+                )}
                 {stato.devices.map((d) => (
                   <button key={d.sessionId} className="dispositivo" onClick={() => noleggia(d)}>
                     <span className="dispositivo-nome">📺 {d.deviceName}</span>

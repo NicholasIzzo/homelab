@@ -7,12 +7,14 @@ import { Dettaglio } from "./schermate/Dettaglio";
 import { Cassa } from "./schermate/Cassa";
 import { BuonaVisione } from "./schermate/BuonaVisione";
 import { Roulette } from "./schermate/Roulette";
+import { ProiezioneQui } from "./schermate/ProiezioneQui";
 
 type Overlay =
   | { tipo: "nessuno" }
   | { tipo: "roulette" }
   | { tipo: "dettaglio"; shelfId: string; item: StoreItem }
   | { tipo: "cassa"; shelfId: string; item: StoreItem }
+  | { tipo: "proiezione"; item: StoreItem }
   | { tipo: "buonavisione"; item: StoreItem; deviceName: string };
 
 export function App() {
@@ -101,10 +103,17 @@ export function App() {
             onFatto={(deviceName) =>
               setOverlay({ tipo: "buonavisione", item: overlay.item, deviceName })
             }
+            onQui={() => setOverlay({ tipo: "proiezione", item: overlay.item })}
             onAnnulla={() =>
               setOverlay({ tipo: "dettaglio", shelfId: overlay.shelfId, item: overlay.item })
             }
           />
+        </div>
+      )}
+
+      {overlay.tipo === "proiezione" && (
+        <div className="overlay">
+          <ProiezioneQui item={overlay.item} onChiudi={() => setOverlay({ tipo: "nessuno" })} />
         </div>
       )}
 

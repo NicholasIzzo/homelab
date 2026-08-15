@@ -158,6 +158,23 @@ app.get("/api/uscite", async () => {
   return payload;
 });
 
+// Proiezione "su questo schermo": lo stream passa da qui, la key resta server-side.
+app.get<{ Params: { id: string } }>("/api/stream/:id", async (req, reply) => {
+  if (cfg.mockMode) {
+    return reply.code(404).send({ error: "niente stream in modalità demo" });
+  }
+  const upstream = await jellyfin.fetchStream(req.params.id, req.headers.range);
+  if (!upstream.ok && upstream.status !== 206) {
+    return reply.code(upstream.status).send();
+  }
+  reply.code(upstream.status);
+  for (const nome of ["content-type", "content-length", "content-range", "accept-ranges"]) {
+    const valore = upstream.headers.get(nome);
+    if (valore) reply.header(nome, valore);
+  }
+  return reply.send(upstream.body ? Readable.fromWeb(upstream.body) : Buffer.alloc(0));
+});
+
 app.get("/api/devices", async () => {
   if (cfg.mockMode) return { devices: mockDevices(), mock: true };
   return { devices: await jellyfin.fetchControllableSessions(), mock: false };

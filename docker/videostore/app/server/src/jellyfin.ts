@@ -76,6 +76,24 @@ export class JellyfinClient {
     return this.request(`/Items/${encodeURIComponent(itemId)}/Images/Primary?${params}`);
   }
 
+  /** Stream video "universale": Jellyfin fa direct-play se il formato è
+   *  compatibile, altrimenti transcodifica (QSV). Niente timeout: è un film. */
+  async fetchStream(itemId: string, range: string | undefined): Promise<Response> {
+    const params = new URLSearchParams({
+      DeviceId: "videostore-server",
+      VideoCodec: "h264",
+      AudioCodec: "aac",
+      VideoBitrate: "12000000",
+      AudioBitrate: "256000",
+    });
+    return fetch(`${this.cfg.jellyfinUrl}/Videos/${encodeURIComponent(itemId)}/stream.mp4?${params}`, {
+      headers: {
+        Authorization: `MediaBrowser Token="${this.cfg.jellyfinApiKey}", Client="Videostore", Device="Videostore", DeviceId="videostore-server", Version="0.1.0"`,
+        ...(range ? { Range: range } : {}),
+      },
+    });
+  }
+
   /** Backdrop orizzontale (per gli schermi delle sale); ripiega sulla copertina. */
   async fetchBackdropImage(itemId: string, height: number): Promise<Response> {
     const params = new URLSearchParams({ fillHeight: String(height), quality: "90" });
