@@ -29,13 +29,18 @@ un'immagine cross-origin senza header CORS non è usabile come texture WebGL.
 `🖤 I Patti Oscuri` · `⚡ Magia & Accademie` · `🏛️ Miti & Leggende` ·
 `⚔️ Saghe & Imperi` · `🌆 Mondi Spezzati` · `🔮 Gli Enigmi Sussurrati` ·
 `❤️‍🔥 I Cuori in Fiamme` · `✨ Lo Scaffale dei Sospiri` (fuori genere) ·
-`⭐ Il Sentiero dei Desideri` (wishlist Amazon).
+`⭐ Il Sentiero dei Desideri` — che però **non è un mobile**: vedi sotto.
 
 I generi sono assegnati in `server/src/scaffali.ts` in tre passaggi, dal più
 preciso al più generico: **mappa curata** titolo→scaffale (verificata a mano,
 libro per libro), poi **regole per autore/serie**, infine **euristica a parole
 chiave** per i titoli aggiunti in futuro. Le sole parole chiave sbagliavano
 spesso (*Il principe crudele* fra i romanzetti rosa, *Wings* fra i fae).
+
+Sugli scaffali stanno **solo i libri da leggere**. I desideri (wishlist Amazon)
+restano fuori: sono libri non ancora suoi, e affiancarli agli altri
+confonderebbe su cosa possiede davvero. Vivono nella **Ruota dei Desideri** e
+nella lista.
 
 "Appena Sussurrati" resta una vista dei dati (ripete libri già presenti
 altrove) e non diventa un mobile: in 3D i titoli comparirebbero due volte.
@@ -74,9 +79,13 @@ altrove) e non diventa un mobile: in 3D i titoli comparirebbero due volte.
   Generate una volta e condivise da tutti i mobili.
 - `web/src/biblioteca3d/scena.ts` — stanza, mobili, luci e navigazione.
 
-I mobili hanno una **credenza chiusa** fino a 72 cm e cinque ripiani sopra: i
-vani vicini al pavimento non si guardano e i libri lì sotto non si
-distinguerebbero. La camera usa un **campo visivo stretto (48°)**: col
+I mobili hanno una **credenza chiusa** fino a 72 cm e i ripiani sopra: i vani
+vicini al pavimento non si guardano e i libri lì sotto non si
+distinguerebbero. L'altezza **segue il contenuto** (`dimensioniPerSezione`, da
+2 a 5 ripiani): un mobile uguale per tutti lascerebbe mezzi scaffali vuoti alle
+sezioni piccole. Le sezioni vengono poi disposte a scacchiera grande/piccola e
+assegnate ogni volta alla parete più corta, così la sala non ha un'estremità
+carica e una spoglia. La camera usa un **campo visivo stretto (48°)**: col
 grandangolo le copertine ai bordi si inclinano e sembrano storte pur essendo
 perfettamente dritte.
 
@@ -92,6 +101,17 @@ copertina è quadrata il libro si abbassa, non si deforma.
 Con quasi duecento volumi in scena le copertine vengono **rimpicciolite** prima
 di diventare texture (192 px, 128 sui telefoni): a piena risoluzione la somma
 occuperebbe centinaia di MB di memoria video.
+
+## Tagli decorati
+
+Ogni volume ha il **taglio dei fogli** decorato, sulle facce laterali, in due
+motivi intonati al colore del genere: *Tinta e oro* e *Giardino inciso*
+(`biblioteca3d/bordi.ts`). Si scelgono libro per libro dal pannello Arreda.
+
+Nota onesta: **nessuna fonte pubblica associa a un ISBN il disegno reale del
+taglio** — né Goodreads né Amazon lo espongono. I due motivi sono disegnati
+qui, non recuperati. Cambiarli aggiorna solo il materiale di quel libro, senza
+ricostruire la sala.
 
 Aprendo con `?diag=1` la console stampa conteggi e violazioni dei bounds.
 

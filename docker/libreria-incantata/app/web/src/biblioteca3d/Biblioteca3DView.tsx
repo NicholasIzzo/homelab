@@ -51,20 +51,23 @@ export function Biblioteca3DView({
   const [sezioneVicina, setSezioneVicina] = useState<string | null>(null);
 
   /**
-   * Le sezioni fisiche della stanza. "Appena Sussurrati" resta solo una vista
-   * (ripete libri già presenti altrove): in 3D lo saltiamo, altrimenti gli
-   * stessi titoli comparirebbero due volte su scaffali diversi. I desideri
-   * Amazon diventano invece una sezione vera e propria.
+   * Le sezioni fisiche della stanza: solo i libri che lei ha davvero da
+   * leggere.
+   *
+   * I desideri (wishlist Amazon) restano fuori dagli scaffali — sono libri non
+   * ancora suoi, e messi accanto agli altri creerebbero confusione su cosa
+   * possiede. Vivono nella Ruota dei Desideri e nella lista.
+   *
+   * "Appena Sussurrati" è una vista che ripete titoli presenti altrove: in 3D
+   * comparirebbero due volte, quindi non diventa un mobile.
    */
-  const sezioni: SezioneScena[] = useMemo(() => {
-    const base = scaffali
-      .filter((s) => s.id !== "recenti" && s.libri.length > 0)
-      .map((s) => ({ id: s.id, nome: s.nome, libri: s.libri }));
-    if (desideri.length > 0) {
-      base.push({ id: "desideri", nome: "Il Sentiero dei Desideri", libri: desideri });
-    }
-    return base;
-  }, [scaffali, desideri]);
+  const sezioni: SezioneScena[] = useMemo(
+    () =>
+      scaffali
+        .filter((s) => s.id !== "recenti" && s.libri.length > 0)
+        .map((s) => ({ id: s.id, nome: s.nome, libri: s.libri })),
+    [scaffali],
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -80,6 +83,7 @@ export function Biblioteca3DView({
         onDesideri: () => onDesideriRef.current(),
       },
       pref,
+      desideri.length > 0,
     );
     scenaRef.current = scena;
 
@@ -95,7 +99,20 @@ export function Biblioteca3DView({
       delete (window as unknown as { __biblioteca?: unknown }).__biblioteca;
       scena.dispose();
     };
-  }, [sezioni, pref]);
+  }, [
+    sezioni,
+    desideri.length,
+    // I tagli decorati sono esclusi apposta: cambiarli aggiorna i materiali
+    // (effetto qui sotto) invece di ricostruire tutta la sala.
+    pref.essenza,
+    pref.luce,
+    pref.atmosfera,
+    pref.decori,
+  ]);
+
+  useEffect(() => {
+    scenaRef.current?.aggiornaBordi(pref.bordi);
+  }, [pref.bordi]);
 
   useEffect(() => {
     if (attiva) scenaRef.current?.riprendi();

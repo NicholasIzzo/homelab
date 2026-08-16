@@ -64,6 +64,8 @@ export interface Preferenze {
   atmosfera: string;
   /** Decori fantasy (lanterne, candelabri, rune, ampolle). */
   decori: boolean;
+  /** Taglio decorato scelto per ogni libro: id → 0 o 1. */
+  bordi: Record<string, 0 | 1>;
 }
 
 export const PREFERENZE_INIZIALI: Preferenze = {
@@ -71,6 +73,7 @@ export const PREFERENZE_INIZIALI: Preferenze = {
   luce: "calda",
   atmosfera: "notte",
   decori: true,
+  bordi: {},
 };
 
 const CHIAVE = "biblioteca-incantata:preferenze";
@@ -87,6 +90,7 @@ export function leggiPreferenze(): Preferenze {
         ? p.atmosfera!
         : PREFERENZE_INIZIALI.atmosfera,
       decori: typeof p.decori === "boolean" ? p.decori : PREFERENZE_INIZIALI.decori,
+      bordi: p.bordi && typeof p.bordi === "object" ? p.bordi : {},
     };
   } catch {
     return PREFERENZE_INIZIALI;

@@ -7,9 +7,11 @@ import type { Libro } from "../tipi";
 import {
   MODULO,
   adattaLibro,
+  dimensioniPerSezione,
   disponiLibri,
   hash01,
   verificaPosti,
+  type DimModulo,
   type Posto,
   type RipianoGeom,
 } from "./layout";
@@ -17,6 +19,7 @@ import {
   coloreMedio,
   copertinaSegnaposto,
   impostaAnisotropia,
+  impostaDefinizione,
   mappaParete,
   mappePavimento,
   mappeLegno,
@@ -25,6 +28,7 @@ import {
   texturaOmbraContatto,
   texturaRune,
 } from "./materiali";
+import { texturaBordo, type VarianteBordo } from "./bordi";
 import {
   atmosferaDi,
   essenzaDi,
@@ -60,7 +64,9 @@ const CORRIDOIO = 3.9; // larghezza libera fra i due lati
 // Aria fra un mobile e l'altro: accostati sembravano una parete unica.
 const PASSO_MODULO = MODULO.larghezza + 0.2;
 const GAP_SEZIONE = 0.7;
-const ALTEZZA_STANZA = 3.5;
+// Soffitto piu basso: i mobili ora seguono il contenuto e sono meno alti,
+// con una sala altissima resterebbe una fascia di parete nuda sopra di loro.
+const ALTEZZA_STANZA = 3.05;
 const RAGGIO_CAMERA = 0.42; // per non entrare dentro i mobili
 
 interface PianoModulo {
@@ -68,6 +74,8 @@ interface PianoModulo {
   indiceModulo: number;
   lato: -1 | 1;
   z: number;
+  /** Misure del mobile: variano da sezione a sezione. */
+  dim: DimModulo;
 }
 
 interface LuceRipiano {
@@ -138,13 +146,19 @@ export class ScenaBiblioteca {
   private luciRipiano: LuceRipiano[] = [];
   private pool: THREE.RectAreaLight[] = [];
   private prossimoRicalcolo = 0;
-  private haDesideri = false;
+
   private sferaDesideri: THREE.Mesh | null = null;
   private rune: THREE.Mesh[] = [];
 
   private loader = new THREE.TextureLoader();
   private risorse: { dispose: () => void }[] = [];
-  private libriMesh: { posto: Posto; corpo: THREE.Mesh; cop: THREE.Mesh }[] = [];
+  private libriMesh: {
+    posto: Posto;
+    corpo: THREE.Mesh;
+    cop: THREE.Mesh;
+    libro: Libro;
+    matBordo: THREE.MeshStandardMaterial;
+  }[] = [];
   private nModuli = 0;
 
   // trascinamento vs clic
@@ -158,6 +172,8 @@ export class ScenaBiblioteca {
     sezioni: SezioneScena[],
     private cb: CallbacksScena,
     private pref: Preferenze = PREFERENZE_INIZIALI,
+    /** Se la wishlist non è vuota si costruisce il leggio della sua ruota. */
+    private haDesideri = false,
   ) {
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -173,6 +189,8 @@ export class ScenaBiblioteca {
     this.renderer.shadowMap.enabled = !BASSA_POTENZA;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     impostaAnisotropia(BASSA_POTENZA ? 4 : this.renderer.capabilities.getMaxAnisotropy());
+    // venature e intonaco piu definiti su desktop, invariati sui telefoni
+    impostaDefinizione(BASSA_POTENZA ? 1 : 2);
     RectAreaLightUniformsLib.init();
 
     // Campo visivo stretto: col grandangolo le copertine ai bordi si inclinano
@@ -215,14 +233,23 @@ export class ScenaBiblioteca {
     const piani: PianoModulo[] = [];
     const cursore: Record<-1 | 1, number> = { [-1]: -0.4, [1]: -0.4 };
 
-    sezioni.forEach((sez) => {
-      const { moduli } = disponiLibri(sez.libri);
-      // Sul lato più corto: alternare a turno sbilancerebbe la sala, perché una
-      // sezione può valere un modulo e un'altra otto (la wishlist).
+    // Grandi e piccole a scacchiera: mettendole in fila per dimensione la sala
+    // avrebbe un'estremità carica di libri e l'altra spoglia.
+    const perDimensione = [...sezioni].sort((a, b) => b.libri.length - a.libri.length);
+    const alternate: SezioneScena[] = [];
+    for (let i = 0, j = perDimensione.length - 1; i <= j; i++, j--) {
+      alternate.push(perDimensione[i]!);
+      if (i !== j) alternate.push(perDimensione[j]!);
+    }
+
+    alternate.forEach((sez) => {
+      const dim = dimensioniPerSezione(sez.libri.length);
+      const { moduli } = disponiLibri(sez.libri, dim);
+      // Sul lato più corto, così le due pareti restano lunghe uguali.
       const lato: -1 | 1 = cursore[-1] >= cursore[1] ? -1 : 1;
       const zPartenza = cursore[lato];
       for (let m = 0; m < moduli; m++) {
-        piani.push({ sezione: sez, indiceModulo: m, lato, z: zPartenza - m * PASSO_MODULO });
+        piani.push({ sezione: sez, indiceModulo: m, lato, z: zPartenza - m * PASSO_MODULO, dim });
       }
       this.nModuli += moduli;
 
@@ -237,8 +264,6 @@ export class ScenaBiblioteca {
         z: zCentro,
         yaw: yawVerso(xSosta, zCentro, xMobile, zCentro),
       });
-
-      if (sez.id === "desideri") this.haDesideri = true;
 
       cursore[lato] = zPartenza - moduli * PASSO_MODULO - GAP_SEZIONE;
     });
@@ -378,10 +403,10 @@ export class ScenaBiblioteca {
     const insegnaFatta = new Set<string>();
 
     for (const piano of piani) {
-      const { sezione, indiceModulo, lato, z } = piano;
+      const { sezione, indiceModulo, lato, z, dim } = piano;
       let layout = layoutPerSezione.get(sezione.id);
       if (!layout) {
-        layout = disponiLibri(sezione.libri);
+        layout = disponiLibri(sezione.libri, piano.dim);
         for (const p of layout.posti) p.gruppo = sezione.id;
         layoutPerSezione.set(sezione.id, layout);
       }
@@ -391,7 +416,7 @@ export class ScenaBiblioteca {
       g.rotation.y = lato < 0 ? Math.PI / 2 : -Math.PI / 2;
       this.scene.add(g);
 
-      this.costruisciCarcassa(g, matLegno, matFondo, geoBox, layout.ripiani);
+      this.costruisciCarcassa(g, matLegno, matFondo, geoBox, layout.ripiani, dim);
 
       const tema = temaDi(sezione.id);
       const luce = new THREE.Color(tema.luce);
@@ -421,7 +446,7 @@ export class ScenaBiblioteca {
       // insegna: una per sezione, sopra il primo modulo
       if (!insegnaFatta.has(sezione.id)) {
         insegnaFatta.add(sezione.id);
-        this.costruisciInsegna(g, sezione, tema.luce);
+        this.costruisciInsegna(g, sezione, tema.luce, dim);
       }
     }
   }
@@ -433,8 +458,8 @@ export class ScenaBiblioteca {
     matFondo: THREE.Material,
     geoBox: THREE.BoxGeometry,
     ripiani: RipianoGeom[],
+    d: DimModulo,
   ) {
-    const d = MODULO;
     const aggiungi = (
       sx: number, sy: number, sz: number,
       px: number, py: number, pz: number,
@@ -482,7 +507,20 @@ export class ScenaBiblioteca {
     const matCorpo = this.traccia(
       new THREE.MeshStandardMaterial({ color: 0x2a1d28, roughness: 0.72, envMapIntensity: 0.25 }),
     );
-    const corpo = new THREE.Mesh(geoBox, matCorpo);
+
+    // Taglio decorato sulle facce dei fogli (lati, cima e piede); davanti e
+    // dietro restano la copertina e la quarta.
+    const variante = (this.pref.bordi[libro.id] ?? 0) as VarianteBordo;
+    const bordoTex = this.traccia(
+      texturaBordo(temaDi(libro.scaffale).luce, variante, Math.floor(hash01(libro.id) * 9999)),
+    );
+    const matBordo = this.traccia(
+      new THREE.MeshStandardMaterial({ map: bordoTex, roughness: 0.55, envMapIntensity: 0.3 }),
+    );
+    matBordo.userData["variante"] = variante;
+    // ordine delle facce di un BoxGeometry: +X, -X, +Y, -Y, +Z, -Z
+    const facce = [matBordo, matBordo, matBordo, matBordo, matCorpo, matCorpo];
+    const corpo = new THREE.Mesh(geoBox, facce);
     corpo.scale.set(posto.larghezza, posto.altezza, posto.spessore);
     corpo.position.set(posto.x, posto.yBase + posto.altezza / 2, posto.z);
     corpo.userData = { libro };
@@ -512,7 +550,7 @@ export class ScenaBiblioteca {
     g.add(ombra);
 
     this.interattivi.push(corpo, cop);
-    this.libriMesh.push({ posto, corpo, cop });
+    this.libriMesh.push({ posto, corpo, cop, libro, matBordo });
 
     // Copertina reale: stesso-origine, quindi utilizzabile come texture.
     this.loader.load(
@@ -600,7 +638,7 @@ export class ScenaBiblioteca {
    */
   private texturaRidotta(tex: THREE.Texture): THREE.Texture {
     const img = tex.image as (CanvasImageSource & { width?: number; height?: number }) | undefined;
-    const maxLarghezza = BASSA_POTENZA ? 128 : 192;
+    const maxLarghezza = BASSA_POTENZA ? 192 : 320;
     if (!img?.width || !img.height || img.width <= maxLarghezza) return tex.clone();
     const scala = maxLarghezza / img.width;
     const c = document.createElement("canvas");
@@ -622,21 +660,21 @@ export class ScenaBiblioteca {
     return this.aloneTex;
   }
 
-  private costruisciInsegna(g: THREE.Group, sez: SezioneScena, luce: string) {
+  private costruisciInsegna(g: THREE.Group, sez: SezioneScena, luce: string, d: DimModulo) {
     const tema = temaDi(sez.id);
     const tex = this.traccia(texturaInsegna(sez.nome, tema.icona, luce, tema.motto));
-    const larghezza = Math.min(MODULO.larghezza * 1.02, 1.08);
+    const larghezza = Math.min(d.larghezza * 1.02, 1.08);
     const insegna = new THREE.Mesh(
       this.traccia(new THREE.PlaneGeometry(larghezza, larghezza * 0.3125)),
       this.traccia(new THREE.MeshBasicMaterial({ map: tex, transparent: true })),
     );
-    insegna.position.set(0, MODULO.altezza + 0.2, MODULO.profondita / 2 - 0.01);
+    insegna.position.set(0, d.altezza + 0.2, d.profondita / 2 - 0.01);
     insegna.userData = { sezioneId: sez.id, azione: sez.id === "desideri" ? "desideri" : undefined };
     g.add(insegna);
     this.interattivi.push(insegna);
 
     const luceInsegna = new THREE.PointLight(new THREE.Color(luce), 0.5, 2.4, 2);
-    luceInsegna.position.set(0, MODULO.altezza + 0.2, MODULO.profondita / 2 + 0.25);
+    luceInsegna.position.set(0, d.altezza + 0.2, d.profondita / 2 + 0.25);
     g.add(luceInsegna);
   }
 
@@ -912,7 +950,7 @@ export class ScenaBiblioteca {
 
     piani.forEach((piano, i) => {
       if (piano.indiceModulo !== 0) return; // uno ogni sezione, non su ogni mobile
-      const cima = MODULO.altezza + 0.01;
+      const cima = piano.dim.altezza + 0.01;
       const g = new THREE.Group();
       g.position.set(
         piano.lato * (CORRIDOIO / 2 + MODULO.profondita / 2),
@@ -1215,6 +1253,27 @@ export class ScenaBiblioteca {
     this.posBersaglio.set(0, 0, this.zMax - 0.6);
     this.yawBersaglio = 0;
     this.ruotaVerso = true;
+  }
+
+  /**
+   * Cambia i tagli decorati senza ricostruire la sala: rifare tutta la scena
+   * a ogni clic renderebbe la scelta libro per libro insopportabile.
+   */
+  aggiornaBordi(bordi: Record<string, 0 | 1>) {
+    for (const { libro, matBordo } of this.libriMesh) {
+      const variante = (bordi[libro.id] ?? 0) as VarianteBordo;
+      if (matBordo.userData["variante"] === variante) continue;
+      const nuova = texturaBordo(
+        temaDi(libro.scaffale).luce,
+        variante,
+        Math.floor(hash01(libro.id) * 9999),
+      );
+      matBordo.map?.dispose();
+      matBordo.map = nuova;
+      matBordo.needsUpdate = true;
+      matBordo.userData["variante"] = variante;
+      this.risorse.push(nuova);
+    }
   }
 
   /** Diagnostica per il controllo finale: conteggi e violazioni di bounds. */

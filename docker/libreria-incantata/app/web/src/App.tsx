@@ -105,6 +105,7 @@ export function App() {
         <div className="overlay">
           <Personalizza
             pref={pref}
+            libri={tuttiILibri}
             onCambia={cambiaPref}
             onChiudi={() => setOverlay({ tipo: "nessuno" })}
           />

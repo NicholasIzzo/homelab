@@ -52,6 +52,28 @@ export const MODULO: DimModulo = {
   rientroFronte: 0.025,
 };
 
+/** Passo verticale fra un ripiano e il successivo, costante fra i mobili. */
+export const PASSO_RIPIANO =
+  (MODULO.altezza - MODULO.spessoreFianco - MODULO.zoccolo) / MODULO.nRipiani;
+
+/**
+ * Mobile su misura per la sezione: quanti ripiani servono davvero.
+ *
+ * Un mobile alto uguale per tutti lascia mezzi scaffali vuoti alle sezioni
+ * piccole, e la sala sembra sguarnita a tratti. Qui l'altezza segue il
+ * contenuto — come in una libreria vera, dove i mobili non sono tutti uguali —
+ * mantenendo però identici passo dei ripiani, larghezza e base.
+ */
+export function dimensioniPerSezione(nLibri: number, d: DimModulo = MODULO): DimModulo {
+  const perRipiano = 3; // stima prudente: ci stanno 3 volumi per ripiano
+  const nRipiani = Math.max(2, Math.min(d.nRipiani, Math.ceil(nLibri / perRipiano)));
+  return {
+    ...d,
+    nRipiani,
+    altezza: d.zoccolo + nRipiani * PASSO_RIPIANO + d.spessoreFianco,
+  };
+}
+
 /** Proporzioni ammesse per una copertina (altezza/larghezza). */
 export const ASPETTO_MIN = 1.28; // copertina più "larga" ammessa
 export const ASPETTO_MAX = 1.85; // copertina più "stretta" ammessa

@@ -13,6 +13,17 @@ export function impostaAnisotropia(v: number) {
   ANISO = Math.max(1, v);
 }
 
+/**
+ * Definizione delle texture procedurali. Su desktop si alza (venature e
+ * intonaco piu leggibili da vicino); sui telefoni resta bassa, dove conta il
+ * framerate e lo schermo e piccolo.
+ */
+let DEFINIZIONE = 1;
+export function impostaDefinizione(fattore: number) {
+  DEFINIZIONE = Math.max(0.5, Math.min(2, fattore));
+}
+const dim = (n: number) => Math.round(n * DEFINIZIONE);
+
 function nuovaCanvas(w: number, h: number): [HTMLCanvasElement, CanvasRenderingContext2D] {
   const c = document.createElement("canvas");
   c.width = w;
@@ -103,7 +114,7 @@ export function mappeLegno(
   base: [number, number, number] = [86, 52, 33],
   ripeti: [number, number] = [1, 1],
 ): MappeLegno {
-  const W = 512, H = 512;
+  const W = dim(512), H = dim(512);
   const alt = altezzaLegno(W, H, seed);
 
   const [cA, ctxA] = nuovaCanvas(W, H);
@@ -135,13 +146,13 @@ export function mappeLegno(
 
 /** Parquet a doghe per il pavimento. */
 export function mappePavimento(): MappeLegno {
-  const W = 512, H = 512;
+  const W = dim(512), H = dim(512);
   const alt = altezzaLegno(W, H, 17);
   const [cA, ctxA] = nuovaCanvas(W, H);
   const [cR, ctxR] = nuovaCanvas(W, H);
   const imgA = ctxA.createImageData(W, H);
   const imgR = ctxR.createImageData(W, H);
-  const doga = 64;
+  const doga = dim(64);
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
       const i = y * W + x, j = i * 4;
@@ -171,12 +182,13 @@ export function mappePavimento(): MappeLegno {
 
 /** Intonaco/pietra per le pareti. */
 export function mappaParete(): MappeLegno {
-  const W = 256, H = 256;
+  const W = dim(256), H = dim(256);
   const n = rumore(41);
   const alt = new Float32Array(W * H);
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      alt[y * W + x] = n(x / 12, y / 12) * 0.6 + n(x / 3, y / 3) * 0.4;
+      const sx = x / DEFINIZIONE, sy = y / DEFINIZIONE;
+      alt[y * W + x] = n(sx / 12, sy / 12) * 0.6 + n(sx / 3, sy / 3) * 0.4;
     }
   }
   const [cA, ctxA] = nuovaCanvas(W, H);
@@ -226,7 +238,7 @@ export function texturaOmbraContatto(): THREE.Texture {
 
 /** Insegna incisa di una sezione: sigillo, nome e motto. */
 export function texturaInsegna(nome: string, icona: string, luce: string, motto: string): THREE.Texture {
-  const W = 640, H = 200;
+  const W = dim(640), H = dim(200);
   const [c, ctx] = nuovaCanvas(W, H);
   const g = ctx.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, "#241606");
