@@ -129,7 +129,7 @@ export class ScenaBiblioteca {
   private luciRipiano: LuceRipiano[] = [];
   private pool: THREE.RectAreaLight[] = [];
   private prossimoRicalcolo = 0;
-  private postoDesideri: { lato: -1 | 1; z: number } | null = null;
+  private haDesideri = false;
   private sferaDesideri: THREE.Mesh | null = null;
 
   private loader = new THREE.TextureLoader();
@@ -164,7 +164,10 @@ export class ScenaBiblioteca {
     impostaAnisotropia(BASSA_POTENZA ? 4 : this.renderer.capabilities.getMaxAnisotropy());
     RectAreaLightUniformsLib.init();
 
-    this.camera = new THREE.PerspectiveCamera(60, 1, 0.08, 70);
+    // Campo visivo stretto: col grandangolo le copertine ai bordi si inclinano
+    // e sembrano storte, pur essendo perfettamente dritte. Si vede un filo di
+    // meno, ma i libri si leggono come in una libreria vera.
+    this.camera = new THREE.PerspectiveCamera(48, 1, 0.08, 70);
     this.camera.rotation.order = "YXZ";
 
     this.scene.background = new THREE.Color(0x0a0713);
@@ -208,9 +211,10 @@ export class ScenaBiblioteca {
       }
       this.nModuli += moduli;
 
-      // waypoint davanti al centro della sezione
+      // Waypoint davanti al centro della sezione, un po' arretrato: da lontano
+      // le copertine si vedono più frontali e meno deformate.
       const zCentro = zPartenza - ((moduli - 1) * PASSO_MODULO) / 2;
-      const xSosta = lato * (CORRIDOIO / 2 - 1.05);
+      const xSosta = lato * (CORRIDOIO / 2 - 1.35);
       const xMobile = lato * (CORRIDOIO / 2);
       this.waypoints.push({
         id: sez.id,
@@ -219,15 +223,7 @@ export class ScenaBiblioteca {
         yaw: yawVerso(xSosta, zCentro, xMobile, zCentro),
       });
 
-      // La sezione dei desideri ha la sua ruota, su un leggio piazzato nel
-      // varco a fine scaffalatura: davanti ai libri sarebbe sotto il naso di
-      // chi guarda i ripiani, e finirebbe fuori inquadratura.
-      if (sez.id === "desideri") {
-        this.postoDesideri = {
-          lato,
-          z: zPartenza - (moduli - 0.5) * PASSO_MODULO - GAP_SEZIONE * 0.45,
-        };
-      }
+      if (sez.id === "desideri") this.haDesideri = true;
 
       cursore[lato] = zPartenza - moduli * PASSO_MODULO - GAP_SEZIONE;
     });
@@ -692,16 +688,16 @@ export class ScenaBiblioteca {
   }
 
   /**
-   * Leggio della Ruota dei Desideri: la wishlist ha il suo sorteggio, davanti
-   * ai suoi scaffali, per scegliere il prossimo libro da comprare.
+   * Leggio della Ruota dei Desideri: sta all'ingresso, sulla destra di chi
+   * entra, così le due ruote non finiscono una addosso all'altra (quella del
+   * Destino resta in fondo, al centro).
    */
   private costruisciLeggioDesideri() {
-    const posto = this.postoDesideri;
-    if (!posto) return;
-    const x = posto.lato * (CORRIDOIO / 2 - 0.5);
-    const z = posto.z;
-    // il leggio guarda verso il centro della corsia, non verso il muro
-    const versoCorsia = facciaVerso(x, z, 0, z);
+    if (!this.haDesideri) return;
+    const x = CORRIDOIO / 2 - 0.35; // destra entrando, appena fuori dal passaggio
+    const z = this.zMax - 1.5;
+    // guarda verso chi entra, non verso il muro
+    const versoCorsia = facciaVerso(x, z, 0, this.zMax - 0.5);
 
     const legno = mappeLegno(13, [78, 52, 26]);
     this.risorse.push(legno.map, legno.normalMap, legno.roughnessMap);
@@ -790,12 +786,13 @@ export class ScenaBiblioteca {
     this.scene.add(g);
 
     // punto di sosta davanti al leggio, abbastanza indietro da inquadrarlo
-    const xSosta = -posto.lato * 0.45;
+    const xSosta = -0.15;
+    const zSosta = z + 0.55;
     this.waypoints.push({
       id: "__ruotaDesideri",
       x: xSosta,
-      z,
-      yaw: yawVerso(xSosta, z, x, z),
+      z: zSosta,
+      yaw: yawVerso(xSosta, zSosta, x, z),
     });
   }
 

@@ -44,7 +44,8 @@ altrove) e non diventa un mobile: in 3D i titoli comparirebbero due volte.
 - **🔮 La Ruota del Destino** sorteggia fra i libri *da leggere* (Goodreads).
 - **⭐ La Ruota dei Desideri** sorteggia fra i libri *da comprare* (wishlist
   Amazon) e risponde a un'altra domanda: "cosa compro adesso?". Ha il suo
-  leggio con la sfera ambra, nel varco a fine scaffalatura dei desideri.
+  leggio con la sfera ambra **all'ingresso, sulla destra**: le due ruote stanno
+  agli estremi opposti della sala (~8 m), non una addosso all'altra.
   Entrambe usano lo stesso componente `Roulette`, parametrico su pool, titolo,
   etichetta e colore.
 - **🔥 L'Angolo di Lettura** (`web/src/angolo3d/`) è una stanzetta a parte:
@@ -71,6 +72,12 @@ altrove) e non diventa un mobile: in 3D i titoli comparirebbero due volte.
   venatura, **normal map** e mappa di rugosità, parquet, intonaco, insegne.
   Generate una volta e condivise da tutti i mobili.
 - `web/src/biblioteca3d/scena.ts` — stanza, mobili, luci e navigazione.
+
+I mobili hanno una **credenza chiusa** fino a 72 cm e cinque ripiani sopra: i
+vani vicini al pavimento non si guardano e i libri lì sotto non si
+distinguerebbero. La camera usa un **campo visivo stretto (48°)**: col
+grandangolo le copertine ai bordi si inclinano e sembrano storte pur essendo
+perfettamente dritte.
 
 Scelte di resa: `ACESFilmicToneMapping` + environment PMREM per riflessi
 credibili, ombre morbide `PCFSoft`, ombre di contatto sotto ogni libro. Le

@@ -41,8 +41,11 @@ export const MODULO: DimModulo = {
   profondita: 0.32,
   spessoreFianco: 0.028,
   spessoreRipiano: 0.024,
-  zoccolo: 0.09,
-  nRipiani: 6,
+  // Base chiusa alta: i ripiani vicini al pavimento non si guardano e i libri
+  // lì sotto non si distinguono. Meglio un mobile con credenza sotto e i libri
+  // tutti fra la vita e gli occhi, che sei ripiani di cui due inservibili.
+  zoccolo: 0.72,
+  nRipiani: 5,
   margineLaterale: 0.022,
   aria: 0.035,
   gap: 0.012,

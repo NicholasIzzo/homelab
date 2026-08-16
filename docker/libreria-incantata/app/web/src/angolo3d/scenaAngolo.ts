@@ -192,7 +192,8 @@ export class ScenaAngolo {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     impostaAnisotropia(BASSA_POTENZA ? 4 : this.renderer.capabilities.getMaxAnisotropy());
 
-    this.camera = new THREE.PerspectiveCamera(60, 1, 0.05, 40);
+    // come in biblioteca: campo stretto, così la copertina resta rettangolare
+    this.camera = new THREE.PerspectiveCamera(50, 1, 0.05, 40);
     this.camera.rotation.order = "YXZ";
     this.camera.position.set(0, 1.24, 1.5);
     this.camera.rotation.x = -0.2;
@@ -545,12 +546,12 @@ export class ScenaAngolo {
       new THREE.MeshStandardMaterial({ color: 0xf0e3c6, roughness: 0.85 }),
     );
 
+    // Pagine perfettamente complanari: la piega a V faceva sembrare storta la
+    // copertina, che è un'immagine e va vista dritta.
     const sx = new THREE.Mesh(geoPagina, this.matPaginaSx);
     sx.position.set(-0.1265, 0, 0.004);
-    sx.rotation.y = 0.06;
     const dx = new THREE.Mesh(geoPagina, this.matPaginaDx);
     dx.position.set(0.1265, 0, 0.004);
-    dx.rotation.y = -0.06;
 
     // Copertina rigida più stretta delle pagine e arretrata: così fra le due
     // facciate resta solo una piega d'ombra, non una fascia che mangia la
@@ -562,9 +563,11 @@ export class ScenaAngolo {
     cop.position.set(0, 0, -0.03);
 
     this.gruppoLibro.add(cop, sx, dx);
-    // in grembo, inclinato verso chi legge
-    this.gruppoLibro.position.set(0, 0.88, 0.86);
-    this.gruppoLibro.rotation.x = -1.06;
+    // Tenuto in mano, quasi frontale rispetto allo sguardo: più il libro è
+    // coricato, più la copertina si schiaccia in prospettiva e sembra storta.
+    // Questa inclinazione è quella che punta il libro verso la camera.
+    this.gruppoLibro.position.set(0, 0.86, 0.62);
+    this.gruppoLibro.rotation.x = -0.41;
     this.gruppoLibro.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.isMesh) {
@@ -690,9 +693,9 @@ export class ScenaAngolo {
     this.candela.intensity = 1.1 * sfarfallio;
     this.fiammaCandela.scale.set(0.07, 0.11 * sfarfallio, 1);
 
-    // il libro respira appena, come se lo si tenesse in mano
-    this.gruppoLibro.rotation.z = Math.sin(t * 0.7) * 0.012;
-    this.gruppoLibro.position.y = 0.92 + Math.sin(t * 0.9) * 0.004;
+    // Il libro respira appena, come se lo si tenesse in mano. Nessuna
+    // oscillazione laterale: farebbe pendere la copertina.
+    this.gruppoLibro.position.y = 0.86 + Math.sin(t * 0.9) * 0.004;
 
     this.renderer.render(this.scene, this.camera);
   };
