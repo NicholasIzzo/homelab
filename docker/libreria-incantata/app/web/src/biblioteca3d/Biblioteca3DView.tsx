@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Preferenze } from "../personalizza";
 import { temaDi } from "../temi";
 import type { Libro, Scaffale } from "../tipi";
 import { ScenaBiblioteca, type SezioneScena } from "./scena";
@@ -12,7 +13,9 @@ interface Props {
   onRouletteDesideri: () => void;
   onDesideri: () => void;
   onAngolo: () => void;
+  onPersonalizza: () => void;
   onEsci: () => void;
+  pref: Preferenze;
   /** Falso mentre è aperto l'angolo di lettura: la scena si mette in pausa. */
   attiva: boolean;
 }
@@ -29,10 +32,13 @@ export function Biblioteca3DView({
   onRouletteDesideri,
   onDesideri,
   onAngolo,
+  onPersonalizza,
   onEsci,
   attiva,
+  pref,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pisteRef = useRef<HTMLDivElement>(null);
   const scenaRef = useRef<ScenaBiblioteca | null>(null);
   const onPickRef = useRef(onPick);
   onPickRef.current = onPick;
@@ -63,13 +69,18 @@ export function Biblioteca3DView({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || sezioni.length === 0) return;
-    const scena = new ScenaBiblioteca(canvas, sezioni, {
-      onPickLibro: (l) => onPickRef.current(l),
-      onArrivo: setSezioneVicina,
-      onRuota: () => onRouletteRef.current(),
-      onRuotaDesideri: () => onRouletteDesideriRef.current(),
-      onDesideri: () => onDesideriRef.current(),
-    });
+    const scena = new ScenaBiblioteca(
+      canvas,
+      sezioni,
+      {
+        onPickLibro: (l) => onPickRef.current(l),
+        onArrivo: setSezioneVicina,
+        onRuota: () => onRouletteRef.current(),
+        onRuotaDesideri: () => onRouletteDesideriRef.current(),
+        onDesideri: () => onDesideriRef.current(),
+      },
+      pref,
+    );
     scenaRef.current = scena;
 
     // Diagnostica su richiesta (?diag=1): conteggi e controllo dei bounds.
@@ -84,7 +95,7 @@ export function Biblioteca3DView({
       delete (window as unknown as { __biblioteca?: unknown }).__biblioteca;
       scena.dispose();
     };
-  }, [sezioni]);
+  }, [sezioni, pref]);
 
   useEffect(() => {
     if (attiva) scenaRef.current?.riprendi();
@@ -134,38 +145,57 @@ export function Biblioteca3DView({
       )}
 
       <div className="hud hud-basso">
-        <button className="hud-insegna oro" onClick={onRoulette}>🔮 Ruota del Destino</button>
         <button
-          className="hud-insegna"
-          style={{ ["--luce" as string]: temaDi("desideri").luce }}
-          onClick={onRouletteDesideri}
-        >⭐ Ruota dei Desideri</button>
+          className="hud-freccia"
+          aria-label="Scorri indietro"
+          onClick={() => pisteRef.current?.scrollBy({ left: -260 })}
+        >‹</button>
+
+        <div className="hud-piste" ref={pisteRef}>
+          <button className="hud-insegna oro" onClick={onRoulette}>🔮 Ruota del Destino</button>
+          <button
+            className="hud-insegna"
+            style={{ ["--luce" as string]: temaDi("desideri").luce }}
+            onClick={onRouletteDesideri}
+          >⭐ Ruota dei Desideri</button>
+          <button
+            className="hud-insegna"
+            style={{ ["--luce" as string]: "#ffb070" }}
+            onClick={onAngolo}
+          >🔥 Angolo di Lettura</button>
+          <button
+            className="hud-insegna"
+            style={{ ["--luce" as string]: temaDi("desideri").luce }}
+            onClick={onDesideri}
+          >🛒 Lista desideri</button>
+          <button
+            className="hud-insegna"
+            style={{ ["--luce" as string]: "#e0c8ff" }}
+            onClick={onPersonalizza}
+          >🪄 Arreda</button>
+          <button
+            className="hud-insegna"
+            style={{ ["--luce" as string]: "#9fe8c0" }}
+            onClick={() => scenaRef.current?.vaiAllIngresso()}
+          >🚪 Ingresso</button>
+          {sezioni.map((s) => {
+            const tema = temaDi(s.id);
+            return (
+              <button
+                key={s.id}
+                className={`hud-insegna ${sezioneVicina === s.id ? "attiva" : ""}`}
+                style={{ ["--luce" as string]: tema.luce }}
+                onClick={() => scenaRef.current?.vaiAScaffale(s.id)}
+              >{tema.icona} {s.nome} <small>({s.libri.length})</small></button>
+            );
+          })}
+        </div>
+
         <button
-          className="hud-insegna"
-          style={{ ["--luce" as string]: "#ffb070" }}
-          onClick={onAngolo}
-        >🔥 Angolo di Lettura</button>
-        <button
-          className="hud-insegna"
-          style={{ ["--luce" as string]: temaDi("desideri").luce }}
-          onClick={onDesideri}
-        >🛒 Lista desideri</button>
-        <button
-          className="hud-insegna"
-          style={{ ["--luce" as string]: "#9fe8c0" }}
-          onClick={() => scenaRef.current?.vaiAllIngresso()}
-        >🚪 Ingresso</button>
-        {sezioni.map((s) => {
-          const tema = temaDi(s.id);
-          return (
-            <button
-              key={s.id}
-              className={`hud-insegna ${sezioneVicina === s.id ? "attiva" : ""}`}
-              style={{ ["--luce" as string]: tema.luce }}
-              onClick={() => scenaRef.current?.vaiAScaffale(s.id)}
-            >{tema.icona} {s.nome}</button>
-          );
-        })}
+          className="hud-freccia"
+          aria-label="Scorri avanti"
+          onClick={() => pisteRef.current?.scrollBy({ left: 260 })}
+        >›</button>
       </div>
     </div>
   );

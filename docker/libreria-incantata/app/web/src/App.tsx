@@ -8,6 +8,8 @@ import { Dettaglio } from "./schermate/Dettaglio";
 import { Roulette } from "./schermate/Roulette";
 import { Desideri } from "./schermate/Desideri";
 import { AngoloLettura } from "./schermate/AngoloLettura";
+import { Personalizza } from "./schermate/Personalizza";
+import { leggiPreferenze, salvaPreferenze, type Preferenze } from "./personalizza";
 
 type Overlay =
   | { tipo: "nessuno" }
@@ -15,7 +17,8 @@ type Overlay =
   | { tipo: "roulette"; fonte: "lettura" | "desideri" }
   | { tipo: "desideri" }
   | { tipo: "dettaglio"; libro: Libro }
-  | { tipo: "angolo"; libro: Libro };
+  | { tipo: "angolo"; libro: Libro }
+  | { tipo: "personalizza" };
 
 function aCaso<T>(lista: T[]): T | null {
   if (lista.length === 0) return null;
@@ -27,6 +30,12 @@ export function App() {
   const [overlay, setOverlay] = useState<Overlay>({ tipo: "nessuno" });
   const [dati, setDati] = useState<BibliotecaPayload | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
+  const [pref, setPref] = useState<Preferenze>(() => leggiPreferenze());
+
+  const cambiaPref = (p: Preferenze) => {
+    setPref(p);
+    salvaPreferenze(p);
+  };
 
   useEffect(() => {
     fetchBiblioteca()
@@ -86,9 +95,21 @@ export function App() {
         onRouletteDesideri={() => setOverlay({ tipo: "roulette", fonte: "desideri" })}
         onDesideri={() => setOverlay({ tipo: "desideri" })}
         onAngolo={() => apriAngolo(aCaso(tuttiILibri))}
+        onPersonalizza={() => setOverlay({ tipo: "personalizza" })}
         onEsci={() => setDentro(false)}
         attiva={overlay.tipo !== "angolo"}
+        pref={pref}
       />
+
+      {overlay.tipo === "personalizza" && (
+        <div className="overlay">
+          <Personalizza
+            pref={pref}
+            onCambia={cambiaPref}
+            onChiudi={() => setOverlay({ tipo: "nessuno" })}
+          />
+        </div>
+      )}
 
       {overlay.tipo === "roulette" && overlay.fonte === "lettura" && (
         <div className="overlay">

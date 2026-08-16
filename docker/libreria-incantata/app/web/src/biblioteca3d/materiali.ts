@@ -261,6 +261,51 @@ export function texturaInsegna(nome: string, icona: string, luce: string, motto:
   return daCanvas(c, true);
 }
 
+/** Cerchio di rune da proiettare sul pavimento. */
+export function texturaRune(colore = "#c9a24b"): THREE.Texture {
+  const S = 256;
+  const [c, ctx] = nuovaCanvas(S, S);
+  ctx.translate(S / 2, S / 2);
+  ctx.strokeStyle = colore;
+  ctx.fillStyle = colore;
+  ctx.lineWidth = 2.5;
+  for (const r of [116, 104, 74]) {
+    ctx.globalAlpha = r === 104 ? 0.5 : 0.85;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  // segni runici disposti in cerchio
+  ctx.globalAlpha = 0.9;
+  const segni = 12;
+  for (let i = 0; i < segni; i++) {
+    ctx.save();
+    ctx.rotate((i / segni) * Math.PI * 2);
+    ctx.translate(0, -90);
+    ctx.beginPath();
+    ctx.moveTo(-7, -9);
+    ctx.lineTo(0, 9);
+    ctx.lineTo(7, -9);
+    if (i % 3 === 0) ctx.moveTo(-6, 0), ctx.lineTo(6, 0);
+    if (i % 4 === 1) ctx.moveTo(0, -12), ctx.lineTo(0, 12);
+    ctx.stroke();
+    ctx.restore();
+  }
+  // stella a sei punte interna
+  ctx.globalAlpha = 0.55;
+  for (const off of [0, Math.PI / 3]) {
+    ctx.beginPath();
+    for (let i = 0; i < 3; i++) {
+      const a = off + (i / 3) * Math.PI * 2;
+      const x = Math.cos(a) * 62, y = Math.sin(a) * 62;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+  }
+  return daCanvas(c, true);
+}
+
 const COPERTINE_SEGNAPOSTO: THREE.Texture[] = [];
 
 /**

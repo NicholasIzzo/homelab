@@ -23,7 +23,15 @@ import {
   texturaAlone,
   texturaInsegna,
   texturaOmbraContatto,
+  texturaRune,
 } from "./materiali";
+import {
+  atmosferaDi,
+  essenzaDi,
+  luceDi,
+  PREFERENZE_INIZIALI,
+  type Preferenze,
+} from "../personalizza";
 
 export interface SezioneScena {
   id: string;
@@ -48,9 +56,10 @@ export const BASSA_POTENZA = (() => {
 })();
 
 const OCCHI = 1.6;
-const CORRIDOIO = 3.5; // larghezza libera fra i due lati
-const PASSO_MODULO = MODULO.larghezza + 0.035;
-const GAP_SEZIONE = 0.32;
+const CORRIDOIO = 3.9; // larghezza libera fra i due lati
+// Aria fra un mobile e l'altro: accostati sembravano una parete unica.
+const PASSO_MODULO = MODULO.larghezza + 0.2;
+const GAP_SEZIONE = 0.7;
 const ALTEZZA_STANZA = 3.5;
 const RAGGIO_CAMERA = 0.42; // per non entrare dentro i mobili
 
@@ -131,6 +140,7 @@ export class ScenaBiblioteca {
   private prossimoRicalcolo = 0;
   private haDesideri = false;
   private sferaDesideri: THREE.Mesh | null = null;
+  private rune: THREE.Mesh[] = [];
 
   private loader = new THREE.TextureLoader();
   private risorse: { dispose: () => void }[] = [];
@@ -147,6 +157,7 @@ export class ScenaBiblioteca {
     private canvas: HTMLCanvasElement,
     sezioni: SezioneScena[],
     private cb: CallbacksScena,
+    private pref: Preferenze = PREFERENZE_INIZIALI,
   ) {
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -170,8 +181,9 @@ export class ScenaBiblioteca {
     this.camera = new THREE.PerspectiveCamera(48, 1, 0.08, 70);
     this.camera.rotation.order = "YXZ";
 
-    this.scene.background = new THREE.Color(0x0a0713);
-    this.scene.fog = new THREE.Fog(0x0a0713, 9, 30);
+    const atm = atmosferaDi(this.pref.atmosfera);
+    this.scene.background = new THREE.Color(atm.fondo);
+    this.scene.fog = new THREE.Fog(atm.fondo, 10, 34);
 
     const piani = this.pianifica(sezioni);
     this.costruisciAmbiente();
@@ -179,6 +191,7 @@ export class ScenaBiblioteca {
     this.costruisciDais();
     this.costruisciLeggioDesideri();
     this.costruisciLuci();
+    this.costruisciDecori(piani);
 
     this.pos.set(0, 0, this.zMax - 0.6);
     this.posBersaglio.copy(this.pos);
@@ -202,9 +215,11 @@ export class ScenaBiblioteca {
     const piani: PianoModulo[] = [];
     const cursore: Record<-1 | 1, number> = { [-1]: -0.4, [1]: -0.4 };
 
-    sezioni.forEach((sez, i) => {
-      const lato: -1 | 1 = i % 2 === 0 ? -1 : 1;
+    sezioni.forEach((sez) => {
       const { moduli } = disponiLibri(sez.libri);
+      // Sul lato più corto: alternare a turno sbilancerebbe la sala, perché una
+      // sezione può valere un modulo e un'altra otto (la wishlist).
+      const lato: -1 | 1 = cursore[-1] >= cursore[1] ? -1 : 1;
       const zPartenza = cursore[lato];
       for (let m = 0; m < moduli; m++) {
         piani.push({ sezione: sez, indiceModulo: m, lato, z: zPartenza - m * PASSO_MODULO });
@@ -241,6 +256,7 @@ export class ScenaBiblioteca {
   }
 
   private costruisciAmbiente() {
+    const atm = atmosferaDi(this.pref.atmosfera);
     // Illuminazione d'ambiente fisica: dà riflessi credibili al legno senza
     // schiarire la scena come uno showroom.
     this.pmrem = new THREE.PMREMGenerator(this.renderer);
@@ -281,6 +297,7 @@ export class ScenaBiblioteca {
         map: par.map,
         normalMap: par.normalMap,
         roughnessMap: par.roughnessMap,
+        color: atm.pareti,
         roughness: 0.95,
         envMapIntensity: 0.15,
       }),
@@ -315,7 +332,7 @@ export class ScenaBiblioteca {
     const tappeto = new THREE.Mesh(
       this.traccia(new THREE.PlaneGeometry(1.9, lung - 1.2)),
       this.traccia(
-        new THREE.MeshStandardMaterial({ color: 0x3d1330, roughness: 0.95, envMapIntensity: 0.1 }),
+        new THREE.MeshStandardMaterial({ color: atm.tappeto, roughness: 0.95, envMapIntensity: 0.1 }),
       ),
     );
     tappeto.rotation.x = -Math.PI / 2;
@@ -327,7 +344,8 @@ export class ScenaBiblioteca {
   // ---- mobili e libri ----------------------------------------------------
 
   private costruisciModuli(piani: PianoModulo[]) {
-    const legno = mappeLegno(3, [86, 52, 33]);
+    const ess = essenzaDi(this.pref.essenza);
+    const legno = mappeLegno(ess.seme, ess.rgb);
     this.risorse.push(legno.map, legno.normalMap, legno.roughnessMap);
     const matLegno = this.traccia(
       new THREE.MeshStandardMaterial({
@@ -499,7 +517,11 @@ export class ScenaBiblioteca {
     // Copertina reale: stesso-origine, quindi utilizzabile come texture.
     this.loader.load(
       coverUrl(libro),
-      (tex) => {
+      (piena) => {
+        // Sullo scaffale un libro occupa poche decine di pixel: tenere le
+        // copertine a piena risoluzione, per centinaia di volumi, riempirebbe
+        // la memoria video (soprattutto sul telefono). Si rimpiccioliscono.
+        const tex = this.texturaRidotta(piena);
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = BASSA_POTENZA ? 4 : this.renderer.capabilities.getMaxAnisotropy();
         tex.generateMipmaps = true;
@@ -507,7 +529,7 @@ export class ScenaBiblioteca {
         tex.magFilter = THREE.LinearFilter;
         this.risorse.push(tex);
 
-        const img = tex.image as { width?: number; height?: number } | undefined;
+        const img = piena.image as { width?: number; height?: number } | undefined;
         const w = img?.width ?? 2;
         const h = img?.height ?? 3;
         // Proporzione reale rispettata sempre: la copertina non viene mai
@@ -526,11 +548,12 @@ export class ScenaBiblioteca {
         ombra.scale.set(posto.larghezza * 1.5, posto.spessore * 3.4, 1);
 
         // dorso e bordi in tinta con la copertina
-        if (img && (img as CanvasImageSource | undefined)) {
-          const c = coloreMedio(tex.image as TexImageSource);
+        if (img) {
+          const c = coloreMedio(piena.image as TexImageSource);
           matCorpo.color.copy(c.multiplyScalar(0.55));
           matCorpo.needsUpdate = true;
         }
+        piena.dispose(); // la copia grande non serve più
       },
       undefined,
       () => {
@@ -542,7 +565,10 @@ export class ScenaBiblioteca {
   /** Striscia LED calda incassata sotto il ripiano superiore. */
   private costruisciStriscia(g: THREE.Group, r: RipianoGeom, tinta: THREE.Color) {
     const cima = r.superficie + r.altezzaUtile;
-    const colore = tinta.clone().lerp(new THREE.Color(0xfff1dc), 0.72);
+    const scelta = luceDi(this.pref.luce).colore;
+    const colore = scelta
+      ? new THREE.Color(scelta)
+      : tinta.clone().lerp(new THREE.Color(0xfff1dc), 0.45);
     const barra = new THREE.Mesh(
       new THREE.BoxGeometry(r.xMax - r.xMin, 0.012, 0.02),
       new THREE.MeshBasicMaterial({ color: colore }),
@@ -565,6 +591,26 @@ export class ScenaBiblioteca {
     alone.position.set(0, cima - 0.05, r.zFronte - 0.03);
     g.add(alone);
     this.risorse.push(alone.material);
+  }
+
+  /**
+   * Copia rimpicciolita di una copertina. Con quasi duecento volumi in scena
+   * la somma delle texture a piena risoluzione sarebbe di centinaia di MB;
+   * a questa dimensione un libro sullo scaffale resta comunque nitido.
+   */
+  private texturaRidotta(tex: THREE.Texture): THREE.Texture {
+    const img = tex.image as (CanvasImageSource & { width?: number; height?: number }) | undefined;
+    const maxLarghezza = BASSA_POTENZA ? 128 : 192;
+    if (!img?.width || !img.height || img.width <= maxLarghezza) return tex.clone();
+    const scala = maxLarghezza / img.width;
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(img.width * scala));
+    c.height = Math.max(1, Math.round(img.height * scala));
+    const ctx = c.getContext("2d");
+    if (!ctx) return tex.clone();
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    return new THREE.CanvasTexture(c);
   }
 
   private aloneTex: THREE.Texture | null = null;
@@ -796,11 +842,158 @@ export class ScenaBiblioteca {
     });
   }
 
+  /**
+   * Decori fantasy: lanterne sospese sopra la corsia, candelabri accesi sui
+   * mobili, ampolle colorate e cerchi di rune sul pavimento. Geometrie e
+   * materiali sono condivisi, così l'aggiunta non pesa sul framerate.
+   */
+  private costruisciDecori(piani: PianoModulo[]) {
+    if (!this.pref.decori) return;
+    const lung = this.zMax - this.zMin;
+
+    const oro = this.traccia(
+      new THREE.MeshStandardMaterial({ color: 0xb8912f, metalness: 0.85, roughness: 0.3 }),
+    );
+    const fiammaMat = () =>
+      this.traccia(
+        new THREE.SpriteMaterial({
+          map: this.aloneCondiviso(),
+          color: 0xffc477,
+          transparent: true,
+          opacity: 0.9,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+
+    // --- lanterne sospese lungo la corsia
+    const geoCatena = this.traccia(new THREE.CylinderGeometry(0.006, 0.006, 0.5, 5));
+    const geoGabbia = this.traccia(new THREE.CylinderGeometry(0.09, 0.11, 0.2, 6, 1, true));
+    const geoCappello = this.traccia(new THREE.ConeGeometry(0.13, 0.09, 6));
+    const nLanterne = Math.max(2, Math.round(lung / 3.4));
+    for (let i = 0; i < nLanterne; i++) {
+      const z = this.zMax - 1.6 - (i * (lung - 2.6)) / Math.max(1, nLanterne - 1);
+      const x = i % 2 === 0 ? -0.75 : 0.75;
+      const g = new THREE.Group();
+      g.position.set(x, 0, z);
+
+      const catena = new THREE.Mesh(geoCatena, oro);
+      catena.position.y = ALTEZZA_STANZA - 0.25;
+      g.add(catena);
+      const gabbia = new THREE.Mesh(geoGabbia, oro);
+      gabbia.position.y = ALTEZZA_STANZA - 0.6;
+      g.add(gabbia);
+      const cappello = new THREE.Mesh(geoCappello, oro);
+      cappello.position.y = ALTEZZA_STANZA - 0.46;
+      g.add(cappello);
+
+      const fiamma = new THREE.Sprite(fiammaMat());
+      fiamma.scale.set(0.22, 0.28, 1);
+      fiamma.position.y = ALTEZZA_STANZA - 0.6;
+      g.add(fiamma);
+
+      const luce = new THREE.PointLight(0xffb877, 1.1, 5.5, 2);
+      luce.position.y = ALTEZZA_STANZA - 0.6;
+      g.add(luce);
+      this.candele.push({ luce, base: 1.1, fase: i * 2.1 });
+
+      this.scene.add(g);
+    }
+
+    // --- candelabri e ampolle sopra i mobili
+    const geoCera = this.traccia(new THREE.CylinderGeometry(0.022, 0.026, 0.16, 8));
+    const geoPiatto = this.traccia(new THREE.CylinderGeometry(0.07, 0.08, 0.02, 10));
+    const geoAmpolla = this.traccia(new THREE.SphereGeometry(0.055, 10, 8));
+    const geoCollo = this.traccia(new THREE.CylinderGeometry(0.016, 0.022, 0.06, 8));
+    const cera = this.traccia(
+      new THREE.MeshStandardMaterial({ color: 0xf2e6c8, roughness: 0.75 }),
+    );
+    const tinteAmpolle = [0x6ad4b0, 0xd46a9a, 0x7a9cff, 0xffc46a];
+
+    piani.forEach((piano, i) => {
+      if (piano.indiceModulo !== 0) return; // uno ogni sezione, non su ogni mobile
+      const cima = MODULO.altezza + 0.01;
+      const g = new THREE.Group();
+      g.position.set(
+        piano.lato * (CORRIDOIO / 2 + MODULO.profondita / 2),
+        0,
+        piano.z,
+      );
+      g.rotation.y = piano.lato < 0 ? Math.PI / 2 : -Math.PI / 2;
+
+      if (i % 2 === 0) {
+        // candelabro a tre bracci
+        const piatto = new THREE.Mesh(geoPiatto, oro);
+        piatto.position.set(0, cima, 0.02);
+        g.add(piatto);
+        for (let k = -1; k <= 1; k++) {
+          const c = new THREE.Mesh(geoCera, cera);
+          c.position.set(k * 0.06, cima + 0.09 + (k === 0 ? 0.03 : 0), 0.02);
+          c.castShadow = true;
+          g.add(c);
+          const f = new THREE.Sprite(fiammaMat());
+          f.scale.set(0.06, 0.1, 1);
+          f.position.set(k * 0.06, cima + 0.19 + (k === 0 ? 0.03 : 0), 0.02);
+          g.add(f);
+        }
+        const luce = new THREE.PointLight(0xffb466, 0.7, 2.6, 2);
+        luce.position.set(0, cima + 0.22, 0.05);
+        g.add(luce);
+        this.candele.push({ luce, base: 0.7, fase: i * 1.3 });
+      } else {
+        // ampolle da alchimista
+        for (let k = -1; k <= 1; k++) {
+          const tinta = tinteAmpolle[(i + k + 4) % tinteAmpolle.length]!;
+          const mat = this.traccia(
+            new THREE.MeshStandardMaterial({
+              color: tinta,
+              emissive: tinta,
+              emissiveIntensity: 0.35,
+              roughness: 0.15,
+              metalness: 0.1,
+              transparent: true,
+              opacity: 0.85,
+            }),
+          );
+          const a = new THREE.Mesh(geoAmpolla, mat);
+          a.position.set(k * 0.13, cima + 0.055, 0.02);
+          g.add(a);
+          const collo = new THREE.Mesh(geoCollo, mat);
+          collo.position.set(k * 0.13, cima + 0.13, 0.02);
+          g.add(collo);
+        }
+      }
+      this.scene.add(g);
+    });
+
+    // --- cerchi di rune sul pavimento
+    const runeTex = this.traccia(texturaRune("#d8b45e"));
+    const matRune = this.traccia(
+      new THREE.MeshBasicMaterial({
+        map: runeTex,
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    );
+    const geoRune = this.traccia(new THREE.PlaneGeometry(1.5, 1.5));
+    const nRune = Math.max(1, Math.round(lung / 5));
+    for (let i = 0; i < nRune; i++) {
+      const z = this.zMax - 2.4 - (i * (lung - 4)) / Math.max(1, nRune - 1);
+      const r = new THREE.Mesh(geoRune, matRune);
+      r.rotation.x = -Math.PI / 2;
+      r.position.set(0, 0.012, z);
+      this.scene.add(r);
+      this.rune.push(r);
+    }
+  }
+
   // ---- luci --------------------------------------------------------------
 
   private costruisciLuci() {
     // 1. ambiente: nessuna zona completamente nera
-    this.scene.add(new THREE.AmbientLight(0x4a3c6a, 0.35));
+    this.scene.add(new THREE.AmbientLight(atmosferaDi(this.pref.atmosfera).ambiente, 0.4));
     this.scene.add(new THREE.HemisphereLight(0x6a5a9a, 0x2a1a10, 0.45));
 
     // 2. luce principale: dà volume ai mobili e proietta ombre morbide
@@ -1115,6 +1308,11 @@ export class ScenaBiblioteca {
     if (this.sferaDesideri) {
       this.sferaDesideri.rotation.y -= dt * 0.6;
       this.sferaDesideri.position.y = 1.46 + Math.sin(t * 1.6) * 0.03;
+    }
+    for (let i = 0; i < this.rune.length; i++) {
+      const r = this.rune[i]!;
+      r.rotation.z = t * 0.06 * (i % 2 === 0 ? 1 : -1);
+      (r.material as THREE.MeshBasicMaterial).opacity = 0.22 + Math.sin(t * 0.9 + i) * 0.1;
     }
     if (this.polvere) this.polvere.rotation.y = t * 0.014;
 

@@ -16,8 +16,9 @@ Three.js e server Fastify in un'unica immagine Docker).
   Goodreads, ricompare da solo. Niente generi nell'RSS → gli scaffali tematici
   sono dedotti da titolo/serie/autore con parole chiave (`server/src/scaffali.ts`).
 - **Desideri** (wishlist Amazon, "da comprare") → statici in
-  [`data/desideri.json`](data/desideri.json). Amazon blocca il fetch automatico,
-  quindi la lista è una fotografia da aggiornare a mano (vedi sotto).
+  [`data/desideri.json`](data/desideri.json), **135 titoli**. Amazon blocca il
+  fetch automatico, quindi la lista è una fotografia da aggiornare a mano
+  (vedi sotto).
 
 Le copertine passano **sempre** dal proxy `/api/cover/:id` (stesso-origine):
 un'immagine cross-origin senza header CORS non è usabile come texture WebGL.
@@ -88,7 +89,23 @@ sarebbero decine di luci e il framerate crollerebbe.
 Le copertine mantengono **sempre** la proporzione reale dell'immagine: se una
 copertina è quadrata il libro si abbassa, non si deforma.
 
+Con quasi duecento volumi in scena le copertine vengono **rimpicciolite** prima
+di diventare texture (192 px, 128 sui telefoni): a piena risoluzione la somma
+occuperebbe centinaia di MB di memoria video.
+
 Aprendo con `?diag=1` la console stampa conteggi e violazioni dei bounds.
+
+## Personalizzazione
+
+Il pulsante **🪄 Arreda** apre un pannello per scegliere essenza del legno
+(noce, rovere, ebano, ciliegio, betulla, verde spina), luce dei ripiani (calda,
+neutra, o del colore del genere) e atmosfera della sala (notte stellata, bosco
+incantato, tramonto d'ambra, regno di ghiaccio), oltre a decori fantasy
+(lanterne sospese, candelabri, ampolle da alchimista, cerchi di rune).
+
+Le scelte stanno in `localStorage`, quindi restano sul dispositivo: la
+biblioteca può essere diversa sul telefono e sul PC. Cambiarle ricostruisce la
+scena, perché le venature del legno sono generate insieme alle texture.
 
 ## Sviluppo
 
@@ -123,8 +140,11 @@ ARM64 se un domani la sposti.
 
 Amazon serve un anti-bot (503) alle richieste automatiche: la
 [`data/desideri.json`](data/desideri.json) va rigenerata a mano leggendo la
-wishlist con un browser reale (titolo, autore, prezzo, copertina, link ASIN) e
-rifacendo il build. Lista attuale: `MPM4BFSYOHU7` (fotografia del 2026-08-15).
+wishlist con un browser reale. **Attenzione**: la pagina mostra solo i primi 10
+titoli e ne carica altri a scorrimento; lo scorrimento però non scatta se la
+scheda non è visibile. Conviene seguire il `showMoreUrl` con il suo
+`paginationToken`, lotto dopo lotto, finché non arrivano più elementi nuovi.
+Lista attuale: `MPM4BFSYOHU7`, 135 titoli (fotografia del 2026-08-16).
 
 ## Struttura
 

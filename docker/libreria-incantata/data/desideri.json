@@ -1,6 +1,6 @@
 {
-  "_nota": "Wishlist Amazon (libri da comprare). Sorgente bloccata al fetch automatico: aggiornare a mano rilanciando lo scrape del browser. Ultimo aggiornamento: 2026-08-15. Lista: MPM4BFSYOHU7",
-  "aggiornato": "2026-08-15",
+  "_nota": "Wishlist Amazon (libri da comprare). Sorgente bloccata al fetch automatico: aggiornare a mano rilanciando lo scrape del browser, scorrendo tutti i lotti. Ultimo aggiornamento: 2026-08-16. Lista: MPM4BFSYOHU7",
+  "aggiornato": "2026-08-16",
   "wishlistId": "MPM4BFSYOHU7",
   "libri": [
     {
@@ -92,6 +92,1131 @@
       "prezzo": "17,00 €",
       "copertina": "https://m.media-amazon.com/images/I/41I5CyKmo2L._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8834747593"
+    },
+    {
+      "asin": "B0GQCKMXCZ",
+      "titolo": "Of thorns and starlight",
+      "autore": "Sofia Mazzanti, Chiara  Topo",
+      "formato": "Formato Kindle",
+      "prezzo": "2,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51w-KKcc17L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0GQCKMXCZ"
+    },
+    {
+      "asin": "B0GX2YPVK4",
+      "titolo": "Labentia Signa. Desiderio",
+      "autore": "Ribes Halley",
+      "formato": "Formato Kindle",
+      "prezzo": "9,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51db5oojmPL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0GX2YPVK4"
+    },
+    {
+      "asin": "8817199540",
+      "titolo": "The wolf king. Ediz. italiana",
+      "autore": "Lauren Palphreyman, Chiara Vannini",
+      "formato": "Copertina rigida",
+      "prezzo": "17,95 €",
+      "copertina": "https://m.media-amazon.com/images/I/41a8iQR75sL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817199540"
+    },
+    {
+      "asin": "8820077744",
+      "titolo": "Fatum",
+      "autore": "Azura Helianthus",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/417RQFzmNpL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8820077744"
+    },
+    {
+      "asin": "8804797304",
+      "titolo": "Il finale si scrive da sé",
+      "autore": "Evelyn Clarke",
+      "formato": "Copertina flessibile",
+      "prezzo": "20,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/41JSBHvuU9L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804797304"
+    },
+    {
+      "asin": "8804800445",
+      "titolo": "Cages. Ediz. italiana",
+      "autore": "Eden Windward",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,57 €",
+      "copertina": "https://m.media-amazon.com/images/I/51A1iB3qiCL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804800445"
+    },
+    {
+      "asin": "B0F1RBT41Q",
+      "titolo": "Rival darling",
+      "autore": "Alexandra Moody",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,15 €",
+      "copertina": "https://m.media-amazon.com/images/I/41SIqgQRE3L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0F1RBT41Q"
+    },
+    {
+      "asin": "B0FCD1BX92",
+      "titolo": "STONE AND SHADOWS: La foresta di cenere",
+      "autore": "ALICE BRANNER",
+      "formato": "Copertina flessibile",
+      "prezzo": "20,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/41OFrYNRfXL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FCD1BX92"
+    },
+    {
+      "asin": "B0FB6J3KN3",
+      "titolo": "Carovana. Idillio di fuoco",
+      "autore": "Manuela Flore",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,95 €",
+      "copertina": "https://m.media-amazon.com/images/I/51XA+4vCsjL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FB6J3KN3"
+    },
+    {
+      "asin": "8817189049",
+      "titolo": "Silvercloak",
+      "autore": "Laura Steven, Maria Concetta Scotto di Santillo",
+      "formato": "Copertina rigida",
+      "prezzo": "17,95 €",
+      "copertina": "https://m.media-amazon.com/images/I/41hBBLZdyZL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817189049"
+    },
+    {
+      "asin": "B0GJ7FGN5X",
+      "titolo": "Fight. Il rischio di amarti (Sky Ridge Hotshots Series Vol. 1)",
+      "autore": "Sloane St. James",
+      "formato": "Formato Kindle",
+      "prezzo": "0,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51gLFOiF+6L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0GJ7FGN5X"
+    },
+    {
+      "asin": "8804755792",
+      "titolo": "La figlia della foresta",
+      "autore": "Juliet Marillier, Simona Garavelli",
+      "formato": "Copertina flessibile",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/51AIDChUFXL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804755792"
+    },
+    {
+      "asin": "8833943178",
+      "titolo": "La magia dei momenti no",
+      "autore": "Alison Espach, Benedetta Gallo",
+      "formato": "Copertina flessibile",
+      "prezzo": "18,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/518sxDZik1L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8833943178"
+    },
+    {
+      "asin": "B0FFWKKV4M",
+      "titolo": "The throne of broken gods. La vendetta degli dei sconfitti. Booklover approved",
+      "autore": "Amber V. Nicole, Ilaria Katerinov",
+      "formato": "Copertina flessibile",
+      "prezzo": "21,75 €",
+      "copertina": "https://m.media-amazon.com/images/I/51oLCleIFNL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FFWKKV4M"
+    },
+    {
+      "asin": "8820083086",
+      "titolo": "Metal Slinger. Ediz. italiana",
+      "autore": "Rachel Schneider, Daniela Di Falco",
+      "formato": "Copertina rigida",
+      "prezzo": "18,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/519Zkfjt1lL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8820083086"
+    },
+    {
+      "asin": "B0GC8J8DDS",
+      "titolo": "On wings of blood: Un'accademia di sangue e draghi (Bloodwing Academy Vol. 1)",
+      "autore": "Briar Boleyn, Valentina Zaffagnini",
+      "formato": "Formato Kindle",
+      "prezzo": "12,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51izIVLCwNL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0GC8J8DDS"
+    },
+    {
+      "asin": "8804780401",
+      "titolo": "Hunger games: Vol. 1",
+      "autore": "Suzanne Collins, Fabio Paracchini",
+      "formato": "Copertina flessibile",
+      "prezzo": "13,77 €",
+      "copertina": "https://m.media-amazon.com/images/I/41iNwrrm1iL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804780401"
+    },
+    {
+      "asin": "B0G61JV8VB",
+      "titolo": "Mercy",
+      "autore": "Francesca Veri",
+      "formato": "Formato Kindle",
+      "prezzo": "3,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51WGqCgoGQL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0G61JV8VB"
+    },
+    {
+      "asin": "B0DJQW3V29",
+      "titolo": "The Raven Cycle: La serie",
+      "autore": "Maggie Stiefvater, M. T. Locatelli",
+      "formato": "Formato Kindle",
+      "prezzo": "16,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41qjN4lB0FL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DJQW3V29"
+    },
+    {
+      "asin": "8855311484",
+      "titolo": "Priest. Un prete",
+      "autore": "Sierra Simone, Done&Tail",
+      "formato": "Copertina flessibile",
+      "prezzo": "13,20 €",
+      "copertina": "https://m.media-amazon.com/images/I/51AIi8Al1gL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8855311484"
+    },
+    {
+      "asin": "B005SZ7S6Q",
+      "titolo": "Proibito (Chrysalide)",
+      "autore": "Tabitha Suzuma, Lorenzo Borgotallo",
+      "formato": "Formato Kindle",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/41hRpvinbxL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B005SZ7S6Q"
+    },
+    {
+      "asin": "B0FWNYVG51",
+      "titolo": "Segreti e passioni proibite a Grimstone",
+      "autore": "Sophie Lark",
+      "formato": "Formato Kindle",
+      "prezzo": "2,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51alWtLYMgL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FWNYVG51"
+    },
+    {
+      "asin": "B0FT5LDNRV",
+      "titolo": "Il bacio dell'usignolo",
+      "autore": "Adi Denner, Sara A. Benatti",
+      "formato": "Formato Kindle",
+      "prezzo": "11,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/516P2V2K9jL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FT5LDNRV"
+    },
+    {
+      "asin": "8820081474",
+      "titolo": "The beast and the ballerina. Ediz. italiana",
+      "autore": "Anna Nicoletto",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/51jDGH89oPL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8820081474"
+    },
+    {
+      "asin": "B07BKPZV4N",
+      "titolo": "L'infinito tra me e te. The Wall of Winnipeg and me",
+      "autore": "Mariana Zapata",
+      "formato": "Formato Kindle",
+      "prezzo": "3,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51q-kASuVGL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B07BKPZV4N"
+    },
+    {
+      "asin": "8820076446",
+      "titolo": "Deviant. Eclissi di Marte (Vol. 1)",
+      "autore": "Ellie B. Luin",
+      "formato": "Copertina rigida",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/51nBqdGDWxL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8820076446"
+    },
+    {
+      "asin": "B0CP51HSZ6",
+      "titolo": "L'altra sposa",
+      "autore": "Catharina Maura",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,05 €",
+      "copertina": "https://m.media-amazon.com/images/I/51EJaFdtmdL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CP51HSZ6"
+    },
+    {
+      "asin": "B0FFWYM3J5",
+      "titolo": "Fable for the end of the world. La preda dell'angelo",
+      "autore": "Ava Reid, Paolo Maria Bonora",
+      "formato": "Copertina flessibile",
+      "prezzo": "22,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/51ZqjZfIPeL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FFWYM3J5"
+    },
+    {
+      "asin": "B0FQGHDPS9",
+      "titolo": "A language of dragons. La scintilla della ribellione",
+      "autore": "S. F. Williamson, Ivan Belikov",
+      "formato": "Copertina rigida",
+      "prezzo": "22,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/51ZY6hWsLUL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FQGHDPS9"
+    },
+    {
+      "asin": "B0FDXLT1KV",
+      "titolo": "Hate love repeat",
+      "autore": "Lea Landucci",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/41rvOodqWKL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FDXLT1KV"
+    },
+    {
+      "asin": "8804777532",
+      "titolo": "Yellowface",
+      "autore": "Rebecca F. Kuang, Giovanna Scocchera",
+      "formato": "Copertina rigida",
+      "prezzo": "20,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/31J1ReeVFyL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804777532"
+    },
+    {
+      "asin": "8855443186",
+      "titolo": "Inferno. La triade di Dante (Vol. 1)",
+      "autore": "Alessia Lorecchio",
+      "formato": "Copertina flessibile",
+      "prezzo": "14,25 €",
+      "copertina": "https://m.media-amazon.com/images/I/51I+ktamEtL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8855443186"
+    },
+    {
+      "asin": "B0BK9YG1NW",
+      "titolo": "Artia di Camelot",
+      "autore": "Cecilia Randall",
+      "formato": "Formato Kindle",
+      "prezzo": "9,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51vvyTerimL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0BK9YG1NW"
+    },
+    {
+      "asin": "B0F5YKWXT1",
+      "titolo": "House of the beast. Ediz. italiana",
+      "autore": "Michelle Wong, Ilaria Katerinov",
+      "formato": "Copertina rigida",
+      "prezzo": "18,91 €",
+      "copertina": "https://m.media-amazon.com/images/I/51E+dI1EIzL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0F5YKWXT1"
+    },
+    {
+      "asin": "B0FVFNYYG1",
+      "titolo": "Kill Creatures: Bugie che uccidono",
+      "autore": "Rory Power, Roberta Verde",
+      "formato": "Formato Kindle",
+      "prezzo": "12,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41pdoF2EHsL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FVFNYYG1"
+    },
+    {
+      "asin": "B0D38W956F",
+      "titolo": "Faster. Il brivido dell'amore (Always Romance)",
+      "autore": "Paola Chiozza",
+      "formato": "Formato Kindle",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/41zLxtKeqGL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0D38W956F"
+    },
+    {
+      "asin": "B09WN9LKPG",
+      "titolo": "Promesse e melagrane (Mostri e Muse Vol. 1)",
+      "autore": "Sav R. Miller, VC Studios",
+      "formato": "Formato Kindle",
+      "prezzo": "2,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51DPS+sgfaL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B09WN9LKPG"
+    },
+    {
+      "asin": "B0FWX72P22",
+      "titolo": "The hunt (I REGNI CORROTTI)",
+      "autore": "Frost Kay, Valentina Pesci",
+      "formato": "Formato Kindle",
+      "prezzo": "5,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51dxIcFGGUL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FWX72P22"
+    },
+    {
+      "asin": "8820076063",
+      "titolo": "Love on the brain. L'amore in testa",
+      "autore": "Ali Hazelwood, Benedetta Gallo",
+      "formato": "Copertina rigida",
+      "prezzo": "9,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/515zIp5EQiL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8820076063"
+    },
+    {
+      "asin": "882007933X",
+      "titolo": "Bride. Ediz italiana",
+      "autore": "Ali Hazelwood, Benedetta Gallo",
+      "formato": "Copertina rigida",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/51IcoZC4jfL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/882007933X"
+    },
+    {
+      "asin": "8820076861",
+      "titolo": "La meccanica dell'amore",
+      "autore": "Alexene Farol Follmuth, Roberta Verde",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,95 €",
+      "copertina": "https://m.media-amazon.com/images/I/41XqNEOU3aL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8820076861"
+    },
+    {
+      "asin": "8804740280",
+      "titolo": "I sette mariti di Evelyn Hugo",
+      "autore": "Taylor Jenkins Reid, Giovanna Scocchera",
+      "formato": "Copertina rigida",
+      "prezzo": "15,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/41pSIpK-y3L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804740280"
+    },
+    {
+      "asin": "B0F85TNG1X",
+      "titolo": "The dagger and the flame. Il pugnale e la fiamma",
+      "autore": "Catherine Doyle, Laura Bortoluzzi",
+      "formato": "Copertina rigida",
+      "prezzo": "22,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/51u1Og3D1OL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0F85TNG1X"
+    },
+    {
+      "asin": "B0FVFNH5PT",
+      "titolo": "Den of Vipers: Oltre ogni regola",
+      "autore": "K.A. Knight",
+      "formato": "Formato Kindle",
+      "prezzo": "12,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51qdXTZ1fxL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FVFNH5PT"
+    },
+    {
+      "asin": "B0FRD1BFWF",
+      "titolo": "Blood of Hercules",
+      "autore": "Jasmine Mas, Veronica Battistoni",
+      "formato": "Formato Kindle",
+      "prezzo": "12,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41tRZGSgGWL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FRD1BFWF"
+    },
+    {
+      "asin": "8806219677",
+      "titolo": "L'arte della gioia",
+      "autore": "Goliarda Sapienza",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/41KgqFErAfL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8806219677"
+    },
+    {
+      "asin": "B0CN2M9JB1",
+      "titolo": "Supermad. Campus drivers. Ediz. Italiana (Vol.1) | Una serie Prime Video",
+      "autore": "C. S. Quill, Simona Brogli",
+      "formato": "Copertina rigida",
+      "prezzo": "18,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/51l4WfuryqL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CN2M9JB1"
+    },
+    {
+      "asin": "B0CV11LK4Y",
+      "titolo": "Zendar: Principe Guerriero (Stars and Sand Vol. 1)",
+      "autore": "Laura Fiamenghi",
+      "formato": "Formato Kindle",
+      "prezzo": "1,50 €",
+      "copertina": "https://m.media-amazon.com/images/I/51SflHYOSWL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CV11LK4Y"
+    },
+    {
+      "asin": "8850254210",
+      "titolo": "Nel buio della mente",
+      "autore": "Paul Tremblay, Anna Ricci",
+      "formato": "Copertina flessibile",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/41Yb2CkTNNL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8850254210"
+    },
+    {
+      "asin": "B0F3RSV3HH",
+      "titolo": "Violent life",
+      "autore": "Fannie Heather",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,05 €",
+      "copertina": "https://m.media-amazon.com/images/I/51m-R8umhUL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0F3RSV3HH"
+    },
+    {
+      "asin": "B0CZ9XSWH8",
+      "titolo": "Assistente cercasi: Assistant to the villain",
+      "autore": "Hannah Nicole Maehrer",
+      "formato": "Formato Kindle",
+      "prezzo": "12,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/516oT+HGZXL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CZ9XSWH8"
+    },
+    {
+      "asin": "8850272294",
+      "titolo": "Wings. Red Oak Manor Collection",
+      "autore": "Valentina Ferraro",
+      "formato": "Copertina flessibile",
+      "prezzo": "6,56 €",
+      "copertina": "https://m.media-amazon.com/images/I/41wgLdQFadL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8850272294"
+    },
+    {
+      "asin": "8893250160",
+      "titolo": "Io ti troverò",
+      "autore": "Shane Stevens, Simonetta Levantini",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/41fPjVnxPoL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8893250160"
+    },
+    {
+      "asin": "B0DY83DNWY",
+      "titolo": "Dragon Heart. Il Viaggio",
+      "autore": "Amabile Giusti",
+      "formato": "Formato Kindle",
+      "prezzo": "1,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41pWP-Ivw-L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DY83DNWY"
+    },
+    {
+      "asin": "B0D6DZ8TK3",
+      "titolo": "La stagione del coraggio",
+      "autore": "Kristin Hannah",
+      "formato": "Formato Kindle",
+      "prezzo": "8,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51ECArYIgBL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0D6DZ8TK3"
+    },
+    {
+      "asin": "882279236X",
+      "titolo": "La città oltre i confini del cielo",
+      "autore": "Francesca Tamburini",
+      "formato": "Copertina flessibile",
+      "prezzo": "12,25 €",
+      "copertina": "https://m.media-amazon.com/images/I/51uhqomlEZL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/882279236X"
+    },
+    {
+      "asin": "880979804X",
+      "titolo": "Obsidian",
+      "autore": "Jennifer L. Armentrout",
+      "formato": "Copertina flessibile",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/51OnXFpxlLL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/880979804X"
+    },
+    {
+      "asin": "B0FCSJBNC2",
+      "titolo": "Cotton Island. Il nostro splendido posto maledetto",
+      "autore": "L.F. Koraline",
+      "formato": "Formato Kindle",
+      "prezzo": "0,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41G-cv4VJgL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FCSJBNC2"
+    },
+    {
+      "asin": "B0DYP541R2",
+      "titolo": "Unrepentaint. Impenitenti (Libri)",
+      "autore": "Ribes Halley",
+      "formato": "Formato Kindle",
+      "prezzo": "9,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41eoBSYHSWL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DYP541R2"
+    },
+    {
+      "asin": "8817180823",
+      "titolo": "Il libro delle porte",
+      "autore": "Gareth Brown, Linda Martini",
+      "formato": "Copertina rigida",
+      "prezzo": "18,52 €",
+      "copertina": "https://m.media-amazon.com/images/I/51ioqyqfEML._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817180823"
+    },
+    {
+      "asin": "B0DSRZRBBB",
+      "titolo": "Vite da vendicare (Sabre Security Vol. 1)",
+      "autore": "J Rose, V.C. Studios",
+      "formato": "Formato Kindle",
+      "prezzo": "0,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51WJh7vrpZL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DSRZRBBB"
+    },
+    {
+      "asin": "8868365626",
+      "titolo": "It",
+      "autore": "Stephen King, Tullio Dobner",
+      "formato": "Copertina flessibile",
+      "prezzo": "18,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/41GZP9yd2PL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8868365626"
+    },
+    {
+      "asin": "B0C4P8W6MJ",
+      "titolo": "The Never King (Vicious Lost Boys Vol. 1)",
+      "autore": "Nikki St. Crowe, Laura Cantù",
+      "formato": "Formato Kindle",
+      "prezzo": "7,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51DR33GD4cL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0C4P8W6MJ"
+    },
+    {
+      "asin": "B0FFZHHX8P",
+      "titolo": "Le bugie che rubiamo (The Hollow Boys - Edizione italiana Vol. 1)",
+      "autore": "Monty Jay, V.C. Studios",
+      "formato": "Formato Kindle",
+      "prezzo": "2,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51OGKKiZEnL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FFZHHX8P"
+    },
+    {
+      "asin": "B0FLDS1FZ2",
+      "titolo": "My dark Romeo",
+      "autore": "L.J. Shen",
+      "formato": "Formato Kindle",
+      "prezzo": "5,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51bJFIAJmML._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FLDS1FZ2"
+    },
+    {
+      "asin": "8822790642",
+      "titolo": "Io non ho ucciso",
+      "autore": "Megan Lally, Leonarda Grazioso",
+      "formato": "Copertina flessibile",
+      "prezzo": "9,41 €",
+      "copertina": "https://m.media-amazon.com/images/I/51JndBpjn5L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8822790642"
+    },
+    {
+      "asin": "B0FHJYJ199",
+      "titolo": "Indecent (Kairos Vol. 6)",
+      "autore": "Ava Lowell",
+      "formato": "Formato Kindle",
+      "prezzo": "3,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51t--OX0OEL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FHJYJ199"
+    },
+    {
+      "asin": "B0CH29HFC3",
+      "titolo": "The Ultimate Sin",
+      "autore": "Harper McKenzie",
+      "formato": "Formato Kindle",
+      "prezzo": "5,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51Mo-s-JR9L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CH29HFC3"
+    },
+    {
+      "asin": "1656635569",
+      "titolo": "TAURUS: Black Dynasty Series #1",
+      "autore": "Marilena Barbagallo",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,42 €",
+      "copertina": "https://m.media-amazon.com/images/I/410VyFvvXSL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/1656635569"
+    },
+    {
+      "asin": "B0DXMW77T5",
+      "titolo": "Cross my heart. Ediz italiana",
+      "autore": "Roxy Sloane, Valentina Nobili",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/41KiZSNkY6L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DXMW77T5"
+    },
+    {
+      "asin": "B0FBFWFWVD",
+      "titolo": "Domino",
+      "autore": "Alessia D'Ambrosio",
+      "formato": "Formato Kindle",
+      "prezzo": "2,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41YyPUMN0iL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0FBFWFWVD"
+    },
+    {
+      "asin": "8817187690",
+      "titolo": "Spark of the everflame. La biblioteca di Daphne",
+      "autore": "Penn Cole, Alessandra Guidoni",
+      "formato": "Copertina rigida",
+      "prezzo": "17,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/511WAEui-+L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817187690"
+    },
+    {
+      "asin": "B0D193VWY6",
+      "titolo": "Il chirurgo",
+      "autore": "Leslie Wolfe",
+      "formato": "Formato Kindle",
+      "prezzo": "1,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41zt7PBd3gL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0D193VWY6"
+    },
+    {
+      "asin": "8804779977",
+      "titolo": "Mrs. Nash's ashes",
+      "autore": "Sarah Adler, Manuela Piemonte",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/41vJxGiqGeL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804779977"
+    },
+    {
+      "asin": "B0DQYG4JRX",
+      "titolo": "A feather so black. La maledizione del cigno",
+      "autore": "Lyra Selene, Tiffany Vecchietti",
+      "formato": "Copertina rigida",
+      "prezzo": "22,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/41FrjotExDL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DQYG4JRX"
+    },
+    {
+      "asin": "880477195X",
+      "titolo": "Dance of thieves. Danza dei ladri. La dilogia",
+      "autore": "Mary E. Pearson, Sofi Hakobyan",
+      "formato": "Copertina rigida",
+      "prezzo": "26,60 €",
+      "copertina": "https://m.media-amazon.com/images/I/51eJ1zdcjeL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/880477195X"
+    },
+    {
+      "asin": "B0F4DVRBPR",
+      "titolo": "Against the Ropes - Contro le corde: sport romance sul wrestling, hate to love, forced proximity, he falls first, slow burn",
+      "autore": "Eliana C.",
+      "formato": "Copertina flessibile",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/41MNmiO4pOL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0F4DVRBPR"
+    },
+    {
+      "asin": "B00R82NQAE",
+      "titolo": "L'apprendista assassino (Trilogia dei Lungavista Vol. 1)",
+      "autore": "Robin Hobb, Paola Bruna Cartoceti",
+      "formato": "Formato Kindle",
+      "prezzo": "11,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51PIdMGjZdL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B00R82NQAE"
+    },
+    {
+      "asin": "8806262874",
+      "titolo": "Le schegge",
+      "autore": "Bret Easton Ellis, Giuseppe Culicchia",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,15 €",
+      "copertina": "https://m.media-amazon.com/images/I/416SuheutvL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8806262874"
+    },
+    {
+      "asin": "B0DLMHZLYG",
+      "titolo": "Il mercante di vendette",
+      "autore": "Bianca Marconero",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,00 €",
+      "copertina": "https://m.media-amazon.com/images/I/41KrrDRCOTL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DLMHZLYG"
+    },
+    {
+      "asin": "B0CDFBFRGS",
+      "titolo": "Stelle e ottone. The hidden society (Vol. 1)",
+      "autore": "Jude Archer",
+      "formato": "Copertina rigida",
+      "prezzo": "22,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/51VXUqAs2sL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CDFBFRGS"
+    },
+    {
+      "asin": "8804769858",
+      "titolo": "La figlia del re dei pirati",
+      "autore": "Tricia Levenseller, Alba Mantovani",
+      "formato": "Copertina flessibile",
+      "prezzo": "14,25 €",
+      "copertina": "https://m.media-amazon.com/images/I/51BLpINnmfL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804769858"
+    },
+    {
+      "asin": "8892892576",
+      "titolo": "Ombre di desiderio. The Luna duet (Vol. 1)",
+      "autore": "Pepper Winters, Francesca Rosa Ravallese",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/51Hw-WwImNL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8892892576"
+    },
+    {
+      "asin": "8806219308",
+      "titolo": "Trilogia della città di K. Il grande quaderno-La prova-La terza menzogna",
+      "autore": "Agota Kristof, Armando Marchi",
+      "formato": "Copertina flessibile",
+      "prezzo": "13,77 €",
+      "copertina": "https://m.media-amazon.com/images/I/41AAbH35zzL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8806219308"
+    },
+    {
+      "asin": "8806225189",
+      "titolo": "Il conte di Montecristo",
+      "autore": "Alexandre Dumas, Margherita Botto",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/41QffKDd8LL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8806225189"
+    },
+    {
+      "asin": "8822784448",
+      "titolo": "L'incanto della biblioteca d'agrifoglio",
+      "autore": "K. A. Linde, Lorena Marrocco",
+      "formato": "Copertina rigida",
+      "prezzo": "12,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/512ANCMn1IL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8822784448"
+    },
+    {
+      "asin": "885024388X",
+      "titolo": "Un estraneo al mio fianco",
+      "autore": "Ann Rule, Maddalena Togliani",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,20 €",
+      "copertina": "https://m.media-amazon.com/images/I/51R7RSmzZvL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/885024388X"
+    },
+    {
+      "asin": "B0C6P4GBDB",
+      "titolo": "Amici per diletto. Faking with Benefits",
+      "autore": "Lily Gold",
+      "formato": "Formato Kindle",
+      "prezzo": "3,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41xOMq2y6kL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0C6P4GBDB"
+    },
+    {
+      "asin": "B0CV3D82X8",
+      "titolo": "La guerra delle dieci regine. Urano Saga",
+      "autore": "Nisha J. Tuli",
+      "formato": "Formato Kindle",
+      "prezzo": "0,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51sDnldU8oL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CV3D82X8"
+    },
+    {
+      "asin": "B0BQ7DPFVW",
+      "titolo": "Batte ancora",
+      "autore": "Jennifer Hartmann, Catnip Design",
+      "formato": "Formato Kindle",
+      "prezzo": "3,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51E+bvbeLmL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0BQ7DPFVW"
+    },
+    {
+      "asin": "B0DGNW82HQ",
+      "titolo": "Please Stay (Rules of Chaos Vol. 1)",
+      "autore": "Hope Atkins",
+      "formato": "Formato Kindle",
+      "prezzo": "1,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/41mw7nNx5yL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0DGNW82HQ"
+    },
+    {
+      "asin": "8892892118",
+      "titolo": "House of beating wings. Il regno dei corvi",
+      "autore": "Olivia Wildenstein, Valentina Nobili",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/51OVHwqg+PL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8892892118"
+    },
+    {
+      "asin": "B09VTM1KKV",
+      "titolo": "Uncino (E se il cattivo... Vol. 1)",
+      "autore": "Emily McIntire, M. Fiorelli",
+      "formato": "Formato Kindle",
+      "prezzo": "2,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/419EN8JY5zL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B09VTM1KKV"
+    },
+    {
+      "asin": "8817178314",
+      "titolo": "Nero come il nostro amore. The Ravenhood",
+      "autore": "Kate Stewart, Mara Gini",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/41Hk7ZBuBSL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817178314"
+    },
+    {
+      "asin": "8817158178",
+      "titolo": "Lezioni di chimica",
+      "autore": "Bonnie Garmus, Anna Rusconi",
+      "formato": "Copertina flessibile",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/410YAV50lFL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817158178"
+    },
+    {
+      "asin": "B0BRYR8M4H",
+      "titolo": "Styx. Per te solo io",
+      "autore": "Tillie Cole",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,11 €",
+      "copertina": "https://m.media-amazon.com/images/I/51FT+YAsamL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0BRYR8M4H"
+    },
+    {
+      "asin": "8855446835",
+      "titolo": "Il libro della vita e della morte. A discovery of witches (Vol. 1)",
+      "autore": "Deborah Harkness, Annalisa Crea",
+      "formato": "Copertina flessibile",
+      "prezzo": "14,25 €",
+      "copertina": "https://m.media-amazon.com/images/I/41cKw8WZaUL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8855446835"
+    },
+    {
+      "asin": "8804787635",
+      "titolo": "Quel che nasconde il fiume",
+      "autore": "Isabel Ibañez, Maurizio Bartocci",
+      "formato": "Copertina flessibile",
+      "prezzo": "21,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/51EVRFoFvfL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804787635"
+    },
+    {
+      "asin": "B0CV2PJMKR",
+      "titolo": "Where the dark stands still. La foresta dell'amore eterno",
+      "autore": "A. B. Poranek, Maria Laura Capobianco",
+      "formato": "Copertina rigida",
+      "prezzo": "22,80 €",
+      "copertina": "https://m.media-amazon.com/images/I/510s5n4XXwL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CV2PJMKR"
+    },
+    {
+      "asin": "B0D8X86SLD",
+      "titolo": "When the Moon hatched. La ballata della luna infranta",
+      "autore": "Sarah A. Parker, Elisa Leonzio",
+      "formato": "Copertina rigida",
+      "prezzo": "24,70 €",
+      "copertina": "https://m.media-amazon.com/images/I/51mFQA0Ry6L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0D8X86SLD"
+    },
+    {
+      "asin": "8817190969",
+      "titolo": "Match point",
+      "autore": "Katherine Reilly, Emma Celi Grassilli",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,64 €",
+      "copertina": "https://m.media-amazon.com/images/I/41GACEcXURL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817190969"
+    },
+    {
+      "asin": "8809925351",
+      "titolo": "La discendente del ladro",
+      "autore": "Giulia Modugno",
+      "formato": "Copertina rigida",
+      "prezzo": "18,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/51ZU7-8WdxL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8809925351"
+    },
+    {
+      "asin": "B0D3NZ8CH8",
+      "titolo": "Koster Academy. Lezione uno: Vol. 1",
+      "autore": "Marilena Barbagallo",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,05 €",
+      "copertina": "https://m.media-amazon.com/images/I/413e-w8+B8L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0D3NZ8CH8"
+    },
+    {
+      "asin": "B093RNYJ34",
+      "titolo": "Vita nostra",
+      "autore": "Marina Djačenko, Sergej Djačenko",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/51Oz10lAVKL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B093RNYJ34"
+    },
+    {
+      "asin": "B0CWN7QC86",
+      "titolo": "After Midnight",
+      "autore": "Valentina Ferraro",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,06 €",
+      "copertina": "https://m.media-amazon.com/images/I/41Co63nA78L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0CWN7QC86"
+    },
+    {
+      "asin": "884293433X",
+      "titolo": "Tomorrow, and tomorrow, and tomorrow. Ediz. italiana",
+      "autore": "Gabrielle Zevin, Elisa Banfi",
+      "formato": "Copertina flessibile",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/51R7wU7x70L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/884293433X"
+    },
+    {
+      "asin": "8806253425",
+      "titolo": "La città dei vivi",
+      "autore": "Nicola Lagioia",
+      "formato": "Copertina flessibile",
+      "prezzo": "14,72 €",
+      "copertina": "https://m.media-amazon.com/images/I/31x5rVJHtwL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8806253425"
+    },
+    {
+      "asin": "8830460311",
+      "titolo": "Il filo della tua storia",
+      "autore": "Nikki Erlick, Katia Bagnoli",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,67 €",
+      "copertina": "https://m.media-amazon.com/images/I/41QlXSuDP1L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8830460311"
+    },
+    {
+      "asin": "B0BHFG12FP",
+      "titolo": "The fine print. Un accordo per due",
+      "autore": "Lauren Asher, Serena Stagi",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,10 €",
+      "copertina": "https://m.media-amazon.com/images/I/51JYUbGH+zL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0BHFG12FP"
+    },
+    {
+      "asin": "8804766328",
+      "titolo": "Grandi promesse. Whitestone Hospital: Vol. 1",
+      "autore": "Ava Reed, Alessandra Petrelli",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,57 €",
+      "copertina": "https://m.media-amazon.com/images/I/41vMaVScvPL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804766328"
+    },
+    {
+      "asin": "8809959698",
+      "titolo": "Teddy",
+      "autore": "Jason Rekulak, Will Staehle",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/51A2fGSsVFL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8809959698"
+    },
+    {
+      "asin": "8804743425",
+      "titolo": "Queste gioie violente",
+      "autore": "Chloe Gong, Laura Miccoli",
+      "formato": "Copertina rigida",
+      "prezzo": "19,85 €",
+      "copertina": "https://m.media-amazon.com/images/I/51lX-tyRFWL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804743425"
+    },
+    {
+      "asin": "8822762967",
+      "titolo": "Facciamo finta che mi ami",
+      "autore": "Elena Armas, Mariacristina Cesa",
+      "formato": "Copertina flessibile",
+      "prezzo": "9,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/41YokBA1lxL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8822762967"
+    },
+    {
+      "asin": "B09MWL7Z28",
+      "titolo": "YM&ZUIAI You Laugh You Drink - Tu Ridi Bevi - Gioco di Carte per Feste in Famiglia, Popolare Divertente Gioco di Bevute per Feste Gioco da Tavolo（Versione Inglese）",
+      "autore": null,
+      "formato": null,
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/https://m.media-amazon.com/images/G/01/x-locale/communities/wishlist/no_image_2x._SL500_.png._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B09MWL7Z28"
+    },
+    {
+      "asin": "880474488X",
+      "titolo": "Un fato così ingiusto e solitario. Cursebreakers (Vol. 1)",
+      "autore": "Brigid Kemmerer, Matteo Curtoni",
+      "formato": "Copertina rigida",
+      "prezzo": "17,07 €",
+      "copertina": "https://m.media-amazon.com/images/I/51u6Yhz7CQL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/880474488X"
+    },
+    {
+      "asin": "8804732059",
+      "titolo": "La mano sinistra del buio",
+      "autore": "Ursula K. Le Guin, Nicoletta Vallorani",
+      "formato": "Copertina flessibile",
+      "prezzo": "14,72 €",
+      "copertina": "https://m.media-amazon.com/images/I/41gUuV+vEwL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8804732059"
+    },
+    {
+      "asin": "885542002X",
+      "titolo": "L'allodola. Il fiorentino (Vol. 1)",
+      "autore": "Sylvain Reynard, Annalisa Gressani",
+      "formato": "Copertina flessibile",
+      "prezzo": "16,44 €",
+      "copertina": "https://m.media-amazon.com/images/I/41SPhnCfXeL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/885542002X"
+    },
+    {
+      "asin": "B089M41XQ3",
+      "titolo": "Ti ho incontrato a mezzanotte",
+      "autore": "Elle Kennedy",
+      "formato": "Copertina flessibile",
+      "prezzo": "9,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/41FPIn8gvGL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B089M41XQ3"
+    },
+    {
+      "asin": "8885603807",
+      "titolo": "Motion. Il moto dei cuori",
+      "autore": "Penny Reid, Daniela Sacerdoti",
+      "formato": "Copertina flessibile",
+      "prezzo": "13,20 €",
+      "copertina": "https://m.media-amazon.com/images/I/41fP0gmicUL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8885603807"
+    },
+    {
+      "asin": "8869052109",
+      "titolo": "Caldo come il fuoco. The dark elements (Vol. 1)",
+      "autore": "Jennifer L. Armentrout",
+      "formato": "Copertina flessibile",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/51BvXEKxPiL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8869052109"
+    },
+    {
+      "asin": "B08DC6H27V",
+      "titolo": "Capital S",
+      "autore": "Elisa Gioia",
+      "formato": "Copertina flessibile",
+      "prezzo": "15,90 €",
+      "copertina": "https://m.media-amazon.com/images/I/413+3bUedwL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B08DC6H27V"
+    },
+    {
+      "asin": "8822738012",
+      "titolo": "Questa nostra stupida storia d'amore",
+      "autore": "Mariana Zapata, Mariafelicia Maione",
+      "formato": "Copertina flessibile",
+      "prezzo": "4,95 €",
+      "copertina": "https://m.media-amazon.com/images/I/51DXh3pdGEL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8822738012"
+    },
+    {
+      "asin": "8822702603",
+      "titolo": "Non mi piaci ma ti amo-Nessuno tranne te-Tutto ma non il mio tailleur",
+      "autore": "Cecile Bertod",
+      "formato": "Copertina rigida",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/51bK0vBgIzL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8822702603"
+    },
+    {
+      "asin": "884292363X",
+      "titolo": "Ti aspettavo",
+      "autore": "Armentrout Jennifer L. (J. Lynn), Ilaria Katerinov",
+      "formato": "Copertina rigida",
+      "prezzo": null,
+      "copertina": "https://m.media-amazon.com/images/I/51t4niGRt4L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/884292363X"
+    },
+    {
+      "asin": "8817106828",
+      "titolo": "Dio di illusioni",
+      "autore": "Donna Tartt, Idolina Landolfi",
+      "formato": "Copertina flessibile",
+      "prezzo": "14,72 €",
+      "copertina": "https://m.media-amazon.com/images/I/41y60g2CMGL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8817106828"
     }
   ]
 }
