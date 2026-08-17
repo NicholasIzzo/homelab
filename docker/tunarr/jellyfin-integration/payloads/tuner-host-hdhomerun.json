@@ -1,0 +1,14 @@
+{
+  "type": "hdhomerun",
+  "url": "__TUNARR_URL__",
+  "friendlyName": "Tunarr",
+  "importFavoritesOnly": false,
+  "allowHWTranscoding": true,
+  "allowFmp4TranscodingContainer": false,
+  "allowStreamSharing": true,
+  "fallbackMaxStreamingBitrate": 30000000,
+  "enableStreamLooping": false,
+  "tunerCount": 0,
+  "ignoreDts": true,
+  "readAtNativeFramerate": false
+}

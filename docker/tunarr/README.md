@@ -115,6 +115,12 @@ ricostruisce da solo.
 Jellyfin gira **nativo** su hpserver (systemd, `:8096`), non in Docker: nessuna
 modifica alla sua configurazione da parte di questo stack.
 
+La registrazione di Tunarr in Jellyfin e' automatizzata via API in
+[jellyfin-integration/](jellyfin-integration/) — script idempotente, con
+backup preventivo, rollback e flag `--reconfigure`. **Va eseguito solo dopo
+che Tunarr e' up e ha almeno un canale**, altrimenti si interrompe da solo.
+Quanto segue e' la procedura manuale equivalente, se si preferisce la UI.
+
 **Tunarr non usa la porta 34400** (quella e' di dizqueTV). Le route HDHomeRun —
 `/device.xml`, `/discover.json`, `/lineup.json` — sono servite dalla stessa
 porta della UI, la `:8000`.

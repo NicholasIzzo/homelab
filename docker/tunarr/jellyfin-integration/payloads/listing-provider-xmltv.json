@@ -1,0 +1,12 @@
+{
+  "type": "xmltv",
+  "path": "__TUNARR_URL__/api/xmltv.xml",
+  "enableAllTuners": true,
+  "enabledTuners": [],
+  "preferredLanguage": "it",
+  "newsCategories": ["news", "journalism", "documentary", "current affairs"],
+  "sportsCategories": ["sports", "basketball", "baseball", "football"],
+  "kidsCategories": ["kids", "family", "children", "childrens", "disney"],
+  "movieCategories": ["movie"],
+  "channelMappings": []
+}
