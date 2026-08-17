@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ScenaAngolo } from "../angolo3d/scenaAngolo";
+import { testoDi } from "../epub/testo";
 import { temaDi } from "../temi";
 import type { Libro } from "../tipi";
 
@@ -14,21 +15,45 @@ export function AngoloLettura({ libro, onCambiaLibro, onChiudi }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scenaRef = useRef<ScenaAngolo | null>(null);
   const [pagine, setPagine] = useState({ totale: 1, corrente: 0 });
+  const [avviso, setAvviso] = useState<string | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const scena = new ScenaAngolo(canvas, libro, {
-      onPagine: (totale, corrente) => setPagine({ totale, corrente }),
-    });
-    scenaRef.current = scena;
-    if (new URLSearchParams(location.search).get("diag") === "1") {
-      (window as unknown as { __angolo?: unknown }).__angolo = scena;
-    }
+    let vivo = true;
+    let scena: ScenaAngolo | null = null;
+
+    // Per i libri EPUB si legge il testo vero (sta sul dispositivo di chi
+    // legge). Per quelli di Goodreads resta la trama: il contenuto non è nostro.
+    const avvia = async () => {
+      let contenuto: string[] | undefined;
+      if (libro.fonte === "epub") {
+        const t = await testoDi(libro.id);
+        if (!vivo) return;
+        if (t.paragrafi.length > 0) contenuto = t.paragrafi;
+        else if (t.mancante) {
+          setAvviso("Il file di questo libro non è più sul dispositivo: reimportalo per leggerlo.");
+        }
+      }
+      if (!vivo || !canvasRef.current) return;
+      scena = new ScenaAngolo(
+        canvasRef.current,
+        libro,
+        { onPagine: (totale, corrente) => setPagine({ totale, corrente }) },
+        contenuto,
+      );
+      scenaRef.current = scena;
+      if (new URLSearchParams(location.search).get("diag") === "1") {
+        (window as unknown as { __angolo?: unknown }).__angolo = scena;
+      }
+    };
+    void avvia();
+
     return () => {
+      vivo = false;
       scenaRef.current = null;
       delete (window as unknown as { __angolo?: unknown }).__angolo;
-      scena.dispose();
+      scena?.dispose();
     };
   }, [libro]);
 
@@ -57,6 +82,8 @@ export function AngoloLettura({ libro, onCambiaLibro, onChiudi }: Props) {
           {libro.autore && <small> · {libro.autore}</small>}
         </span>
       </div>
+
+      {avviso && <p className="angolo-avviso">{avviso}</p>}
 
       <div className="angolo-basso">
         <button

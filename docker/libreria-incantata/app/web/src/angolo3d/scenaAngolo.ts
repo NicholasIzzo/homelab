@@ -130,6 +130,32 @@ function texturaPagina(
   return t;
 }
 
+/** Impagina una sequenza di paragrafi mantenendo gli stacchi. */
+function impaginaParagrafi(blocchi: string[]): string[][] {
+  const righe: string[] = [];
+  for (const blocco of blocchi) {
+    const titolo = blocco.startsWith("§ ");
+    const testoBlocco = titolo ? blocco.slice(2) : blocco;
+    const parole = testoBlocco.split(/\s+/).filter(Boolean);
+    let riga = "";
+    for (const parola of parole) {
+      if ((riga + " " + parola).trim().length > CARATTERI_PER_RIGA) {
+        if (riga.trim()) righe.push(riga.trim());
+        riga = parola;
+      } else {
+        riga += " " + parola;
+      }
+    }
+    if (riga.trim()) righe.push(riga.trim());
+    righe.push(""); // riga vuota fra i paragrafi
+  }
+  const pagine: string[][] = [];
+  for (let i = 0; i < righe.length; i += RIGHE_PER_PAGINA) {
+    pagine.push(righe.slice(i, i + RIGHE_PER_PAGINA));
+  }
+  return pagine.length > 0 ? pagine : [[]];
+}
+
 /** Spezza il testo in righe e poi in pagine. */
 function impagina(testo: string): string[][] {
   const parole = testo.split(/\s+/).filter(Boolean);
@@ -182,6 +208,7 @@ export class ScenaAngolo {
     private canvas: HTMLCanvasElement,
     libro: Libro,
     private cb: CallbacksAngolo,
+    contenuto?: string[],
   ) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !BASSA_POTENZA });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, BASSA_POTENZA ? 1.5 : 2));
@@ -206,7 +233,7 @@ export class ScenaAngolo {
     this.costruisciArredo();
     this.costruisciPagine();
     this.costruisciIlluminazione();
-    this.impostaLibro(libro);
+    this.impostaLibro(libro, contenuto);
 
     this.ridimensiona();
     addEventListener("resize", this.ridimensiona);
@@ -578,13 +605,22 @@ export class ScenaAngolo {
     this.scene.add(this.gruppoLibro);
   }
 
-  /** Carica il libro: copertina a sinistra, trama impaginata a destra. */
-  impostaLibro(libro: Libro) {
+  /**
+   * Carica il libro: copertina a sinistra, testo a destra.
+   *
+   * Per i libri EPUB il testo è quello vero, passato in `contenuto`; per quelli
+   * di Goodreads resta la trama, perché il contenuto non è nostro.
+   */
+  impostaLibro(libro: Libro, contenuto?: string[]) {
     this.libro = libro;
-    const trama = libro.descrizione?.trim()
-      ? libro.descrizione.trim()
-      : "Di questo libro non conosciamo ancora la storia. Aprilo davvero: è lì che comincia.";
-    this.pagine = impagina(trama);
+    if (contenuto && contenuto.length > 0) {
+      this.pagine = impaginaParagrafi(contenuto);
+    } else {
+      const trama = libro.descrizione?.trim()
+        ? libro.descrizione.trim()
+        : "Di questo libro non conosciamo ancora la storia. Aprilo davvero: è lì che comincia.";
+      this.pagine = impagina(trama);
+    }
     this.indicePagina = 0;
 
     // pagina sinistra: la copertina vera
