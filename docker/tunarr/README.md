@@ -5,7 +5,7 @@ HDHomeRun. Tunarr crea palinsesti (film, serie, filler/bumper), genera la guida
 XMLTV e transcodifica al volo con FFmpeg.
 
 - **Host**: hpserver (`192.168.0.33`), Ubuntu 24.04, i3-8100T + UHD 630.
-- **Path deploy**: `/home/nicholas/docker/tunarr/`
+- **Path deploy**: `~/homelab/docker/tunarr/`
 - **Web UI**: <http://192.168.0.33:8000>
 - **Immagine**: `ghcr.io/chrisbenincasa/tunarr:1.3.13` pinnata a digest.
 
@@ -22,11 +22,11 @@ XMLTV e transcodifica al volo con FFmpeg.
 ## Primo avvio
 
 ```bash
-mkdir -p /home/nicholas/docker/tunarr/config && chown -R 1000:1000 /home/nicholas/docker/tunarr/config
+mkdir -p ~/homelab/docker/tunarr/config && chown -R 1000:1000 ~/homelab/docker/tunarr/config
 ```
 
 ```bash
-cd /home/nicholas/docker/tunarr && docker compose pull && docker compose up -d
+cd ~/homelab/docker/tunarr && docker compose pull && docker compose up -d
 ```
 
 ```bash
@@ -65,7 +65,7 @@ TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:chrisbenincasa/tunarr:pu
 5. Sul server:
 
 ```bash
-cd /home/nicholas/docker/tunarr && git -C ~/homelab pull && docker compose pull && docker compose up -d
+cd ~/homelab && git pull && cd docker/tunarr && docker compose pull && docker compose up -d
 ```
 
 Rollback: ripristinare il pin precedente **e** il backup del DB — una volta
@@ -87,7 +87,7 @@ Il DB e' SQLite: copiare `db.db` con `cp` a container acceso puo' produrre un
 file incoerente (WAL a meta'). Backup a caldo consistente:
 
 ```bash
-sqlite3 /home/nicholas/docker/tunarr/config/db.db ".backup '/home/nicholas/backup/tunarr-db-$(date +%Y%m%d).db'"
+sqlite3 ~/homelab/docker/tunarr/config/db.db ".backup '/home/nicholas/backup/tunarr-db-$(date +%Y%m%d).db'"
 ```
 
 `sqlite3` non e' installato di default su hpserver; in alternativa, senza
@@ -95,7 +95,7 @@ aggiungere pacchetti, si usa il client gia' presente nell'immagine oppure si
 ferma il container e si copia a freddo:
 
 ```bash
-cd /home/nicholas/docker/tunarr && docker compose stop && cp config/db.db ~/backup/tunarr-db-$(date +%Y%m%d).db && docker compose start
+cd ~/homelab/docker/tunarr && docker compose stop && cp config/db.db ~/backup/tunarr-db-$(date +%Y%m%d).db && docker compose start
 ```
 
 L'indice Meilisearch (`config/data.ms/`) puo' pesare diversi GB e si ricostruisce
