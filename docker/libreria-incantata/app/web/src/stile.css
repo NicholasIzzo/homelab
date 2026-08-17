@@ -468,3 +468,48 @@ h1, h2, h3, .serif { font-family: Georgia, "Times New Roman", serif; }
 .bordo-opzione img { width: 1.7rem; height: 2.4rem; border-radius: 3px; display: block; }
 .bordo-opzione:hover { color: var(--crema); }
 .bordo-opzione.attiva { border-color: var(--oro); color: var(--oro-chiaro); }
+
+/* ---- ingresso: sorgente e import -------------------------------------- */
+.ingresso-azioni { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
+.ingresso-sorgenti { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1.2rem; }
+.ingresso-nota {
+  margin: 1.4rem auto 0; max-width: 30rem;
+  font-size: 0.78rem; line-height: 1.5; color: #9a8fb8;
+}
+
+/* ---- import EPUB ------------------------------------------------------- */
+.importa {
+  position: relative; width: min(40rem, 100%); text-align: center;
+  background: linear-gradient(160deg, var(--notte2), #0c0715);
+  border: 1px solid rgba(246, 215, 138, 0.32);
+  border-radius: 20px; box-shadow: 0 20px 60px var(--ombra);
+  padding: 1.9rem 1.5rem;
+}
+.importa-titolo { font-size: clamp(1.4rem, 5vw, 2rem); margin: 0 0 0.4rem; color: var(--oro-chiaro); }
+.importa-sotto { color: #c6b9e2; font-size: 0.9rem; line-height: 1.6; margin: 0 auto 1.4rem; max-width: 30rem; }
+.importa-azioni { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; }
+.importa-spazio { color: #a99fc4; font-size: 0.8rem; margin: 1rem 0 0; }
+.importa-svuota {
+  margin-left: 0.6rem; background: none; border: none; cursor: pointer;
+  color: var(--rosa); text-decoration: underline; font-size: 0.8rem;
+}
+.importa-barra {
+  position: relative; margin-top: 1.3rem; height: 1.7rem; border-radius: 999px;
+  background: rgba(255,255,255,0.08); overflow: hidden;
+}
+.importa-barra-piena {
+  position: absolute; inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--oro), var(--oro-chiaro));
+  transition: width 0.2s;
+}
+.importa-barra span {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 0.72rem; color: #201203; font-weight: 600;
+  text-shadow: 0 0 6px rgba(255,255,255,0.5);
+  padding: 0 0.6rem; white-space: nowrap; overflow: hidden;
+}
+.importa-esito { margin-top: 1.2rem; color: #d8cdf0; font-size: 0.88rem; }
+.importa-errori {
+  text-align: left; margin: 0.6rem auto 0; max-width: 28rem;
+  color: #e4a0b8; font-size: 0.76rem; line-height: 1.5;
+}

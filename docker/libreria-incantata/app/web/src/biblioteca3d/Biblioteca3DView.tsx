@@ -14,6 +14,7 @@ interface Props {
   onDesideri: () => void;
   onAngolo: () => void;
   onPersonalizza: () => void;
+  onImporta: () => void;
   onEsci: () => void;
   pref: Preferenze;
   /** Falso mentre è aperto l'angolo di lettura: la scena si mette in pausa. */
@@ -33,6 +34,7 @@ export function Biblioteca3DView({
   onDesideri,
   onAngolo,
   onPersonalizza,
+  onImporta,
   onEsci,
   attiva,
   pref,
@@ -190,6 +192,11 @@ export function Biblioteca3DView({
             style={{ ["--luce" as string]: "#e0c8ff" }}
             onClick={onPersonalizza}
           >🪄 Arreda</button>
+          <button
+            className="hud-insegna"
+            style={{ ["--luce" as string]: "#9fc8ff" }}
+            onClick={onImporta}
+          >📚 I miei libri</button>
           <button
             className="hud-insegna"
             style={{ ["--luce" as string]: "#9fe8c0" }}

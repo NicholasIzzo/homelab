@@ -12,7 +12,14 @@ export interface Libro {
   scaffale: string;
   /** Impronta della copertina: entra nell'URL per invalidare la cache. */
   copertinaVer: string;
-  fonte: "goodreads" | "amazon";
+  /**
+   * Copertina già disponibile localmente (EPUB importati): un blob URL da usare
+   * al posto del proxy, perché quei file non passano dal server.
+   */
+  copertinaUrl?: string;
+  /** Capitoli leggibili, presenti solo per i libri EPUB. */
+  capitoli?: { percorso: string; tipo: string }[];
+  fonte: "goodreads" | "amazon" | "epub";
   prezzo: string | null;
   formato: string | null;
   aggiunto: string | null;

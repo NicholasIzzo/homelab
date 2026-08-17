@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchBiblioteca } from "./api";
+import { caricaBiblioteca, libriLocali, type NomeSorgente } from "./sorgenti";
 import type { BibliotecaPayload, Libro } from "./tipi";
 import { temaDi } from "./temi";
 import { Ingresso } from "./schermate/Ingresso";
@@ -9,6 +9,7 @@ import { Roulette } from "./schermate/Roulette";
 import { Desideri } from "./schermate/Desideri";
 import { AngoloLettura } from "./schermate/AngoloLettura";
 import { Personalizza } from "./schermate/Personalizza";
+import { ImportaEpub } from "./schermate/ImportaEpub";
 import { leggiPreferenze, salvaPreferenze, type Preferenze } from "./personalizza";
 
 type Overlay =
@@ -18,7 +19,8 @@ type Overlay =
   | { tipo: "desideri" }
   | { tipo: "dettaglio"; libro: Libro }
   | { tipo: "angolo"; libro: Libro }
-  | { tipo: "personalizza" };
+  | { tipo: "personalizza" }
+  | { tipo: "importa" };
 
 function aCaso<T>(lista: T[]): T | null {
   if (lista.length === 0) return null;
@@ -31,17 +33,26 @@ export function App() {
   const [dati, setDati] = useState<BibliotecaPayload | null>(null);
   const [errore, setErrore] = useState<string | null>(null);
   const [pref, setPref] = useState<Preferenze>(() => leggiPreferenze());
+  const [sorgente, setSorgente] = useState<NomeSorgente>("server");
+  const [nLocali, setNLocali] = useState(0);
 
   const cambiaPref = (p: Preferenze) => {
     setPref(p);
     salvaPreferenze(p);
   };
 
-  useEffect(() => {
-    fetchBiblioteca()
+  const ricarica = (s: NomeSorgente) => {
+    setDati(null);
+    caricaBiblioteca(s)
       .then(setDati)
       .catch((e: unknown) => setErrore(String(e)));
-  }, []);
+  };
+
+  useEffect(() => {
+    void libriLocali().then(setNLocali);
+    ricarica(sorgente);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorgente]);
 
   // Tutti i libri "da leggere", senza i doppioni dello scaffale "Appena Sussurrati".
   const tuttiILibri = useMemo(() => {
@@ -79,7 +90,15 @@ export function App() {
       <Ingresso
         lettrice={dati?.lettrice ?? ""}
         pronta={dati !== null}
+        sorgente={sorgente}
+        nLocali={nLocali}
         onEntra={() => setDentro(true)}
+        onImporta={() => {
+          setSorgente("epub");
+          setOverlay({ tipo: "importa" });
+          setDentro(true);
+        }}
+        onSorgente={setSorgente}
       />
     );
   }
@@ -96,10 +115,24 @@ export function App() {
         onDesideri={() => setOverlay({ tipo: "desideri" })}
         onAngolo={() => apriAngolo(aCaso(tuttiILibri))}
         onPersonalizza={() => setOverlay({ tipo: "personalizza" })}
+        onImporta={() => setOverlay({ tipo: "importa" })}
         onEsci={() => setDentro(false)}
         attiva={overlay.tipo !== "angolo"}
         pref={pref}
       />
+
+      {overlay.tipo === "importa" && (
+        <div className="overlay">
+          <ImportaEpub
+            onFatto={async () => {
+              setNLocali(await libriLocali());
+              ricarica("epub");
+              setOverlay({ tipo: "nessuno" });
+            }}
+            onChiudi={() => setOverlay({ tipo: "nessuno" })}
+          />
+        </div>
+      )}
 
       {overlay.tipo === "personalizza" && (
         <div className="overlay">

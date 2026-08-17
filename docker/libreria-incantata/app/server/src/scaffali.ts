@@ -208,6 +208,17 @@ const PER_AUTORE: { autore: string; scaffale: string }[] = [
   { autore: "anne mccaffrey", scaffale: "draghi" },
 ];
 
+/**
+ * Le stesse regole, in forma dati, per chi classifica altrove: i libri EPUB
+ * arrivano dal browser e vanno smistati lì, ma il criterio deve restare uno.
+ */
+export const REGOLE = {
+  scaffali: SCAFFALI,
+  perTitolo: PER_TITOLO,
+  perAutore: PER_AUTORE,
+  nomiSpeciali: NOMI_SPECIALI,
+};
+
 const IDS_VALIDI = new Set([...SCAFFALI.map((s) => s.id), "sospiri"]);
 
 /** Chiavi curate ordinate dalla più lunga: "wicca creed" batte "wicca". */

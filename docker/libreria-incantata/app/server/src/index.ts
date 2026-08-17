@@ -4,7 +4,7 @@ import { Readable } from "node:stream";
 import { loadConfig } from "./config.js";
 import { scaricaCatalogo } from "./goodreads.js";
 import { caricaDesideri } from "./desideri.js";
-import { costruisciScaffali } from "./scaffali.js";
+import { costruisciScaffali, REGOLE } from "./scaffali.js";
 import { catalogoMock, copertinaMockSvg } from "./mock.js";
 import type { BibliotecaPayload, Libro } from "./tipi.js";
 
@@ -54,6 +54,10 @@ async function getCatalogo(): Promise<Snapshot> {
     throw err;
   }
 }
+
+// Regole di classificazione, per il client che importa EPUB: la logica di
+// smistamento è una sola, e sta qui.
+app.get("/api/scaffali", async () => REGOLE);
 
 app.get("/api/health", async () => ({ ok: true, mock: cfg.mockMode }));
 
