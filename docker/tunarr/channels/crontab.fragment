@@ -1,0 +1,3 @@
+# Tunarr: rigenera i palinsesti dei canali film per genere.
+# 04:30 — dopo il backup interno di Tunarr (04:00). Vedi channels/README.md.
+30 4 * * * cd /home/nicholas/homelab/docker/tunarr/channels && /usr/bin/python3 build-movie-channels.py > last-run.log 2>&1

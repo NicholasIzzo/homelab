@@ -1,0 +1,35 @@
+{
+  "_commento": "Canali film per genere. I generi sono quelli riportati da Jellyfin (in italiano). Un film con piu' generi finisce su piu' canali: e' voluto. Verifica i generi disponibili con: curl -s http://localhost:8000/api/programs/facets/genres.name | jq '.facetValues'",
+  "canali": [
+    {
+      "number": 10,
+      "name": "Commedia",
+      "generi": ["Commedia"]
+    },
+    {
+      "number": 11,
+      "name": "Azione & Avventura",
+      "generi": ["Azione", "Avventura"]
+    },
+    {
+      "number": 12,
+      "name": "Dramma",
+      "generi": ["Dramma"]
+    },
+    {
+      "number": 13,
+      "name": "Horror & Thriller",
+      "generi": ["Horror", "Thriller", "Crime", "Mistero"]
+    },
+    {
+      "number": 14,
+      "name": "Sci-Fi & Fantasy",
+      "generi": ["Fantascienza", "Fantasy"]
+    },
+    {
+      "number": 15,
+      "name": "Animazione & Famiglia",
+      "generi": ["Animazione", "Famiglia"]
+    }
+  ]
+}
