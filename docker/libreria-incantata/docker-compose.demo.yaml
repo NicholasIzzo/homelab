@@ -1,0 +1,50 @@
+# Demo pubblica della Biblioteca Incantata.
+#
+# Istanza SEPARATA da quella di casa, su un'altra porta e con dati finti:
+# MOCK=1 mostra titoli inventati, così non si pubblica la biblioteca vera né il
+# nome di chi la usa. Chi visita porta i propri EPUB dal browser: quei file non
+# passano da qui.
+#
+# Non espone nulla da sé: va abbinata a un tunnel (vedi README, sezione
+# "Demo pubblica"). Avvio:
+#   docker compose -f docker-compose.demo.yaml up -d --build
+
+services:
+  libreria-demo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: libreria-incantata:0.7.0 # stessa immagine dell'istanza di casa
+    container_name: libreria-demo
+    restart: unless-stopped
+    ports:
+      # Solo loopback: raggiungibile dal tunnel, non dalla LAN né da Internet.
+      - "127.0.0.1:8093:8092"
+    environment:
+      # Dati finti: nessun libro reale, nessun nome reale.
+      MOCK: "1"
+      # Limite di richieste per IP: protegge banda di casa e proxy copertine.
+      PUBBLICA: "1"
+      LETTRICE: "una biblioteca di prova"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8092/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

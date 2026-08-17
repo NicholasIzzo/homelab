@@ -59,9 +59,10 @@ altrove) e non diventa un mobile: in 3D i titoli comparirebbero due volte.
   Il libro scelto è aperto in grembo — copertina sulla pagina sinistra, trama
   impaginata e sfogliabile sulla destra (frecce ← → o i pulsanti).
 
-  Il testo dei romanzi **non ce l'abbiamo** (Goodreads espone solo la trama, e
-  il contenuto dei libri non andrebbe comunque ridistribuito): quello che si
-  "legge" accanto al fuoco è la quarta di copertina.
+  Cosa si legge dipende da dove viene il libro: per i titoli **Goodreads** solo
+  la trama (il contenuto dei romanzi non è nostro da ridistribuire), per gli
+  **EPUB portati dall'utente** i capitoli veri — quel testo è una sua copia, sul
+  suo dispositivo.
 
   Mentre l'angolo è aperto la scena della biblioteca va in **pausa**: due scene
   WebGL che disegnano insieme sprecherebbero GPU e batteria per mostrarne una.
@@ -166,12 +167,68 @@ scheda non è visibile. Conviene seguire il `showMoreUrl` con il suo
 `paginationToken`, lotto dopo lotto, finché non arrivano più elementi nuovi.
 Lista attuale: `MPM4BFSYOHU7`, 135 titoli (fotografia del 2026-08-16).
 
+
+## Portare i propri libri (EPUB)
+
+Chiunque apra l'app può caricare i propri EPUB dal pulsante **📚 I miei libri**.
+Titolo, autore, copertina, trama, categorie e capitoli si leggono nel browser
+(`web/src/epub/`): un EPUB è uno ZIP, e si estrae solo il necessario in tre
+passaggi mirati — mai l'archivio intero, che con le illustrazioni pesa decine di
+MB.
+
+**I file non vengono caricati da nessuna parte.** Restano in IndexedDB su quel
+dispositivo (`epub/archivio.ts`), assieme a copertine e metadati; oltre 24 MB
+per file si conserva solo la scheda. Da qui la scelta di **non avere account**:
+con i dati sul dispositivo un login aggiungerebbe credenziali da custodire senza
+proteggere nulla, e ogni visitatore ha già la propria libreria per costruzione.
+Se un domani servisse la sincronia fra dispositivi, si aggiunge un OAuth sopra
+questa base senza toccare la scena 3D.
+
+Lo smistamento nei generi usa le stesse regole della biblioteca Goodreads,
+scaricate da `/api/scaffali`: correggere un genere in un posto lo corregge per
+tutti. Con gli EPUB c'è un criterio in più che Goodreads non offre — le
+categorie dichiarate dall'editore (`dc:subject`), più affidabili delle parole
+nel titolo.
+
+E soprattutto: **per gli EPUB l'angolo del camino mostra i capitoli veri**, non
+la trama. Il testo è una copia dell'utente, sul suo dispositivo, quindi si può
+leggere davvero.
+
+Limiti onesti: su iPhone non esiste accesso persistente ai file, quindi dopo
+aver svuotato i dati del browser va rifatto l'import; con centinaia di EPUB il
+primo import richiede qualche minuto (la barra di avanzamento lo mostra).
+
+## Demo pubblica
+
+C'è un compose separato, [`docker-compose.demo.yaml`](docker-compose.demo.yaml):
+istanza distinta, porta 8093 **solo su loopback**, `MOCK=1` (titoli inventati,
+nessun libro né nome reale) e `PUBBLICA=1` (limite di 240 richieste al minuto
+per IP).
+
+Non espone nulla da sé — di proposito. Per pubblicarla serve un tunnel, e la
+strada che consiglio è **Cloudflare Tunnel**: il traffico esce dal server verso
+Cloudflare, quindi non si aprono porte sul router di casa e non si espone l'IP
+domestico.
+
+```bash
+docker compose -f docker-compose.demo.yaml up -d --build
+# poi, con un token creato sul proprio account Cloudflare:
+docker run -d --name cloudflared --restart unless-stopped --network host   cloudflare/cloudflared:latest tunnel --no-autoupdate run --token <TOKEN>
+```
+
+Il token va creato a mano nel proprio pannello Cloudflare: non è qualcosa che si
+possa generare da qui, ed è la ragione per cui l'ultimo passo resta manuale.
+
 ## Struttura
 
 ```
 app/
-  server/  Fastify: RSS Goodreads → JSON, proxy copertine, desideri
-  web/     React + Three.js: scena 3D, Ruota del Destino, schede, desideri
+  server/  Fastify: RSS Goodreads → JSON, proxy copertine, desideri, regole generi
+  web/
+    biblioteca3d/  scena, layout scaffali, materiali, tagli decorati
+    angolo3d/      la stanza col camino e il libro aperto
+    epub/          lettura EPUB, archivio locale, generi, testo dei capitoli
+    schermate/     ingresso, schede, ruote, import, personalizzazione
 data/
   desideri.json   wishlist Amazon (statica)
 ```

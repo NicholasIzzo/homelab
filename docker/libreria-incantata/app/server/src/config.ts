@@ -12,6 +12,12 @@ export interface Config {
   lettrice: string;
   /** Forza i dati finti anche con Goodreads raggiungibile (sviluppo UI). */
   mockMode: boolean;
+  /**
+   * Istanza esposta a Internet: attiva il limite di richieste. Non cambia i
+   * dati mostrati — per una demo pubblica va comunque abbinata a MOCK=1, così
+   * non si pubblica la biblioteca di casa.
+   */
+  pubblica: boolean;
 }
 
 export function loadConfig(): Config {
@@ -24,5 +30,6 @@ export function loadConfig(): Config {
     desideriPath: process.env["DESIDERI_PATH"] ?? "",
     lettrice: process.env["LETTRICE"] ?? "",
     mockMode: process.env["MOCK"] === "1",
+    pubblica: process.env["PUBBLICA"] === "1",
   };
 }

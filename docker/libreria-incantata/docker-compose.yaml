@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: libreria-incantata:0.6.0 # tag fisso: mai :latest in produzione
+    image: libreria-incantata:0.7.0 # tag fisso: mai :latest in produzione
     container_name: libreria-incantata
     restart: unless-stopped
     ports:

@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
+import fastifyRateLimit from "@fastify/rate-limit";
 import { Readable } from "node:stream";
 import { loadConfig } from "./config.js";
 import { scaricaCatalogo } from "./goodreads.js";
@@ -53,6 +54,18 @@ async function getCatalogo(): Promise<Snapshot> {
     }
     throw err;
   }
+}
+
+// Esposta a Internet: un tetto alle richieste per IP. Il catalogo Goodreads
+// è già in cache per 30 minuti, quindi il limite serve a proteggere la banda di
+// casa e il proxy delle copertine, non la sorgente.
+if (cfg.pubblica) {
+  await app.register(fastifyRateLimit, {
+    max: 240,
+    timeWindow: "1 minute",
+    allowList: ["127.0.0.1"],
+  });
+  app.log.info("modalità pubblica: limite di 240 richieste al minuto per IP");
 }
 
 // Regole di classificazione, per il client che importa EPUB: la logica di
