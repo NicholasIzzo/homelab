@@ -42,6 +42,8 @@ SKIP_BACKUP=0
 info()  { printf '  %s\n' "$*"; }
 step()  { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 ok()    { printf '  \033[32mOK\033[0m   %s\n' "$*"; }
+# Esito di un'azione: in dry-run non e' successo niente, non dirlo al passato.
+did()   { if [ "${DRY_RUN:-0}" -eq 1 ]; then info "^ non eseguito (dry-run)"; else ok "$*"; fi; }
 warn()  { printf '  \033[33mWARN\033[0m %s\n' "$*"; }
 fail()  { printf '  \033[31mFAIL\033[0m %s\n' "$*" >&2; }
 die()   { fail "$2"; exit "$1"; }
@@ -90,10 +92,18 @@ EOF
 jf_call() {
     local method="$1" path="$2" body="${3:-}" label="$4"
     if [ "$DRY_RUN" -eq 1 ]; then
-        info "DRY-RUN $method ${JELLYFIN_URL}${path}"
-        if [ -n "$body" ]; then
-            printf '%s\n' "$body" | jq . | sed 's/^/         /'
-        fi
+        # Su stderr: i chiamanti scartano stdout con >/dev/null per non
+        # stamparsi addosso la risposta JSON, e si porterebbero via anche queste.
+        {
+            info "DRY-RUN $method ${JELLYFIN_URL}${path}"
+            info '        header  Authorization: MediaBrowser Token="$JELLYFIN_API_KEY"'
+            if [ -n "$body" ]; then
+                info "        body:"
+                printf '%s\n' "$body" | jq . | sed 's/^/          /'
+            else
+                info "        (nessun body)"
+            fi
+        } >&2
         return 0
     fi
     local response status payload
@@ -195,14 +205,14 @@ remove_existing() {
 
     if [ -n "$tid" ]; then
         jf_call DELETE "/LiveTv/TunerHosts?id=${tid}" "" "delete tuner" >/dev/null
-        ok "tuner rimosso ($tid)"
+        did "tuner rimosso ($tid)"
     else
         info "nessun tuner Tunarr da rimuovere"
     fi
 
     if [ -n "$pid" ]; then
         jf_call DELETE "/LiveTv/ListingProviders?id=${pid}" "" "delete provider" >/dev/null
-        ok "provider rimosso ($pid)"
+        did "provider rimosso ($pid)"
     else
         info "nessun provider XMLTV da rimuovere"
     fi
@@ -227,7 +237,7 @@ add_tuner() {
     # Se Tunarr e' down qui la POST fallisce con 4xx.
     jf_call POST "/LiveTv/TunerHosts" "$(render_payload tuner-host-hdhomerun.json)" \
         "add tuner" >/dev/null
-    ok "tuner creato ($TUNARR_URL)"
+    did "tuner creato ($TUNARR_URL)"
 }
 
 add_provider() {
@@ -241,7 +251,7 @@ add_provider() {
     fi
     jf_call POST "/LiveTv/ListingProviders?validateListings=false&validateLogin=false" \
         "$(render_payload listing-provider-xmltv.json)" "add provider" >/dev/null
-    ok "provider creato (${TUNARR_URL}/api/xmltv.xml)"
+    did "provider creato (${TUNARR_URL}/api/xmltv.xml)"
 }
 
 # --- 5. Mapping canali <-> guida --------------------------------------------
@@ -283,7 +293,7 @@ map_channels() {
         body="$(jq -n --arg p "$pid" --arg t "$tuner_ch_id" --arg c "$provider_ch_id" \
             '{providerId: $p, tunerChannelId: $t, providerChannelId: $c}')"
         jf_call POST "/LiveTv/ChannelMappings" "$body" "map $tuner_name" >/dev/null
-        ok "\"$tuner_name\" -> $provider_ch_id"
+        did "\"$tuner_name\" -> $provider_ch_id"
     done < <(printf '%s' "$unmapped" | jq -r '.[] | [.Id, .Name] | @tsv')
 }
 
@@ -302,7 +312,7 @@ refresh_guide() {
         | jq -r '.[] | select(.Key == "RefreshGuide") | .Id' | head -1)"
     [ -n "$task_id" ] || die 4 "task RefreshGuide non trovato"
     jf_call POST "/ScheduledTasks/Running/${task_id}" "" "avvio RefreshGuide" >/dev/null
-    ok "task RefreshGuide avviato ($task_id)"
+    did "task RefreshGuide avviato ($task_id)"
 }
 
 # --- 7. Verifiche post-config ----------------------------------------------

@@ -1,0 +1,11 @@
+# Il repo si edita da Windows ma gli script girano su Linux (NAS, hpserver).
+# Un CRLF in uno script shell lo rompe all'esecuzione con errori opachi tipo
+# "$'\r': command not found". Forziamo LF su tutto cio' che viene eseguito.
+*.sh        text eol=lf
+*.py        text eol=lf
+*.bash      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.json      text eol=lf
+*.fragment  text eol=lf
+Dockerfile  text eol=lf
