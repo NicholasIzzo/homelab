@@ -158,6 +158,15 @@ check_tunarr() {
     [ "$channels" -gt 0 ] 2>/dev/null \
         || die 3 "Tunarr non ha canali reali (solo il segnaposto /setup). Creane almeno uno con dei programmi nella UI: ${TUNARR_PROBE_URL}"
     ok "$channels canale/i reale/i nel lineup"
+
+    # Un canale puo' esistere ed essere vuoto: comparirebbe in Jellyfin senza
+    # riprodurre niente. Serve almeno un canale con dei programmi dentro.
+    local programmed
+    programmed="$(curl -sf --max-time 10 "${TUNARR_PROBE_URL}/api/channels" \
+        | jq '[.[] | select((.programCount // 0) > 0)] | length')"
+    [ "$programmed" -gt 0 ] 2>/dev/null \
+        || die 3 "I canali Tunarr sono tutti vuoti (programCount 0). Aggiungi programmi dalla tab Programming prima di configurare Jellyfin."
+    ok "$programmed canale/i con programmi"
 }
 
 # --- 2. Stato attuale di Jellyfin -------------------------------------------

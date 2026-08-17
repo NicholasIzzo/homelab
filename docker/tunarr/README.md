@@ -164,3 +164,20 @@ stabile ai cambi di programma quando Jellyfin non transcodifica.
   ripristinati.
 - Tunarr e Jellyfin condividono la stessa CPU e la stessa iGPU: una sessione
   Tunarr in transcoding sottrae capacita' QSV a Jellyfin.
+- **Il sync delle librerie Jellyfin termina in errore** (bug upstream
+  [#1975](https://github.com/chrisbenincasa/tunarr/issues/1975), aperto dal
+  2026-08-01, presente in 1.3.13):
+
+  ```
+  SqliteError: UNIQUE constraint failed:
+    external_collections.media_source_id, external_collections.external_key
+  ```
+
+  Jellyfin restituisce gli stessi BoxSet per ogni libreria; la prima li
+  importa, le successive vanno in conflitto. **L'impatto e' limitato**: film,
+  serie ed episodi vengono importati regolarmente — l'errore arriva nella
+  riconciliazione finale delle collection. Verificato il 2026-08-17: dopo
+  l'errore il DB conteneva 6559 episodi, 103 serie e 919 film.
+  Cosa si perde: le collection/BoxSet di Jellyfin non sono utilizzabili come
+  raggruppamento nella programmazione. Si ripresenta a ogni sync (default ogni
+  6 ore) e sporca i log, ma non degrada i canali gia' configurati.
