@@ -148,13 +148,16 @@ check_tunarr() {
         ok "$ep"
     done
 
-    # lineup.json vuoto = nessun canale: Jellyfin registrerebbe un tuner senza
-    # niente da mostrare, e il mapping guida non avrebbe su cosa lavorare.
+    # Senza canali reali Tunarr non restituisce un lineup vuoto: espone un
+    # segnaposto che punta a /setup ({"GuideName":"Tunarr","URL":".../setup"}).
+    # Contare gli elementi non basta — va escluso, altrimenti si registrerebbe
+    # in Jellyfin un tuner che non mostra nulla.
     local channels
-    channels="$(curl -sf --max-time 10 "${TUNARR_PROBE_URL}/lineup.json" | jq 'length')"
+    channels="$(curl -sf --max-time 10 "${TUNARR_PROBE_URL}/lineup.json" \
+        | jq '[.[] | select((.URL // "") | endswith("/setup") | not)] | length')"
     [ "$channels" -gt 0 ] 2>/dev/null \
-        || die 3 "Tunarr non ha canali (lineup.json vuoto). Creane almeno uno nella UI: ${TUNARR_PROBE_URL}"
-    ok "$channels canale/i nel lineup"
+        || die 3 "Tunarr non ha canali reali (solo il segnaposto /setup). Creane almeno uno con dei programmi nella UI: ${TUNARR_PROBE_URL}"
+    ok "$channels canale/i reale/i nel lineup"
 }
 
 # --- 2. Stato attuale di Jellyfin -------------------------------------------
