@@ -58,8 +58,16 @@ serve solo durante l'esecuzione dello script.
 1. **Prerequisiti Tunarr**: `/api/system/health`, `/device.xml`,
    `/discover.json`, `/lineup.json`, `/api/xmltv.xml`, e verifica che
    `lineup.json` non sia vuoto.
-2. **Backup** di `/etc/jellyfin` e `/var/lib/jellyfin/config` in
+2. **Backup** di `/etc/jellyfin` in
    `$BACKUP_DIR/jellyfin-backup-pre-tunarr-<data>.tar.gz`. Se fallisce, si ferma.
+   I path si cambiano con `BACKUP_PATHS`; quelli inesistenti vengono saltati con
+   un avviso invece di far fallire l'intero tar.
+
+   **Cosa non e' incluso, e perche'**: `/var/lib/jellyfin/data` (607 MB, con un
+   SQLite da 185 MB in WAL) resta fuori. Copiarlo a container acceso darebbe un
+   file potenzialmente incoerente, e non e' cio' che questo script modifica: la
+   configurazione Live TV vive in `/etc/jellyfin/livetv.xml`. Per disfare le
+   modifiche usa [rollback.sh](rollback.sh), che passa dall'API.
 3. **Tuner**: `POST /LiveTv/TunerHosts` con
    [payloads/tuner-host-hdhomerun.json](payloads/tuner-host-hdhomerun.json).
 4. **Provider guida**: `POST /LiveTv/ListingProviders` con

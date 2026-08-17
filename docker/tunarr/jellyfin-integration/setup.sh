@@ -130,16 +130,36 @@ jf_get() {
 
 # --- 0. Backup --------------------------------------------------------------
 
+# Solo /etc/jellyfin: e' li' che vive livetv.xml, cioe' tutto cio' che questo
+# script modifica. /var/lib/jellyfin/data e' escluso di proposito — 607 MB con
+# un SQLite da 185 MB in WAL, che copiato a caldo darebbe un file potenzialmente
+# incoerente. Per disfare le modifiche il mezzo giusto e' rollback.sh, che passa
+# dall'API; questo tar e' la rete di sicurezza sulla configurazione.
+BACKUP_PATHS="${BACKUP_PATHS:-/etc/jellyfin}"
+
 do_backup() {
     step "Backup configurazione Jellyfin"
     local target="${BACKUP_DIR}/jellyfin-backup-pre-tunarr-$(date +%Y%m%d-%H%M).tar.gz"
+
+    # Un path inesistente fa fallire tutto il tar: teniamo solo quelli veri.
+    local -a paths=()
+    local p
+    for p in $BACKUP_PATHS; do
+        if [ -e "$p" ]; then
+            paths+=("$p")
+        else
+            warn "salto $p: non esiste su questo host"
+        fi
+    done
+    [ ${#paths[@]} -gt 0 ] || die 6 "nessun path da salvare tra: $BACKUP_PATHS"
+
     if [ "$DRY_RUN" -eq 1 ]; then
-        info "DRY-RUN sudo tar czf $target /etc/jellyfin /var/lib/jellyfin/config"
+        info "DRY-RUN sudo tar czf $target ${paths[*]}"
         return 0
     fi
-    sudo tar czf "$target" /etc/jellyfin /var/lib/jellyfin/config \
+    sudo tar czf "$target" "${paths[@]}" \
         || die 6 "backup fallito: non proseguo"
-    ok "backup: $target"
+    ok "backup: $target ($(du -h "$target" | cut -f1))"
 }
 
 # --- 1. Prerequisiti Tunarr -------------------------------------------------
