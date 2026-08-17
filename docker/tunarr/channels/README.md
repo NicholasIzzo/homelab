@@ -1,12 +1,58 @@
-# Canali film per genere
+# Canali Tunarr
 
-Crea e mantiene i canali Tunarr costruiti sui generi (10-15), rigenerandone il
-palinsesto ogni notte cosi' che i film aggiunti da Radarr entrino in rotazione.
+Due generatori, con cicli di vita diversi:
 
-I canali serie TV (1-3) **non** sono gestiti da qui: sono programmati a mano
-nella UI con Block Shuffle, che preserva l'ordine degli episodi.
+| Script | Canali | Rigenerazione |
+|---|---|---|
+| [build-movie-channels.py](build-movie-channels.py) | 10-15, film per genere | **automatica**, cron notturno |
+| [build-series-channels.py](build-series-channels.py) | 1-5, serie per categoria | **solo a mano**, vedi sotto |
 
-## Uso
+## Perche' le serie non stanno nel cron
+
+Rigenerare un canale di film significa rimescolare film indipendenti: nessuna
+perdita. Rigenerare un canale di serie invece **riparte da S01E01 di ogni
+serie**: la progressione degli episodi si azzera, e quello che stavi seguendo
+torna all'inizio.
+
+Quindi `build-series-channels.py` va lanciato solo quando serve davvero —
+tipicamente dopo aver aggiunto nuove serie alla libreria — accettando
+consapevolmente che il palinsesto riparta da capo.
+
+## Canali serie TV (1-5)
+
+```bash
+cd ~/homelab/docker/tunarr/channels && ./build-series-channels.py --dry-run
+```
+
+Categorie in [series-channels.json](series-channels.json). Ogni serie finisce in
+**una sola** categoria, scelta per priorita': `_ordine_priorita` viene valutato
+dall'alto e vince la prima corrispondenza. L'ordine e' quello che rende
+utilizzabile la classificazione — "Dramma" da solo copre 80 serie su 103, quindi
+Drama sta in fondo e raccoglie ciò che le categorie piu' specifiche non hanno
+preso.
+
+Lo script **si rifiuta di scrivere** se anche una sola serie resta senza canale,
+elencando le orfane: aggiungi i loro generi a una categoria e rilancia.
+
+Gli episodi seguono il Block Shuffle: N episodi consecutivi di una serie, poi la
+successiva, con l'ordine (stagione, episodio) sempre preservato. `blocco` e'
+configurabile per canale — 3 per i canali di episodi corti, 2 per i drama.
+
+Ripartizione al 2026-08-17, 103 serie e 6559 episodi:
+
+| Ch | Nome | Serie | Episodi | Palinsesto |
+|---:|---|---:|---:|---:|
+| 1 | Sitcom & Commedia | 18 | 925 | 468h |
+| 2 | Drama | 23 | 1596 | 1206h |
+| 3 | Sci-Fi & Fantasy | 28 | 1844 | 1455h |
+| 4 | Crime & Azione | 24 | 918 | 800h |
+| 5 | Animazione & Kids | 10 | 1276 | 480h |
+
+Se un canale esiste con lo stesso numero ma nome diverso, viene **eliminato e
+ricreato**: e' il modo per cambiare la struttura delle categorie senza lasciare
+canali orfani, ma cancella anche la programmazione fatta a mano su quel numero.
+
+## Canali film (10-15)
 
 ```bash
 cd ~/homelab/docker/tunarr/channels && ./build-movie-channels.py --dry-run

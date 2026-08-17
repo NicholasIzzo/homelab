@@ -1,0 +1,37 @@
+{
+  "_commento": "Canali serie TV. Le categorie sono valutate NELL'ORDINE in cui compaiono: una serie finisce nella prima che corrisponde, e in una sola. L'ordine conta — 'Dramma' da solo copre 80 serie su 103, quindi Drama sta in fondo e raccoglie ciò che nessuna categoria più specifica ha preso. L'ultima categoria deve restare abbastanza generica da non lasciare serie fuori: lo script fallisce se una resta orfana.",
+  "_blocco": "episodi consecutivi della stessa serie prima di passare alla successiva (equivalente del Block Shuffle di Tunarr)",
+  "canali": [
+    {
+      "number": 1,
+      "name": "Sitcom & Commedia",
+      "generi": ["Commedia"],
+      "blocco": 3
+    },
+    {
+      "number": 2,
+      "name": "Drama",
+      "generi": ["Dramma", "Documentario", "Soap"],
+      "blocco": 2
+    },
+    {
+      "number": 3,
+      "name": "Sci-Fi & Fantasy",
+      "generi": ["Sci-Fi & Fantasy"],
+      "blocco": 2
+    },
+    {
+      "number": 4,
+      "name": "Crime & Azione",
+      "generi": ["Crime", "Mistero", "Action & Adventure", "War & Politics", "Western"],
+      "blocco": 2
+    },
+    {
+      "number": 5,
+      "name": "Animazione & Kids",
+      "generi": ["Animazione", "Kids", "Famiglia"],
+      "blocco": 3
+    }
+  ],
+  "_ordine_priorita": ["Animazione & Kids", "Sitcom & Commedia", "Sci-Fi & Fantasy", "Crime & Azione", "Drama"]
+}
