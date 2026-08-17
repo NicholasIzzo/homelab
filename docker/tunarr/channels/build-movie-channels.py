@@ -24,8 +24,10 @@ import os
 import random
 import sqlite3
 import sys
+import time
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 
 TUNARR_URL = os.environ.get("TUNARR_URL", "http://localhost:8000")
@@ -163,17 +165,32 @@ def main():
             ch_id = "<nuovo-canale>"
             info(f"DRY-RUN POST /api/channels  number={num} name=\"{nome}\"")
         else:
+            # SaveableChannelSchema richiede l'id generato dal client, piu'
+            # icon/offline/duration: campi non opzionali anche in creazione.
             payload = {
                 "type": "new",
                 "channel": {
+                    "id": str(uuid.uuid4()),
                     "number": num,
                     "name": nome,
-                    "startTime": 0,
-                    "transcodeConfigId": transcode_id,
-                    "groupTitle": "Film",
+                    "duration": 0,
+                    "startTime": int(time.time() * 1000),
                     "stealth": False,
+                    "groupTitle": "Film",
                     "guideMinimumDuration": 30000,
+                    "disableFillerOverlay": False,
+                    "subtitlesEnabled": False,
                     "streamMode": "hls",
+                    "transcodeConfigId": transcode_id,
+                    "icon": {
+                        "path": "",
+                        "width": 0,
+                        "duration": 0,
+                        "position": "bottom-right",
+                        "useDefaultIconFallback": True,
+                    },
+                    "offline": {"picture": "", "soundtrack": "", "mode": "pic"},
+                    "onDemand": {"enabled": False},
                 },
             }
             creato = api("POST", "/api/channels", payload)
