@@ -14,7 +14,7 @@ XMLTV e transcodifica al volo con FFmpeg.
 | Scelta | Motivo |
 |---|---|
 | `network_mode: host` | L'immagine espone `1900/udp` per l'annuncio SSDP: e' cosi' che il "Detect My Devices" di Jellyfin trova il tuner. In bridge il multicast non esce dal container. Conseguenza: `ports:` e' ignorato, Tunarr occupa direttamente la `:8000` dell'host. |
-| `user: "1000:1000"` + `group_add` | L'immagine non e' linuxserver.io (base `ersatztv-ffmpeg`, nessun init s6): **`PUID`/`PGID` non esistono**. L'unico modo di non girare come root e' `user:`. I gruppi `44` (video) e `993` (render) servono per `/dev/dri/card1` e `/dev/dri/renderD128`. |
+| Gira come **root** | L'immagine non e' linuxserver.io (base `ersatztv-ffmpeg`, nessun init s6): `PUID`/`PGID` non esistono. E il non-root non e' praticabile: `meilisearch-linux-x64` ha permessi `0744`, eseguibile solo da root. Vedi sotto. |
 | `./config:/config/tunarr` | La data dir nel container e' `/config/tunarr`, non `/config`. Montare `/config` lascerebbe il DB in un layer effimero: si perde tutto al primo aggiornamento. |
 | `devices: /dev/dri` | VAAPI/QSV per FFmpeg. Nessuna immagine `-vaapi` separata: la variante hardware si abilita solo passando il device. |
 | Healthcheck su `/api/system/health` | Tunarr **non** ha `/health`. `curl` e' presente nell'immagine base. `start_period: 120s` perche' al primo avvio viene costruito l'indice Meilisearch. |
@@ -22,7 +22,7 @@ XMLTV e transcodifica al volo con FFmpeg.
 ## Primo avvio
 
 ```bash
-mkdir -p ~/homelab/docker/tunarr/config && chown -R 1000:1000 ~/homelab/docker/tunarr/config
+mkdir -p ~/homelab/docker/tunarr/config
 ```
 
 ```bash
@@ -36,13 +36,25 @@ docker compose logs -f tunarr
 La UI risponde su <http://192.168.0.33:8000>. Da li' si aggiungono le sorgenti
 media (`/media/film`, `/media/serie`) e i canali.
 
-### Se il container non parte per permessi
+### Perche' gira come root
 
-`user: "1000:1000"` e' la parte meno collaudata di questo stack: Tunarr scrive
-anche fuori dal volume (working dir `/tunarr`, `/tmp`). Se nei log compaiono
-`EACCES`/`EPERM`, commentare `user:` e `group_add:` nel compose e riavviare —
-si torna al default upstream (root), che e' la configurazione testata a monte.
-In tal caso `chown -R root:root config/`.
+Il primo tentativo di deploy usava `user: "1000:1000"` + `group_add` per video e
+render, per non far girare il container come root. Non funziona, in due tappe:
+
+1. `Error: EACCES: permission denied, mkdir '/root/.cache'` — l'eseguibile e'
+   impacchettato con `pkg` ed estrae le native bindings di SQLite in `$HOME/.cache`,
+   ma `HOME` resta `/root` anche cambiando `user:`. Aggirabile con `HOME=/config/tunarr`.
+2. `spawn /tunarr/bin/meilisearch EACCES`, poi *"Unable to start process meilisearch
+   after 3 attempts. Giving up"*. Questo **non** e' aggirabile:
+   `/tunarr/server/bin/meilisearch-linux-x64` ha permessi `-rwxr--r--` (0744),
+   cioe' il bit di esecuzione e' solo per root. Tunarr non parte senza Meilisearch.
+
+Renderlo non-root richiederebbe un'immagine custom con un `chmod +x` sul binario,
+rinunciando al pin sul digest upstream. Non ne vale il prezzo per un servizio in
+LAN: resta root, come nella configurazione testata a monte.
+
+Se in futuro upstream sistemasse i permessi, la variante non-root e'
+`user: "1000:1000"` + `group_add: ["44", "993"]` + `HOME=/config/tunarr`.
 
 ## Aggiornare a una nuova versione
 

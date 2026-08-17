@@ -12,13 +12,14 @@ services:
     # NOTA: in host mode "ports:" e' ignorato — Tunarr ascolta su :8000 dell'host.
     network_mode: host
 
-    # L'immagine NON e' linuxserver.io (base: ghcr.io/ersatztv/ersatztv-ffmpeg,
-    # nessun init s6): le env PUID/PGID non esistono. L'equivalente e' far girare
-    # il processo direttamente come nicholas.
-    user: "1000:1000"
-    group_add:
-      - "44"   # video  -> /dev/dri/card1
-      - "993"  # render -> /dev/dri/renderD128
+    # Gira come root, come da default upstream. NON e' una svista:
+    #  - l'immagine non e' linuxserver.io (base ersatztv-ffmpeg, nessun init s6),
+    #    quindi PUID/PGID non esistono;
+    #  - /tunarr/server/bin/meilisearch-linux-x64 ha permessi 0744, cioe' e'
+    #    eseguibile SOLO da root. Con "user: 1000:1000" Tunarr parte ma muore con
+    #    "spawn /tunarr/bin/meilisearch EACCES" dopo 3 tentativi.
+    # Verificato sul campo il 2026-08-17. Renderlo non-root richiederebbe una
+    # immagine custom, perdendo il pin al digest upstream.
 
     environment:
       - TZ=Europe/Rome
