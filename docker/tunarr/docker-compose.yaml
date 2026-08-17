@@ -1,0 +1,58 @@
+services:
+  tunarr:
+    # Tag fisso + digest dell'index multi-arch (mai :latest in produzione).
+    # Upstream taggia la release "v1.3.13", ma su GHCR il tag e' senza "v".
+    image: ghcr.io/chrisbenincasa/tunarr:1.3.13@sha256:ffaedbfd237114bd68daa50405787a6d915e89456a87e86dc9e481b700c6c1b3
+    container_name: tunarr
+    restart: unless-stopped
+
+    # Host network: l'immagine espone 1900/udp per l'annuncio SSDP con cui
+    # Jellyfin trova i tuner HDHomeRun ("Detect My Devices"). In bridge il
+    # multicast non uscirebbe dal container.
+    # NOTA: in host mode "ports:" e' ignorato — Tunarr ascolta su :8000 dell'host.
+    network_mode: host
+
+    # L'immagine NON e' linuxserver.io (base: ghcr.io/ersatztv/ersatztv-ffmpeg,
+    # nessun init s6): le env PUID/PGID non esistono. L'equivalente e' far girare
+    # il processo direttamente come nicholas.
+    user: "1000:1000"
+    group_add:
+      - "44"   # video  -> /dev/dri/card1
+      - "993"  # render -> /dev/dri/renderD128
+
+    environment:
+      - TZ=Europe/Rome
+      - TUNARR_LOG_LEVEL=info
+
+    # VAAPI / QSV per il transcoding FFmpeg (i3-8100T, UHD 630).
+    devices:
+      - /dev/dri:/dev/dri
+
+    volumes:
+      # Data dir di Tunarr: db.db (SQLite), settings.json, channel-lineups,
+      # images, cache, indice Meilisearch, backups.
+      # Il path nel container e' /config/tunarr, NON /config.
+      - ./config:/config/tunarr
+      # Sorgenti media in sola lettura. film/serie sono CIFS dal NAS
+      # (automount systemd), prerolls e' locale su hpserver.
+      - /media/film:/media/film:ro
+      - /media/serie:/media/serie:ro
+      - /media/prerolls:/media/prerolls:ro
+
+    # Non esiste /health: l'endpoint e' /api/system/health (curl e' nell'immagine).
+    # start_period ampio: al primo avvio Tunarr costruisce l'indice Meilisearch.
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/api/system/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

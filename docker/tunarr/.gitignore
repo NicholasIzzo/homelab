@@ -1,0 +1,4 @@
+# Dati runtime di Tunarr: DB SQLite, settings.json, palinsesti, artwork,
+# cache, indice Meilisearch (data.ms, puo' arrivare a diversi GB), log e
+# backup interni. Si rigenerano/ripristinano da backup, non vanno nel repo.
+config/

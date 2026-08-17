@@ -1,0 +1,148 @@
+# Tunarr
+
+Canali TV lineari costruiti sulla libreria media, esposti a Jellyfin come tuner
+HDHomeRun. Tunarr crea palinsesti (film, serie, filler/bumper), genera la guida
+XMLTV e transcodifica al volo con FFmpeg.
+
+- **Host**: hpserver (`192.168.0.33`), Ubuntu 24.04, i3-8100T + UHD 630.
+- **Path deploy**: `/home/nicholas/docker/tunarr/`
+- **Web UI**: <http://192.168.0.33:8000>
+- **Immagine**: `ghcr.io/chrisbenincasa/tunarr:1.3.13` pinnata a digest.
+
+## Scelte di configurazione, e perche'
+
+| Scelta | Motivo |
+|---|---|
+| `network_mode: host` | L'immagine espone `1900/udp` per l'annuncio SSDP: e' cosi' che il "Detect My Devices" di Jellyfin trova il tuner. In bridge il multicast non esce dal container. Conseguenza: `ports:` e' ignorato, Tunarr occupa direttamente la `:8000` dell'host. |
+| `user: "1000:1000"` + `group_add` | L'immagine non e' linuxserver.io (base `ersatztv-ffmpeg`, nessun init s6): **`PUID`/`PGID` non esistono**. L'unico modo di non girare come root e' `user:`. I gruppi `44` (video) e `993` (render) servono per `/dev/dri/card1` e `/dev/dri/renderD128`. |
+| `./config:/config/tunarr` | La data dir nel container e' `/config/tunarr`, non `/config`. Montare `/config` lascerebbe il DB in un layer effimero: si perde tutto al primo aggiornamento. |
+| `devices: /dev/dri` | VAAPI/QSV per FFmpeg. Nessuna immagine `-vaapi` separata: la variante hardware si abilita solo passando il device. |
+| Healthcheck su `/api/system/health` | Tunarr **non** ha `/health`. `curl` e' presente nell'immagine base. `start_period: 120s` perche' al primo avvio viene costruito l'indice Meilisearch. |
+
+## Primo avvio
+
+```bash
+mkdir -p /home/nicholas/docker/tunarr/config && chown -R 1000:1000 /home/nicholas/docker/tunarr/config
+```
+
+```bash
+cd /home/nicholas/docker/tunarr && docker compose pull && docker compose up -d
+```
+
+```bash
+docker compose logs -f tunarr
+```
+
+La UI risponde su <http://192.168.0.33:8000>. Da li' si aggiungono le sorgenti
+media (`/media/film`, `/media/serie`) e i canali.
+
+### Se il container non parte per permessi
+
+`user: "1000:1000"` e' la parte meno collaudata di questo stack: Tunarr scrive
+anche fuori dal volume (working dir `/tunarr`, `/tmp`). Se nei log compaiono
+`EACCES`/`EPERM`, commentare `user:` e `group_add:` nel compose e riavviare —
+si torna al default upstream (root), che e' la configurazione testata a monte.
+In tal caso `chown -R root:root config/`.
+
+## Aggiornare a una nuova versione
+
+Mai `:latest`: si aggiorna cambiando il pin nel repo, non sul server.
+
+1. Trovare la release stabile piu' recente:
+
+```bash
+curl -sL "https://api.github.com/repos/chrisbenincasa/tunarr/releases/latest" | grep '"tag_name"'
+```
+
+2. Recuperare il digest del tag su GHCR (il tag e' senza la `v` iniziale):
+
+```bash
+TOKEN=$(curl -s "https://ghcr.io/token?scope=repository:chrisbenincasa/tunarr:pull&service=ghcr.io" | sed -E 's/.*"token":"([^"]+)".*/\1/'); curl -sI -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.oci.image.index.v1+json" "https://ghcr.io/v2/chrisbenincasa/tunarr/manifests/<VERSIONE>" | grep -i docker-content-digest
+```
+
+3. **Backup prima dell'update** (vedi sotto): gli upgrade migrano lo schema del DB.
+4. Aggiornare `image:` in `docker-compose.yaml` in questo repo, commit e push.
+5. Sul server:
+
+```bash
+cd /home/nicholas/docker/tunarr && git -C ~/homelab pull && docker compose pull && docker compose up -d
+```
+
+Rollback: ripristinare il pin precedente **e** il backup del DB — una volta
+migrato, lo schema non torna indietro da solo.
+
+## Backup
+
+Tunarr ha un backup schedulato integrato (Settings > System > Backup, default
+giornaliero alle 04:00, 3 copie in `config/backups/`). Include `db.db`,
+`settings.json`, `channel-lineups/`, `images/`, `cache/`.
+
+Trigger manuale:
+
+```bash
+curl -X POST "http://192.168.0.33:8000/api/tasks/BackupTask/run?background=true"
+```
+
+Il DB e' SQLite: copiare `db.db` con `cp` a container acceso puo' produrre un
+file incoerente (WAL a meta'). Backup a caldo consistente:
+
+```bash
+sqlite3 /home/nicholas/docker/tunarr/config/db.db ".backup '/home/nicholas/backup/tunarr-db-$(date +%Y%m%d).db'"
+```
+
+`sqlite3` non e' installato di default su hpserver; in alternativa, senza
+aggiungere pacchetti, si usa il client gia' presente nell'immagine oppure si
+ferma il container e si copia a freddo:
+
+```bash
+cd /home/nicholas/docker/tunarr && docker compose stop && cp config/db.db ~/backup/tunarr-db-$(date +%Y%m%d).db && docker compose start
+```
+
+L'indice Meilisearch (`config/data.ms/`) puo' pesare diversi GB e si ricostruisce
+da solo all'avvio: escluderlo da qualsiasi backup esterno. Per tenerlo fuori
+anche dagli archivi interni di Tunarr:
+`TUNARR_DISABLE_SEARCH_SNAPSHOT_IN_BACKUP=true`.
+
+### Restore
+
+Non esiste un restore automatico. A container fermo: estrarre l'archivio e
+copiare `db.db` + `settings.json` (e opzionalmente `images/`, `cache/`,
+`channel-lineups/`) in `config/`, poi riavviare. L'indice di ricerca si
+ricostruisce da solo.
+
+## Integrazione Jellyfin
+
+Jellyfin gira **nativo** su hpserver (systemd, `:8096`), non in Docker: nessuna
+modifica alla sua configurazione da parte di questo stack.
+
+**Tunarr non usa la porta 34400** (quella e' di dizqueTV). Le route HDHomeRun —
+`/device.xml`, `/discover.json`, `/lineup.json` — sono servite dalla stessa
+porta della UI, la `:8000`.
+
+Procedura manuale nella dashboard:
+
+1. Jellyfin > menu hamburger > **Dashboard** > **Live TV**.
+2. **Add tuner** > tipo **HDHomeRun**.
+3. URL: `http://localhost:8000` (Tunarr e' sulla stessa macchina, host network).
+   "Detect My Devices" dovrebbe trovarlo da solo via SSDP; in caso contrario
+   inserire l'URL a mano.
+4. Salvare, poi **Add Provider** > **XMLTV**.
+5. Nel campo "File or URL": `http://localhost:8000/api/xmltv.xml`.
+6. Lasciare "Enable for all tuner devices" spuntato (istanza singola).
+7. Salvare: Jellyfin inizia l'aggiornamento della guida. I canali compaiono
+   nella card **Live TV** in home.
+
+Nota upstream: Tunarr supporta anche M3U, ma con Jellyfin l'HDHomeRun e' piu'
+stabile ai cambi di programma quando Jellyfin non transcodifica.
+
+## Rischi noti
+
+- `/media/film` e `/media/serie` sono automount systemd su CIFS. I bind mount
+  Docker vengono risolti alla creazione del container: se il NAS fosse
+  irraggiungibile in quel momento, il container partirebbe con le cartelle
+  vuote. Gli automount sono configurati `timeout=0` (nessuno smontaggio
+  automatico), quindi il rischio si concretizza solo dopo un riavvio con NAS
+  giu'. In quel caso: `docker compose down && docker compose up -d` a mount
+  ripristinati.
+- Tunarr e Jellyfin condividono la stessa CPU e la stessa iGPU: una sessione
+  Tunarr in transcoding sottrae capacita' QSV a Jellyfin.
