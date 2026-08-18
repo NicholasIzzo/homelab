@@ -122,6 +122,49 @@ copiare `db.db` + `settings.json` (e opzionalmente `images/`, `cache/`,
 `channel-lineups/`) in `config/`, poi riavviare. L'indice di ricerca si
 ricostruisce da solo.
 
+## Impostazioni runtime da rifare dopo un restore
+
+Vivono nel DB di Tunarr, non in questo repo: se `config/` viene perso o
+ricostruito da zero, tornano ai default **senza segnalarlo**.
+
+**Lingua audio preferita** (Settings > FFMPEG > Language Preferences). Il default
+di Tunarr e' cablato su English: senza questa impostazione i film con doppio
+audio partono in inglese, e da Jellyfin la traccia non si puo' cambiare — lo
+stream Live TV arriva gia' transcodificato con una sola traccia.
+
+```bash
+curl -s http://localhost:8000/api/ffmpeg-settings > /tmp/ff.json && python3 -c "
+import json
+d = json.load(open('/tmp/ff.json'))
+d['languagePreferences'] = {'preferences': [
+  {'iso6391':'it','iso6392':'ita','displayName':'Italiano'},
+  {'iso6391':'en','iso6392':'eng','displayName':'English'}]}
+json.dump(d, open('/tmp/ff2.json','w'))" && curl -s -X PUT http://localhost:8000/api/ffmpeg-settings -H 'Content-Type: application/json' -d @/tmp/ff2.json -o /dev/null -w 'HTTP %{http_code}\n'
+```
+
+Verifica:
+
+```bash
+curl -s http://localhost:8000/api/ffmpeg-settings | jq '.languagePreferences'
+```
+
+L'inglese resta in seconda posizione come riserva per i film senza traccia
+italiana. La preferenza vale per le **nuove** sessioni di streaming: un canale
+gia' in riproduzione va riaperto.
+
+## Diagnosticare problemi di riproduzione
+
+Tunarr ha uno **Stream Troubleshooter** in *System > Troubleshoot*: si sceglie un
+programma e un canale, ed esegue la stessa pipeline della riproduzione reale —
+connessione alla sorgente, selezione delle tracce, costruzione del comando
+FFmpeg, transcodifica di prova di 30s con anteprima. E' il primo posto dove
+guardare quando un singolo film non parte, va in loop o esce con l'audio
+sbagliato: dice esattamente quale traccia ha scelto e perche'.
+
+Il logging FFmpeg e' abilitato (`enableLogging: true`, livello `warning`); i log
+finiscono in `config/logs/`. Se serve piu' dettaglio si alza a `info`, ma e'
+verboso.
+
 ## Integrazione Jellyfin
 
 Jellyfin gira **nativo** su hpserver (systemd, `:8096`), non in Docker: nessuna
