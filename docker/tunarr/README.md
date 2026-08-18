@@ -152,6 +152,41 @@ L'inglese resta in seconda posizione come riserva per i film senza traccia
 italiana. La preferenza vale per le **nuove** sessioni di streaming: un canale
 gia' in riproduzione va riaperto.
 
+**Accelerazione hardware.** Il transcode config di default di Tunarr nasce con
+`hardwareAccelerationMode: none`: transcodifica in software con `libx264`, che su
+un i3-8100T da 35W non regge il 1080p in tempo reale e produce micro-blocchi di
+circa un secondo. La docs upstream lo dice esplicitamente ("extremely
+CPU-intensive... will cause dropped frames, stuttering"). Per Intel su Linux
+upstream raccomanda **VAAPI**, non QSV.
+
+Config VAAPI creato il 2026-08-18 (`vaapiDevice: /dev/dri/renderD128`,
+`vaapiDriver: system`), **assegnato al solo canale 15** come prova. Per crearlo
+da zero dopo un restore:
+
+```bash
+curl -s http://localhost:8000/api/transcode_configs | jq '.[0]' > /tmp/tc.json && python3 -c "
+import json
+d = json.load(open('/tmp/tc.json')); d.pop('id', None)
+d.update(name='VAAPI (Intel UHD 630)', hardwareAccelerationMode='vaapi',
+         vaapiDevice='/dev/dri/renderD128', vaapiDriver='system', isDefault=False)
+json.dump(d, open('/tmp/tc-vaapi.json','w'))" && curl -s -X POST http://localhost:8000/api/transcode_configs -H 'Content-Type: application/json' -d @/tmp/tc-vaapi.json | jq '{id, name, hardwareAccelerationMode}'
+```
+
+Verificare quale encoder viene realmente usato, dopo aver riprodotto qualcosa:
+
+```bash
+grep -o '"args":"[^"]*"' ~/homelab/docker/tunarr/config/logs/tunarr.log | grep -oE 'h264_vaapi|libx264' | tail -3
+```
+
+`h264_vaapi` = hardware attivo. `libx264` = ancora software. Se VAAPI fallisce,
+il canale non parte: si torna indietro riassegnandogli il config `Default` con
+una PUT su `/api/channels/{id}` (il body richiede `duration`, che va tenuto).
+
+**I sottotitoli sono gia' disattivati** su tutti i canali (`subtitlesEnabled:
+false`) e l'estrazione e' spenta (`enableSubtitleExtraction: false`): non
+compaiono filtri sottotitoli nei comandi FFmpeg generati. Non sono loro la causa
+dei micro-blocchi.
+
 ## Diagnosticare problemi di riproduzione
 
 Tunarr ha uno **Stream Troubleshooter** in *System > Troubleshoot*: si sceglie un
