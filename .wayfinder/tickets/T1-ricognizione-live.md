@@ -3,7 +3,7 @@ id: T1
 title: Ricognizione live sul NAS
 labels: [wayfinder:task]
 status: open
-assignee:
+assignee: claude+nicholas
 blocked-by: []
 map: ../map.md
 ---
