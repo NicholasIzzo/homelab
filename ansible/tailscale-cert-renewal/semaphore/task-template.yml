@@ -1,0 +1,56 @@
+# ============================================================================
+# Questo file NON è letto da Semaphore. semaphoreui/semaphore:v2.19.7 non ha
+# "config as code" per i task template (a differenza, per esempio, delle
+# pipeline GitLab CI) — la configurazione vive nel suo DB, impostata dalla
+# UI o dalla sua API.
+#
+# È un riferimento: la registrazione di cosa impostare A MANO nella UI di
+# Semaphore, per poterlo ricostruire identico se il container viene ricreato
+# o l'istanza migrata. Nessun deploy è avvenuto in questa sessione (vincolo
+# esplicito) — questo file documenta l'intenzione, non uno stato applicato.
+# ============================================================================
+
+project:
+  name: "homelab"                        # progetto Semaphore esistente, o da creare
+
+repository:
+  # Questo stesso repo, sul branch dopo il merge di questa automazione.
+  url: "<url del repo Gitea/GitHub>"
+  branch: "master"
+
+inventory:
+  type: "static"
+  # Incollare il contenuto di ../inventory.ini, oppure puntare Semaphore al
+  # file nel repo checkout se la versione in uso supporta inventory da path.
+
+environment:
+  name: "tailscale-cert-renewal"
+
+  # Variabili non segrete
+  env:
+    ANSIBLE_HOST_KEY_CHECKING: "False"    # ridondante con accept-new nel playbook, ma esplicito
+
+  # Variabili segrete — Semaphore le cifra con SEMAPHORE_ACCESS_KEY_ENCRYPTION
+  # (vedi docker/semaphore/docker-compose.yaml). Nessun valore reale qui.
+  secrets:
+    - name: NAS_CERT_RENEWAL_SSH_KEY
+      description: >
+        Contenuto della chiave privata dedicata generata in T2
+        (~/.ssh/semaphore-cert-renew sul NAS). Mai riusata per altro scopo.
+        Dopo averla incollata qui, cancellarla dal NAS.
+    - name: GF_SMTP_USER
+      description: "Riuso della stessa identità SMTP già configurata per Grafana (docker/grafana/.env)"
+    - name: GF_SMTP_PASSWORD
+      description: "Stessa app password Office365 di docker/grafana/.env — non una credenziale nuova"
+    - name: CERT_RENEWAL_ALERT_TO
+      description: "Indirizzo destinatario delle notifiche di fallimento (G4b)"
+
+task_template:
+  name: "Rinnovo certificato Tailscale (Vaultwarden/NPM)"
+  playbook: "ansible/tailscale-cert-renewal/playbook.yml"
+  inventory: "ansible/tailscale-cert-renewal/inventory.ini"
+  environment: "tailscale-cert-renewal"
+  schedule:
+    cron: "0 4 * * *"                     # giornaliero, notte — cadenza fissata nelle Note di map.md
+  # Non attivare lo schedule ("Autorun") finché il runbook (../docs/runbook.md)
+  # non è stato eseguito almeno una volta con esito atteso.

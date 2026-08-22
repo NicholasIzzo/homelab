@@ -1,0 +1,7 @@
+---
+# Serve solo per community.general.mail, usato dal playbook per notificare
+# i fallimenti (G4b). Installare con:
+#   ansible-galaxy collection install -r requirements.yml
+collections:
+  - name: community.general
+    version: ">=7.0.0"

@@ -2,8 +2,8 @@
 id: P1
 title: Bozza del playbook di rinnovo
 labels: [wayfinder:prototype]
-status: open
-assignee:
+status: closed
+assignee: claude+nicholas
 blocked-by: [G2, T2]
 map: ../map.md
 ---
@@ -34,3 +34,22 @@ parità di risultato, preferisci il modo **idiomatico e leggibile** a quello com
 Se un modulo Ansible nativo fa il lavoro, usalo invece di un `shell:` che fa la stessa cosa.
 
 Chiama `prototype`. Linka il file prodotto come asset nella risoluzione, non incollarlo qui.
+
+---
+
+## Risoluzione
+
+Il percorso previsto da questo ticket (bozza throwaway per alzare la fedeltà della discussione
+*prima* del grilling) è stato invertito: le decisioni di [G1](G1-npm-o-tailscale-serve.md),
+[G2](G2-installazione-cert-senza-downtime.md), [T2](T2-ssh-ristretto-semaphore.md),
+[G3](G3-test-e-rollback.md), [G4a](G4a-kuma-expiry-monitor.md) e
+[G4b](G4b-notifica-fallimento-job.md) sono state prese per esteso, un ticket alla volta con
+conferma esplicita, **prima** di scrivere qualunque codice. Il playbook è stato quindi scritto
+direttamente in forma quasi-definitiva — non una bozza da criticare e poi buttare, ma l'artefatto
+finale stesso.
+
+Struttura dei task, dove vive l'idempotenza, backup del DB/dei file, parametri vs costanti, e cosa
+viene loggato in un giorno no-op — tutti i punti che questo ticket chiedeva di mettere sul tavolo —
+sono risolti in `ansible/tailscale-cert-renewal/playbook.yml` e
+`ansible/tailscale-cert-renewal/remote/tailscale-cert-renew.sh`. Non linkati come asset separato
+perché sono il deliverable finale, non una bozza a parte.

@@ -2,8 +2,8 @@
 id: G4b
 title: Notifica di fallimento del job Semaphore
 labels: [wayfinder:grilling]
-status: open
-assignee:
+status: closed
+assignee: claude+nicholas
 blocked-by: [G2]
 map: ../map.md
 ---
@@ -37,3 +37,28 @@ Da decidere:
    silenzio di "tutto bene" — o si accetta il rischio e si segna Telegram come upgrade path?
 
 Chiama `grilling` e `domain-modeling`.
+
+---
+
+## Risoluzione
+
+1. **Cosa notifica**: solo gli stati `error` e `rollback` (dei 5 fissati durante il grilling di T2:
+   `nochange`/`pending`/`renewed`/`error`/`rollback`) — gli altri tre sono già "va tutto bene" per
+   costruzione, niente email su un run normale.
+2. **Fallimento silenzioso**: `set -euo pipefail` nello script remoto, asserzioni esplicite
+   (byte-diff post-scrittura, verifica del certificato live post-reload), e un `trap` su `EXIT` che
+   garantisce comunque una riga `RESULT:` anche in caso di crash imprevisto — nessun percorso può
+   uscire 0 in silenzio.
+3. **Meccanismo**: il playbook manda l'email da sé (`community.general.mail`), non la notifica
+   nativa del task Semaphore — una notifica nativa vedrebbe solo l'exit code del task, perdendo
+   l'informazione strutturata della riga `RESULT:`, che è appunto il motivo per cui quel formato
+   esiste (deciso in T2, ripreso qui).
+4. **Contenuto**: hostname, stato, messaggio, output completo dello script, e un controllo live del
+   certificato eseguito **al momento della notifica** (non riciclato) — risponde subito a "il
+   servizio è su o giù ORA".
+5. **Rumore**: accettato senza deduplica — un'email per ogni run fallito, volume basso a cadenza
+   giornaliera su un solo servizio.
+6. **Fragilità SMTP**: rischio accettato esplicitamente, fuori scope rilevarlo (richiederebbe un
+   secondo canale indipendente); Telegram resta l'upgrade path già scritto nelle Note della mappa.
+
+Implementato in `ansible/tailscale-cert-renewal/playbook.yml`.

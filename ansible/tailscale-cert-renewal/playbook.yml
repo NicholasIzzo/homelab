@@ -1,0 +1,151 @@
+---
+# playbook.yml
+#
+# Orchestratore, non esecutore: tutta la logica di rinnovo vive in
+# remote/tailscale-cert-renew.sh, sul NAS. Questo playbook si limita a:
+#
+#   1. materializzare la chiave SSH ristretta (arriva da Semaphore come
+#      variabile d'ambiente segreta, mai committata — vedi ../.gitignore)
+#   2. eseguire UNA sessione SSH verso il NAS — il comando richiesto è
+#      irrilevante: per via del `command=` in authorized_keys (T2, vedi
+#      remote/authorized_keys.snippet) il server esegue comunque e solo lo
+#      script fisso, qualunque cosa gli si chieda
+#   3. leggere l'ultima riga "RESULT: <stato> | <messaggio>" dall'output
+#   4. notificare via email SOLO sugli stati di fallimento (error, rollback)
+#      — vedi .wayfinder/tickets/G4b-notifica-fallimento-job.md
+#
+# Gira su localhost, non sul NAS: il NAS non è modellato come host
+# d'inventario perché la chiave ristretta rende impossibile l'uso normale
+# della connessione SSH di Ansible, che deve eseguire payload arbitrari
+# (moduli Python serializzati, sftp) per ogni singolo task — il `command=`
+# fisso lo impedisce per costruzione. Vedi README.md per la spiegazione
+# estesa di questa scelta architetturale.
+
+- name: Rinnovo certificato Tailscale su NPM (Vaultwarden)
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    nas_host: "192.168.0.36"
+    nas_user: "nicholasizzo"
+
+    # Segreti e configurazione SMTP: iniettati da Semaphore come variabili
+    # d'ambiente (vedi semaphore/task-template.yml). Riuso deliberato delle
+    # stesse credenziali Office365 già in uso per Grafana (docker/grafana),
+    # non una nuova identità da gestire.
+    ssh_key_content: "{{ lookup('env', 'NAS_CERT_RENEWAL_SSH_KEY') }}"
+    notify_mail_to: "{{ lookup('env', 'CERT_RENEWAL_ALERT_TO') }}"
+    notify_mail_from: "{{ lookup('env', 'GF_SMTP_USER') }}"
+    smtp_host: "smtp.office365.com"
+    smtp_port: 587
+    smtp_user: "{{ lookup('env', 'GF_SMTP_USER') }}"
+    smtp_password: "{{ lookup('env', 'GF_SMTP_PASSWORD') }}"
+
+  tasks:
+    - name: Verifica che la chiave SSH sia stata passata da Semaphore
+      ansible.builtin.assert:
+        that:
+          - ssh_key_content | length > 0
+        fail_msg: >
+          NAS_CERT_RENEWAL_SSH_KEY non è impostata. Va configurata come
+          variabile d'ambiente segreta nel task template di Semaphore
+          (vedi semaphore/task-template.yml).
+
+    - name: Materializza temporaneamente la chiave privata ristretta
+      ansible.builtin.tempfile:
+        state: file
+        suffix: ".key"
+      register: ssh_key_file
+
+    - name: Scrive la chiave nel file temporaneo con permessi 0600
+      ansible.builtin.copy:
+        content: "{{ ssh_key_content }}"
+        dest: "{{ ssh_key_file.path }}"
+        mode: "0600"
+
+    - name: Esegue il rinnovo sul NAS via SSH
+      # Il comando "true" è un placeholder: per via del command= ristretto
+      # lato server (T2), qualunque cosa scrivessimo qui verrebbe comunque
+      # ignorata e sostituita con l'esecuzione di tailscale-cert-renew.sh.
+      # failed_when: false perché l'esito si legge dalla riga RESULT, non
+      # dall'exit code grezzo di ssh (che può essere 0/1/2 a seconda dello
+      # stato — vedi lo script remoto — e nessuno di questi è "un errore di
+      # Ansible" da segnalare come tale).
+      ansible.builtin.command:
+        argv:
+          - ssh
+          - -i
+          - "{{ ssh_key_file.path }}"
+          - -o
+          - BatchMode=yes
+          - -o
+          - StrictHostKeyChecking=accept-new
+          - "{{ nas_user }}@{{ nas_host }}"
+          - "true"
+      register: renewal_run
+      changed_when: false
+      failed_when: false
+
+    - name: Rimuove subito la chiave temporanea
+      ansible.builtin.file:
+        path: "{{ ssh_key_file.path }}"
+        state: absent
+
+    - name: Isola le righe RESULT dall'output (può essere vuoto se ssh non è nemmeno partito)
+      ansible.builtin.set_fact:
+        result_lines: "{{ (renewal_run.stdout_lines | default([])) | select('match', '^RESULT:') | list }}"
+
+    - name: Riga RESULT effettiva, con fallback esplicito se assente
+      # Se result_lines è vuoto (connessione SSH fallita, chiave rifiutata,
+      # script non installato) trattiamo il caso come "error" a tutti gli
+      # effetti: nessuna riga RESULT è di per sé un fallimento, non un
+      # successo silenzioso (G4b, difesa contro il fallimento silenzioso).
+      ansible.builtin.set_fact:
+        result_line: >-
+          {{ result_lines[-1] if (result_lines | length > 0)
+             else 'RESULT: error | connessione SSH fallita o nessuna riga RESULT nell_output (rc=' ~ renewal_run.rc ~ ')' }}
+
+    - name: Analizza stato e messaggio dalla riga RESULT
+      ansible.builtin.set_fact:
+        result_state: "{{ (result_line.split(':', 1)[1]).split('|')[0] | trim }}"
+        result_message: "{{ (result_line.split(':', 1)[1]).split('|')[1:] | join('|') | trim }}"
+
+    - name: Log a schermo (visibile nella cronologia task di Semaphore)
+      ansible.builtin.debug:
+        msg: "stato={{ result_state }} — {{ result_message }}"
+
+    - name: Notifica via email sugli stati di fallimento
+      # Il playbook manda l'email da sé (non la notifica nativa del task
+      # Semaphore) apposta: una notifica nativa vedrebbe solo l'exit code
+      # del task, perdendo esattamente l'informazione strutturata che la
+      # riga RESULT porta — ed è il motivo per cui quel formato esiste
+      # (deciso in T2/G4b).
+      community.general.mail:
+        host: "{{ smtp_host }}"
+        port: "{{ smtp_port }}"
+        username: "{{ smtp_user }}"
+        password: "{{ smtp_password }}"
+        secure: starttls
+        from: "{{ notify_mail_from }}"
+        to: "{{ notify_mail_to }}"
+        subject: "[homelab] rinnovo cert Vaultwarden: {{ result_state }}"
+        body: |
+          Stato: {{ result_state }}
+          Messaggio: {{ result_message }}
+
+          --- output completo dello script remoto ---
+          {{ renewal_run.stdout | default('(nessuno)') }}
+
+          --- stderr ---
+          {{ renewal_run.stderr | default('(nessuno)') }}
+
+          rc ssh: {{ renewal_run.rc | default('n/d') }}
+      when: result_state in ['error', 'rollback']
+
+    - name: Fallisce il task Semaphore sugli stati di fallimento
+      # Cronologia Semaphore leggibile a colpo d'occhio: i run 'nochange',
+      # 'pending' e 'renewed' risultano verdi, error/rollback rossi.
+      ansible.builtin.fail:
+        msg: "Rinnovo cert fallito: {{ result_state }} — {{ result_message }}"
+      when: result_state in ['error', 'rollback']

@@ -2,8 +2,8 @@
 id: G2
 title: Installazione del cert in NPM senza downtime
 labels: [wayfinder:grilling]
-status: open
-assignee:
+status: closed
+assignee: claude+nicholas
 blocked-by: [T1, G1]
 map: ../map.md
 ---
@@ -51,3 +51,30 @@ Il cuore della mappa. Da decidere:
 
 Chiama `grilling` e `domain-modeling`. Rileggi il vincolo sul test nelle Note della mappa prima
 di proporre qualunque verifica: **non esiste end-to-end onesto prima di novembre 2026**.
+
+---
+
+## Risoluzione
+
+1. **Catena di trasformazione**: lo split leaf/intermediate del README sparisce del tutto — T1/B6
+   ha stabilito che la cache di tailscaled (`/var/lib/tailscale/certs/`) contiene già la stessa
+   catena a 4 blocchi installata in NPM, byte-compatibile. Trigger via
+   `tailscale cert --cert-file=- --key-file=-` (nessun file scritto nel container); lettura diretta
+   della cache per il confronto.
+2. **Byte-diff**: confronto letterale contro `npm-3/fullchain.pem` e `privkey.pem`, Strada A di
+   [R1](R1-npm-cert-storage.md) (scrittura diretta dei file, non `POST /upload`) — evita una
+   credenziale JWT aggiuntiva, dato che B non evita comunque il `docker exec` per il reload. Costo
+   accettato e documentato: `expires_on` e il blob nel DB NPM restano stale (innocuo, R1: quei blob
+   non vengono mai riletti).
+3. **Atomicità**: scrittura in staging (`.new`), verifica byte-esatta prima di toccare la
+   produzione, backup singolo (`npm-3.bak`, sovrascritto — nessuno storico, è compito di git per il
+   testo), poi rename in ordine **privkey prima, poi fullchain** (difesa in profondità, corretto
+   dopo revisione).
+4. **Reload**: `nginx -t` come cancello duro (R1: NPM non verifica cert↔chiave), `nginx -s reload`
+   solo se passa — mai un restart del container.
+5. **Primo giro**: nessuno — `certificate_id = 3` è una costante misurata in
+   [T1](T1-ricognizione-live.md)/B3, mai cercata per nome (`nice_name` non è una chiave, R1).
+6. **Idempotenza**: un solo gate byte-diff racchiude backup/scrittura/`nginx -t`/reload in un unico
+   ramo condizionale — dimostrabile oggi, non solo a novembre.
+
+Implementato in `ansible/tailscale-cert-renewal/remote/tailscale-cert-renew.sh`.

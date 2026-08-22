@@ -2,8 +2,8 @@
 id: T2
 title: Accesso SSH ristretto da Semaphore al NAS
 labels: [wayfinder:task]
-status: open
-assignee:
+status: closed
+assignee: claude+nicholas
 blocked-by: [T1, G1]
 map: ../map.md
 ---
@@ -49,3 +49,41 @@ Da fare:
 La risoluzione deve registrare: dove vive la chiave privata, con quale nome è censita in
 Semaphore, quale utente esegue sul NAS, il path esatto dello script vincolato, e l'esito della
 verifica del punto 6.
+
+---
+
+## Risoluzione
+
+**Utente sul NAS: `nicholasizzo`, nessun `sudo`.** La ricognizione live ([T1](T1-ricognizione-live.md))
+ha dimostrato che questo utente esegue già `docker exec` su `tailscale` e `nginx-proxy-manager`
+senza sudo — dentro quei container si entra come root del container indipendentemente da chi ha
+lanciato `docker exec` sull'host, quindi non serve mai toccare i permessi host su `/volume1`.
+
+**Script vincolato**: `/home/nicholasizzo/bin/tailscale-cert-renew.sh` — path scelto fuori da
+`/volume1` apposta, non richiede root per essere installato o aggiornato. Versionato in
+`ansible/tailscale-cert-renewal/remote/tailscale-cert-renew.sh`; il deploy fisico resta un passo
+manuale (HITL), non eseguito in questa sessione.
+
+**Riga `authorized_keys`**: template in `ansible/tailscale-cert-renewal/remote/authorized_keys.snippet`
+— `command="/home/nicholasizzo/bin/tailscale-cert-renew.sh"` più
+`no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty`.
+
+**Chiave**: generata sul NAS (`ssh-keygen -t ed25519 -f ~/.ssh/semaphore-cert-renew -N ""`),
+pubblica installata come sopra, privata da incollare in Semaphore come credenziale
+`NAS_CERT_RENEWAL_SSH_KEY` (vedi `ansible/tailscale-cert-renewal/semaphore/task-template.yml`) e
+poi cancellata dal NAS — non deve restare una copia della chiave privata sulla macchina che serve
+a raggiungere.
+
+**Conseguenza architetturale non anticipata dal ticket**: il `command=` fisso è incompatibile con
+il modo normale in cui Ansible parla SSH (deve eseguire payload arbitrari per ogni modulo — moduli
+Python serializzati, sftp). Risolto facendo girare il playbook su `hosts: localhost` e raggiungendo
+il NAS con un singolo comando `ssh` esplicito dentro un task — dettagliato in
+`ansible/tailscale-cert-renewal/README.md`. Tutta la logica idempotente vive nello script remoto,
+non nei task Ansible.
+
+**Regola fissata**: mai `docker exec -t` nello script remoto — nessuna allocazione TTY, coerente
+con `no-pty`.
+
+**Verifica del punto 6**: documentata come Test 1 in `ansible/tailscale-cert-renewal/docs/runbook.md`
+(`ssh -i <chiave> nicholasizzo@192.168.0.36 "whoami"` deve **non** stampare `nicholasizzo`). Non
+eseguita dal vivo in questa sessione — richiede la chiave installata sul NAS.

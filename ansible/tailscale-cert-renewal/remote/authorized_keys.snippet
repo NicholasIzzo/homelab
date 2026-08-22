@@ -1,0 +1,38 @@
+# Riga da incollare in ~/.ssh/authorized_keys dell'utente nicholasizzo sul
+# NAS (192.168.0.36) — NON è consumata automaticamente da nulla, è un
+# riferimento per l'installazione manuale (T2, HITL).
+#
+# Prerequisito: generare la coppia di chiavi dedicata SUL NAS, usata SOLO
+# per questo scopo:
+#   ssh-keygen -t ed25519 -f ~/.ssh/semaphore-cert-renew -N ""
+#
+# Poi sostituire <PLACEHOLDER-CHIAVE-PUBBLICA> qui sotto con il contenuto
+# di ~/.ssh/semaphore-cert-renew.pub, e incollare la riga risultante in
+# ~/.ssh/authorized_keys.
+#
+# Spiegazione di ogni clausola (T2 — "chiave dedicata + command= ristretto,
+# così anche se Semaphore fosse compromesso questa chiave non può fare
+# altro"):
+#
+#   command="/home/nicholasizzo/bin/tailscale-cert-renew.sh"
+#       Esegue SEMPRE e SOLO questo script, qualunque comando il client SSH
+#       chieda. $SSH_ORIGINAL_COMMAND viene ignorato di proposito: lo
+#       script non legge argomenti (vedi remote/tailscale-cert-renew.sh).
+#   no-port-forwarding      niente tunnel attraverso questa connessione
+#   no-agent-forwarding     niente inoltro dell'agente SSH del chiamante
+#   no-X11-forwarding       niente forwarding grafico, non serve qui
+#   no-pty                  nessuna allocazione di terminale — coerente con
+#                           la regola "mai docker exec -t" nello script
+#
+# Dopo l'installazione, verificare che la restrizione funzioni davvero
+# (vedi docs/runbook.md, primo test):
+#   ssh -i ~/.ssh/semaphore-cert-renew nicholasizzo@192.168.0.36 "whoami"
+# Successo = NON stampa "nicholasizzo": esegue lo script fisso comunque.
+#
+# Dopo aver incollato la chiave privata in Semaphore come credenziale
+# (variabile d'ambiente segreta NAS_CERT_RENEWAL_SSH_KEY, vedi
+# semaphore/task-template.yml), cancellare ~/.ssh/semaphore-cert-renew dal
+# NAS: non deve restare una copia della chiave privata sulla macchina che
+# quella chiave serve a raggiungere.
+
+command="/home/nicholasizzo/bin/tailscale-cert-renew.sh",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty ssh-ed25519 <PLACEHOLDER-CHIAVE-PUBBLICA>

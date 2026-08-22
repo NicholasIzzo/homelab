@@ -1,0 +1,7 @@
+# Difesa in profondità: se per errore la chiave privata temporanea del
+# playbook (vedi playbook.yml, task "Scrive la chiave nel file temporaneo")
+# finisse scritta qui invece che nella dir temporanea di sistema, non deve
+# mai poter essere committata per sbaglio.
+*.key
+*.pem
+tmp/

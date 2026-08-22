@@ -2,8 +2,8 @@
 id: G4a
 title: Monitor di scadenza cert in Uptime Kuma
 labels: [wayfinder:grilling]
-status: open
-assignee:
+status: closed
+assignee: claude+nicholas
 blocked-by: [T1]
 map: ../map.md
 ---
@@ -47,3 +47,30 @@ Nota per il punto 2: la soglia di preavviso va tarata su una finestra che **camb
 giorni di vita. Una soglia scelta oggi troppo vicina al limite diventerà silenziosamente sbagliata.
 
 Chiama `grilling` e `domain-modeling`.
+
+---
+
+## Risoluzione
+
+**Priorità alta, non opzionale** — confermato esplicitamente durante il grilling: con NPM davanti
+a Vaultwarden il refresh loop interno di tailscaled non parte mai
+([R2](R2-tailscale-cert-renewal.md)), quindi il cron Semaphore è l'**unico** motore di rinnovo, e
+questo monitor è l'unica rete di sicurezza contro "il job non è mai partito".
+
+1. **Cosa monitorare**: l'**endpoint TLS live** (`https://192.168.0.36:44075/`), non i file —
+   unico modo di coprire lo scenario più probabile, "rinnovato da Tailscale ma non ancora installato
+   in NPM".
+2. **Soglia: 10 giorni**, come suggerito esplicitamente da R2 — resta sotto tutte le finestre di
+   rinnovo future (~30gg oggi, ~21gg dal 2027-02-10, ~15gg dal 2028-02-16), senza bisogno di essere
+   mai rivista.
+3. **Raggiungibilità**: IP LAN (`192.168.0.36`) invece del nome Tailscale, perché Kuma gira su
+   bridge Docker senza risoluzione MagicDNS (verificato nel compose). `Ignore TLS Error` attivo per
+   il mismatch di hostname atteso — non impedisce la lettura della scadenza del certificato.
+4. **Canale**: stessa notifica SMTP Office365 già in uso per Grafana, nessuna escalation aggiuntiva.
+5. **Limite accettato esplicitamente**: il NAS non sorveglia sé stesso. Idea futura a bassa
+   priorità (monitor esterno tipo Uptime Robot/healthchecks.io) annotata, non implementata — fuori
+   perimetro (la mappa esclude l'esposizione a internet).
+
+Istruzioni passo-passo in `ansible/tailscale-cert-renewal/docs/kuma-setup.md`, incluse la verifica
+periodica che il monitor legga davvero il certificato. Configurazione nella UI di Kuma non eseguita
+in questa sessione (HITL).

@@ -2,8 +2,8 @@
 id: G1
 title: NPM o tailscale serve sul percorso TLS
 labels: [wayfinder:grilling]
-status: open
-assignee:
+status: closed
+assignee: claude+nicholas
 blocked-by: [T1]
 map: ../map.md
 ---
@@ -52,3 +52,24 @@ preferibile. Se invece l'unica via è manipolare il DB SQLite o un'API interna n
 il costo di manutenzione di quell'automazione va confrontato seriamente con la migrazione.
 
 Chiama `grilling` e `domain-modeling`. La decisione è dell'utente, non tua.
+
+---
+
+## Risoluzione
+
+**Decisione: si resta su NPM, non si migra a `tailscale serve`.**
+
+R1 smonta l'argomento principale a favore della migrazione: il certificato non è "sepolto in un
+DB SQLite irraggiungibile" — è un file in un path deterministico (`/data/custom_ssl/npm-<id>/`),
+sovrascrivibile in place senza rischio (dimostrato in pratica dal playbook di G2). Migrare a
+`tailscale serve` costringerebbe a riconfigurare ogni client Bitwarden — il tipo di operazione a
+rischio massimo su un password manager — e toglierebbe a CrowdSec la visibilità sui log di
+Vaultwarden, che oggi legge.
+
+Il rischio "il cron è l'unico motore di rinnovo" ([R2](R2-tailscale-cert-renewal.md)) esiste
+**comunque**, indipendentemente da NPM o `tailscale serve`: si mitiga con [G4a](G4a-kuma-expiry-monitor.md)
+(monitor sull'endpoint), non con la scelta architetturale — non è un argomento decisivo in nessuna
+direzione. Il perimetro confermato in [T1](T1-ricognizione-live.md) (un cert, un proxy host) non
+introduce complessità multi-host che avrebbe reso `tailscale serve` comparativamente più economico.
+
+Nessuna migrazione eseguita: l'automazione in `ansible/tailscale-cert-renewal/` è scritta per NPM.

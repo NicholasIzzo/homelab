@@ -1,6 +1,6 @@
 ---
 labels: [wayfinder:map]
-status: open
+status: closed
 ---
 
 # Automazione del certificato Tailscale servito da NPM
@@ -99,6 +99,33 @@ di risultato, preferisci la soluzione **leggibile e idiomatica** a quella elegan
   dietro NPM, Nextcloud non ha alcun container; `privkey.pem` è `700` root:root; l'entry attiva
   (`npm-3`) ha una catena a **4 blocchi** (leaf+intermediate+root, non 2) da cui G2 deve decidere se
   normalizzare; la cache `/var/lib/tailscale/certs/` è utilizzabile come fonte diretta per G2.
+- [NPM o tailscale serve](tickets/G1-npm-o-tailscale-serve.md): **si resta su NPM**. L'argomento
+  principale a favore della migrazione (cert sepolto in un DB) è falso (R1); migrare costringerebbe
+  a riconfigurare ogni client Bitwarden e toglierebbe a CrowdSec la visibilità su Vaultwarden. Il
+  rischio "cron unico motore di rinnovo" (R2) si mitiga con G4a, non con la scelta architetturale.
+- [Accesso SSH ristretto da Semaphore](tickets/T2-ssh-ristretto-semaphore.md): utente `nicholasizzo`,
+  nessun sudo (tutto passa per `docker exec`); script fisso in `/home/nicholasizzo/bin/`, chiave
+  dedicata con `command=` ristretto. Il `command=` fisso è incompatibile con i moduli Ansible via
+  SSH → il playbook gira su `localhost` e raggiunge il NAS con un solo comando `ssh` esplicito.
+- [Installazione cert senza downtime](tickets/G2-installazione-cert-senza-downtime.md): niente
+  split leaf/intermediate (la cache tailscaled è già la catena completa); scrittura diretta dei
+  file (Strada A di R1, non l'API); backup singolo sovrascritto, rename privkey-poi-fullchain,
+  `nginx -t` come cancello duro; `certificate_id = 3` è costante, mai cercata per nome.
+- [Test e rollback](tickets/G3-test-e-rollback.md): l'host NPM usa-e-getta non è realizzabile
+  (NPM rifiuta un secondo host sullo stesso nome) — sostituito con un config nginx sintetico e
+  scartabile per isolare il gate `nginx -t` senza toccare la produzione. Primo run atteso
+  `RESULT: renewed` cosmetico (differenza di formattazione T1/B5, non un rinnovo vero).
+- [Monitor di scadenza in Kuma](tickets/G4a-kuma-expiry-monitor.md): **priorità alta, non
+  opzionale** — è l'unica rete di sicurezza contro "il job non è mai partito" (R2: il cron è
+  l'unico motore di rinnovo). Monitor sull'endpoint TLS live via IP LAN, soglia 10 giorni (sotto
+  tutte le finestre future fino al 2028), stessa notifica SMTP di Grafana.
+- [Notifica di fallimento job](tickets/G4b-notifica-fallimento-job.md): notifica solo su
+  `error`/`rollback`; il playbook manda l'email da sé (non la notifica nativa Semaphore) per non
+  perdere il contenuto strutturato della riga `RESULT: <stato> | <messaggio>`; trap EXIT garantisce
+  che un crash imprevisto non esca 0 in silenzio.
+- [Bozza del playbook](tickets/P1-bozza-playbook.md): percorso invertito — le decisioni sono state
+  prese per esteso prima di scrivere codice, quindi il playbook è stato scritto direttamente in
+  forma quasi-definitiva in `ansible/tailscale-cert-renewal/`, non come bozza a parte.
 
 ## Not yet specified
 

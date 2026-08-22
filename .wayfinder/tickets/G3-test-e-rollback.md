@@ -2,8 +2,8 @@
 id: G3
 title: Procedura di test e piano di rollback
 labels: [wayfinder:grilling]
-status: open
-assignee:
+status: closed
+assignee: claude+nicholas
 blocked-by: [R1, G2]
 map: ../map.md
 ---
@@ -53,3 +53,37 @@ solo il ramo che finora non è mai stato preso.
    trovabile in quel momento — cioè quando il password manager non è raggiungibile.
 
 Chiama `grilling` e `domain-modeling`.
+
+---
+
+## Risoluzione
+
+Il fixture originale ("host NPM usa-e-getta sullo stesso cert") **non è realizzabile**:
+[T1](T1-ricognizione-live.md)/B3 conferma che NPM rifiuta un secondo host con lo stesso
+`domain_name`, e senza `dns-subdomain-resolve` (assente, T1/B1) non esiste un secondo nome da
+assegnargli — chiuso sia dal control plane Tailscale sia dal codice NPM.
+
+**Sostituito con** un config nginx sintetico e scartabile
+(`nginx -t -c /tmp/cert-rehearsal/nginx.conf`) che isola esattamente il rischio segnalato da
+[R1](R1-npm-cert-storage.md) — NPM non verifica che chiave e certificato corrispondano — senza mai
+toccare la configurazione live: sia il caso "deve passare" (coppia reale) sia il caso "deve fallire
+apposta" (chiave sbagliata), per provare che il rollback funziona davvero e non solo in teoria.
+
+**No-op reale in produzione**, sicuro perché il byte-diff garantisce zero scrittura se identico:
+asserzioni osservabili — PID worker nginx invariati (nessun reload), mtime di `npm-3.bak` invariato
+(nessuna sostituzione).
+
+**Nota registrata esplicitamente**: la prima esecuzione in produzione produrrà `RESULT: renewed`
+per un riallineamento cosmetico di formattazione (T1/B5: cache e `npm-3` hanno la stessa catena a 4
+blocchi ma differiscono di ~96 byte), non per un rinnovo vero — decisione: confronto byte-a-byte
+letterale, non normalizzato; costo accettato, documentato nel runbook.
+
+**Criterio di successo a novembre**: sequenza `RESULT: pending` (giorno N) → `RESULT: renewed`
+(giorno N+1). Il silenzio di [G4a](G4a-kuma-expiry-monitor.md) conferma solo "non sta per scadere",
+non "si è rinnovato secondo programma" — per la conferma positiva serve un controllo manuale.
+
+**Piano B**: procedura manuale esistente in `docker/vaultwarden/README.md`, con la correzione del
+path (`/var/lib/tailscale/certs/`, non `/tmp/certs/`) annotata nel runbook per chi la leggerà sotto
+pressione.
+
+Implementato in `ansible/tailscale-cert-renewal/docs/runbook.md`.
