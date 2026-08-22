@@ -93,17 +93,20 @@ di risultato, preferisci la soluzione **leggibile e idiomatica** a quella elegan
   cadenza giornaliera è sicura sui rate limit con margine ~100x; ma il rinnovo è **asincrono** —
   l'esecuzione che lo innesca stampa `unchanged` e installa solo il giorno dopo — il **cron è
   l'unico motore di rinnovo** e non un guardiano, e `--min-validity` non va passato mai.
+- [Ricognizione live sul NAS](tickets/T1-ricognizione-live.md): checklist B1-B6 eseguita dal vivo.
+  `CertDomains` reale = `dh4300plus-fix.taile39e4f.ts.net`, repo allineato; scadenza cert **misurata**
+  = `Nov 5 2026`; **un solo proxy host** esiste, `certificate_id = 3`; Home Assistant gira ma non
+  dietro NPM, Nextcloud non ha alcun container; `privkey.pem` è `700` root:root; l'entry attiva
+  (`npm-3`) ha una catena a **4 blocchi** (leaf+intermediate+root, non 2) da cui G2 deve decidere se
+  normalizzare; la cache `/var/lib/tailscale/certs/` è utilizzabile come fonte diretta per G2.
 
 ## Not yet specified
 
-- **Generalizzazione agli altri servizi** (Home Assistant, Nextcloud). Dopo
-  [R3](tickets/R3-stato-reale-nas.md) questo potrebbe essere **un non-problema anziché una
-  decisione**: senza la capability wildcard, l'unica via per quei servizi sono le Custom Locations
-  sotto l'unico proxy host — che non aggiungono certificati e quindi non toccano l'automazione del
-  rinnovo. Conferma o smentita da B1 e B4 di [T1](tickets/T1-ricognizione-live.md). Se confermato,
-  questa voce si chiude senza diventare un ticket.
 - **Aggiornamento della documentazione**: i README di Vaultwarden, Home Assistant e Nextcloud
-  descrivono oggi la procedura manuale a 9 passi, che l'automazione rende obsoleta.
+  descrivono oggi la procedura manuale a 9 passi, che l'automazione rende obsoleta. Dopo
+  [T1](tickets/T1-ricognizione-live.md) la correzione non è più solo cosmetica:
+  `docker/home-assistant/README.md:62` propone un proxy host che NPM rifiuta comunque (nome già in
+  uso), e `docker/nextcloud/README.md:85` descrive un servizio che **non esiste come container**.
 - **Retention e rotazione dei backup del DB NPM** presi prima di ogni sostituzione. Un job
   giornaliero che fa backup accumula; nessuno ha deciso quanti tenerne.
 - **Riuso del pattern SMTP per notifiche di altri servizi** (Scrutiny, e futuri). Decisione
