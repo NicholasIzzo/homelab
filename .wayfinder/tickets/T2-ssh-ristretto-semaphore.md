@@ -87,3 +87,27 @@ con `no-pty`.
 **Verifica del punto 6**: documentata come Test 1 in `ansible/tailscale-cert-renewal/docs/runbook.md`
 (`ssh -i <chiave> nicholasizzo@192.168.0.36 "whoami"` deve **non** stampare `nicholasizzo`). Non
 eseguita dal vivo in questa sessione — richiede la chiave installata sul NAS.
+
+### Nota post-deploy (2026-08-23) — l'isolamento non regge, rischio accettato
+
+Test 1 eseguito dal vivo durante l'attivazione: **fallito**. `whoami` via la chiave ristretta
+stampa `nicholasizzo`, non l'output dello script. Causa trovata leggendo `/etc/ssh/sshd_config`
+sul NAS: UGOS impone globalmente (fuori da qualunque `Match`) `ForceCommand
+/etc/ssh/force_command.sh`, che **ha precedenza assoluta** sul `command=` di `authorized_keys`
+(comportamento documentato di OpenSSH, non un bug). Quello script, letto per intero, concede shell
+o comando arbitrario a **qualunque utente nel gruppo `admin` o `root`** — e `nicholasizzo` è nel
+gruppo `admin` (verificato: `ls -la ~/bin` → `nicholasizzo admin`). Per gli utenti non-admin la
+whitelist è `rsync`/`scp`/`sftp-server`, tutto il resto rifiutato via `nologin-origin`.
+
+**Conseguenza**: la chiave dedicata autentica come `nicholasizzo`, quindi eredita lo stesso
+lasciapassare admin — il `command=` scritto in `authorized_keys` non isola nulla su questo NAS.
+Se la chiave trapelasse, l'accesso ottenuto è equivalente a un login admin completo, non
+"solo lo script di rinnovo" come assunto nella risoluzione originale sopra.
+
+**Decisione (Nicholas, in sessione)**: rischio accettato esplicitamente, si procede senza
+modificare `force_command.sh` (file di sistema condiviso, root-owned, fuori perimetro di questa
+mappa — modificarlo rischierebbe di rompere l'accesso SSH per tutti gli altri usi del NAS). La
+chiave resta comunque utile come **compartimentazione operativa** (credenziale dedicata,
+revocabile singolarmente, non riusata altrove) ma **non** come sandbox di comando. Non
+riaprire questo punto senza motivo nuovo — se un giorno servisse davvero l'isolamento, la strada
+è un utente NAS dedicato fuori dal gruppo `admin`/`root`, non ridiscussa qui.

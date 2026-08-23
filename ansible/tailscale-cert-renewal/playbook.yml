@@ -6,10 +6,8 @@
 #
 #   1. materializzare la chiave SSH ristretta (arriva da Semaphore come
 #      variabile d'ambiente segreta, mai committata — vedi ../.gitignore)
-#   2. eseguire UNA sessione SSH verso il NAS — il comando richiesto è
-#      irrilevante: per via del `command=` in authorized_keys (T2, vedi
-#      remote/authorized_keys.snippet) il server esegue comunque e solo lo
-#      script fisso, qualunque cosa gli si chieda
+#   2. eseguire UNA sessione SSH verso il NAS, richiedendo esplicitamente
+#      lo script fisso come comando
 #   3. leggere l'ultima riga "RESULT: <stato> | <messaggio>" dall'output
 #   4. notificare via email SOLO sugli stati di fallimento (error, rollback)
 #      — vedi .wayfinder/tickets/G4b-notifica-fallimento-job.md
@@ -65,9 +63,14 @@
         mode: "0600"
 
     - name: Esegue il rinnovo sul NAS via SSH
-      # Il comando "true" è un placeholder: per via del command= ristretto
-      # lato server (T2), qualunque cosa scrivessimo qui verrebbe comunque
-      # ignorata e sostituita con l'esecuzione di tailscale-cert-renew.sh.
+      # Richiede esplicitamente lo script come comando remoto. NON ci si
+      # può affidare al `command=` ristretto in authorized_keys (T2) per
+      # sostituirlo automaticamente: UGOS impone globalmente un
+      # `ForceCommand` in sshd_config che ha precedenza su `command=` ed
+      # esegue il comando richiesto così com'è per gli utenti del gruppo
+      # admin (verificato dal vivo 2026-08-23, dettaglio in
+      # .wayfinder/tickets/T2-ssh-ristretto-semaphore.md, nota post-deploy).
+      # Va quindi chiesto per nome, non con un placeholder come "true".
       # failed_when: false perché l'esito si legge dalla riga RESULT, non
       # dall'exit code grezzo di ssh (che può essere 0/1/2 a seconda dello
       # stato — vedi lo script remoto — e nessuno di questi è "un errore di
@@ -82,7 +85,7 @@
           - -o
           - StrictHostKeyChecking=accept-new
           - "{{ nas_user }}@{{ nas_host }}"
-          - "true"
+          - "/home/nicholasizzo/bin/tailscale-cert-renew.sh"
       register: renewal_run
       changed_when: false
       failed_when: false

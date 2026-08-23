@@ -108,7 +108,7 @@ log "=== avvio rinnovo per ${DOMAIN} ==="
 log "invocazione tailscale cert (trigger + eventuale rinnovo ARI in background)..."
 TAILSCALE_CERT_LOG="${WORKDIR}/tailscale-cert.log"
 if ! docker exec "${TAILSCALE_CONTAINER}" \
-        tailscale cert --socket="${TAILSCALE_SOCKET}" \
+        tailscale --socket="${TAILSCALE_SOCKET}" cert \
         --cert-file=- --key-file=- "${DOMAIN}" \
         > "${TAILSCALE_CERT_LOG}" 2>&1; then
     log "tailscale cert ha fallito:"

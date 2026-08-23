@@ -42,6 +42,17 @@ tipicamente termina con una riga `RESULT: ...`), **non** la stringa
 `authorized_keys` non è impostato correttamente — fermarsi qui e rivedere
 `remote/authorized_keys.snippet` prima di procedere.
 
+> **Eccezione nota su questo NAS (verificata 2026-08-23, vedi
+> [T2](../../../.wayfinder/tickets/T2-ssh-ristretto-semaphore.md), nota
+> post-deploy)**: su UGOS il test **stampa sempre `nicholasizzo`**,
+> indipendentemente da come è scritto `authorized_keys` — un
+> `ForceCommand` globale in `sshd_config` ha precedenza sul `command=` e
+> concede comando arbitrario a chiunque autentichi come utente del gruppo
+> `admin` (`nicholasizzo` lo è). Non è un errore di configurazione da
+> correggere: è un limite noto e accettato. Su questo NAS il Test 1 **non
+> è un cancello affidabile** — non fermarti qui per questo, ma non
+> considerare la chiave un vero sandbox di comando.
+
 ## Test 2 — rehearsal: la coppia cert/chiave candidata è valida per nginx
 
 Isola il rischio che R1 ha segnalato: NPM non verifica che chiave e
@@ -58,6 +69,7 @@ docker exec nginx-proxy-manager sh -c '
   cp /data/custom_ssl/npm-3/fullchain.pem /tmp/cert-rehearsal/
   cp /data/custom_ssl/npm-3/privkey.pem /tmp/cert-rehearsal/
   cat > /tmp/cert-rehearsal/nginx.conf <<EOF
+user npm;
 events {}
 http {
   server {
@@ -70,6 +82,14 @@ EOF
   nginx -t -c /tmp/cert-rehearsal/nginx.conf
 '
 ```
+
+> **Nota (verificata 2026-08-23)**: la direttiva `user npm;` è necessaria
+> — omettendola nginx prova a droppare i privilegi sull'utente di default
+> `nginx`, che in questo container non esiste (`getpwnam("nginx") failed`).
+> L'immagine `jc21/nginx-proxy-manager` gira come utente `npm`
+> (`/etc/passwd`: `npm:x:0:0::/tmp/npmuserhome:/bin/false`), non `nginx`.
+> Senza questa riga il test fallisce per un motivo indipendente dal
+> certificato, e sembra (erroneamente) un problema di cert/chiave.
 
 **Atteso**: `nginx: configuration file /tmp/cert-rehearsal/nginx.conf test
 is successful`.
