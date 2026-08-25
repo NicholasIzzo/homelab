@@ -5,6 +5,7 @@ import { Readable } from "node:stream";
 import { loadConfig } from "./config.js";
 import { scaricaCatalogo } from "./goodreads.js";
 import { caricaDesideri } from "./desideri.js";
+import { articoliALibri, scaricaWishlist } from "./amazon.js";
 import { costruisciScaffali, REGOLE } from "./scaffali.js";
 import { catalogoMock, copertinaMockSvg } from "./mock.js";
 import type { BibliotecaPayload, Libro } from "./tipi.js";
@@ -12,8 +13,30 @@ import type { BibliotecaPayload, Libro } from "./tipi.js";
 const cfg = loadConfig();
 const app = Fastify({ logger: true });
 
-// I desideri sono statici: si caricano una volta all'avvio.
-const desiderata = await caricaDesideri(cfg.desideriPath);
+/**
+ * I desideri: si parte dal file incluso, così l'app è subito completa, e si
+ * rilegge la wishlist dal vivo poco dopo l'avvio e poi a intervalli. Se Amazon
+ * non risponde o cambia struttura si continua a servire l'ultimo elenco buono:
+ * una lista ferma è meglio di una lista vuota.
+ */
+let desiderata = await caricaDesideri(cfg.desideriPath);
+let desideriAggiornati: string | null = null;
+
+async function aggiornaDesideri(): Promise<void> {
+  if (!cfg.wishlistId) return;
+  try {
+    const articoli = await scaricaWishlist(cfg.wishlistId);
+    const nuovi = articoliALibri(articoli);
+    // le copertine del file di riserva restano valide per i libri già visti
+    for (const [k, v] of desiderata.copertine) if (!nuovi.copertine.has(k)) nuovi.copertine.set(k, v);
+    const prima = desiderata.desideri.length;
+    desiderata = nuovi;
+    desideriAggiornati = new Date().toISOString();
+    app.log.info(`wishlist Amazon riletta: ${nuovi.desideri.length} titoli (prima ${prima})`);
+  } catch (err) {
+    app.log.warn({ err }, "wishlist Amazon non riletta: resta l'elenco precedente");
+  }
+}
 
 // Cache del catalogo Goodreads: lo scaffale cambia di rado, niente martellate.
 const CATALOGO_TTL_MS = 30 * 60 * 1000;
@@ -80,6 +103,7 @@ app.get("/api/biblioteca", async (): Promise<BibliotecaPayload> => {
     lettrice: cfg.lettrice || cat.lettrice || "la tua biblioteca",
     scaffali: costruisciScaffali(cat.libri),
     desideri: desiderata.desideri,
+    desideriAggiornati,
     mock: cfg.mockMode,
   };
 });
@@ -135,6 +159,10 @@ if (cfg.publicDir) {
 try {
   await app.listen({ host: cfg.host, port: cfg.port });
   app.log.info(`Libreria Incantata avviata (mock: ${cfg.mockMode}, desideri: ${desiderata.desideri.length})`);
+  // Non si blocca l'avvio per Amazon: l'app parte con il file incluso e la
+  // lista si aggiorna appena possibile, poi a intervalli regolari.
+  void aggiornaDesideri();
+  setInterval(() => void aggiornaDesideri(), Math.max(1, cfg.wishlistOre) * 3600_000).unref();
 } catch (err) {
   app.log.error(err);
   process.exit(1);

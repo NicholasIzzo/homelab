@@ -1,8 +1,26 @@
 {
-  "_nota": "Wishlist Amazon (libri da comprare). Sorgente bloccata al fetch automatico: aggiornare a mano rilanciando lo scrape del browser, scorrendo tutti i lotti. Ultimo aggiornamento: 2026-08-16. Lista: MPM4BFSYOHU7",
-  "aggiornato": "2026-08-16",
+  "_nota": "Riserva della wishlist Amazon: il server la rilegge dal vivo ogni poche ore, questo file serve solo al primo avvio e se Amazon non risponde. Rigenerato: 2026-08-25",
+  "aggiornato": "2026-08-25",
   "wishlistId": "MPM4BFSYOHU7",
   "libri": [
+    {
+      "asin": "B0H78L4YQ9",
+      "titolo": "Daybreak. Splendida finzione (Sorrowsong Series Vol. 2)",
+      "autore": "Autumn Woods",
+      "formato": "Formato Kindle",
+      "prezzo": "6,99 €",
+      "copertina": "https://m.media-amazon.com/images/I/51KaEkzs52L._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/B0H78L4YQ9"
+    },
+    {
+      "asin": "8820084007",
+      "titolo": "The night we met. Ediz. italiana",
+      "autore": "Abby Jimenez, Susanna Decio",
+      "formato": "Copertina flessibile",
+      "prezzo": "17,95 €",
+      "copertina": "https://m.media-amazon.com/images/I/41yn3m2wUbL._SL500_.jpg",
+      "link": "https://www.amazon.it/dp/8820084007"
+    },
     {
       "asin": "B0F5NGJ874",
       "titolo": "Quasi Morti Del Tutto (I misteri del cimitero di Grimdale Vol. 1)",
@@ -96,7 +114,7 @@
     {
       "asin": "B0GQCKMXCZ",
       "titolo": "Of thorns and starlight",
-      "autore": "Sofia Mazzanti, Chiara  Topo",
+      "autore": "Sofia Mazzanti, Chiara Topo",
       "formato": "Formato Kindle",
       "prezzo": "2,99 €",
       "copertina": "https://m.media-amazon.com/images/I/51w-KKcc17L._SL500_.jpg",
@@ -179,7 +197,7 @@
       "titolo": "Silvercloak",
       "autore": "Laura Steven, Maria Concetta Scotto di Santillo",
       "formato": "Copertina rigida",
-      "prezzo": "17,95 €",
+      "prezzo": "13,99 €",
       "copertina": "https://m.media-amazon.com/images/I/41hBBLZdyZL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8817189049"
     },
@@ -197,7 +215,7 @@
       "titolo": "La figlia della foresta",
       "autore": "Juliet Marillier, Simona Garavelli",
       "formato": "Copertina flessibile",
-      "prezzo": null,
+      "prezzo": "17,10 €",
       "copertina": "https://m.media-amazon.com/images/I/51AIDChUFXL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8804755792"
     },
@@ -230,7 +248,7 @@
     },
     {
       "asin": "B0GC8J8DDS",
-      "titolo": "On wings of blood: Un'accademia di sangue e draghi (Bloodwing Academy Vol. 1)",
+      "titolo": "On wings of blood: Un&#039;accademia di sangue e draghi (Bloodwing Academy Vol. 1)",
       "autore": "Briar Boleyn, Valentina Zaffagnini",
       "formato": "Formato Kindle",
       "prezzo": "12,99 €",
@@ -293,7 +311,7 @@
     },
     {
       "asin": "B0FT5LDNRV",
-      "titolo": "Il bacio dell'usignolo",
+      "titolo": "Il bacio dell&#039;usignolo",
       "autore": "Adi Denner, Sara A. Benatti",
       "formato": "Formato Kindle",
       "prezzo": "11,99 €",
@@ -311,7 +329,7 @@
     },
     {
       "asin": "B07BKPZV4N",
-      "titolo": "L'infinito tra me e te. The Wall of Winnipeg and me",
+      "titolo": "L&#039;infinito tra me e te. The Wall of Winnipeg and me",
       "autore": "Mariana Zapata",
       "formato": "Formato Kindle",
       "prezzo": "3,99 €",
@@ -329,7 +347,7 @@
     },
     {
       "asin": "B0CP51HSZ6",
-      "titolo": "L'altra sposa",
+      "titolo": "L&#039;altra sposa",
       "autore": "Catharina Maura",
       "formato": "Copertina flessibile",
       "prezzo": "16,05 €",
@@ -338,7 +356,7 @@
     },
     {
       "asin": "B0FFWYM3J5",
-      "titolo": "Fable for the end of the world. La preda dell'angelo",
+      "titolo": "Fable for the end of the world. La preda dell&#039;angelo",
       "autore": "Ava Reid, Paolo Maria Bonora",
       "formato": "Copertina flessibile",
       "prezzo": "22,80 €",
@@ -350,7 +368,7 @@
       "titolo": "A language of dragons. La scintilla della ribellione",
       "autore": "S. F. Williamson, Ivan Belikov",
       "formato": "Copertina rigida",
-      "prezzo": "22,80 €",
+      "prezzo": "23,75 €",
       "copertina": "https://m.media-amazon.com/images/I/51ZY6hWsLUL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/B0FQGHDPS9"
     },
@@ -395,7 +413,7 @@
       "titolo": "House of the beast. Ediz. italiana",
       "autore": "Michelle Wong, Ilaria Katerinov",
       "formato": "Copertina rigida",
-      "prezzo": "18,91 €",
+      "prezzo": "21,37 €",
       "copertina": "https://m.media-amazon.com/images/I/51E+dI1EIzL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/B0F5YKWXT1"
     },
@@ -410,7 +428,7 @@
     },
     {
       "asin": "B0D38W956F",
-      "titolo": "Faster. Il brivido dell'amore (Always Romance)",
+      "titolo": "Faster. Il brivido dell&#039;amore (Always Romance)",
       "autore": "Paola Chiozza",
       "formato": "Formato Kindle",
       "prezzo": null,
@@ -437,7 +455,7 @@
     },
     {
       "asin": "8820076063",
-      "titolo": "Love on the brain. L'amore in testa",
+      "titolo": "Love on the brain. L&#039;amore in testa",
       "autore": "Ali Hazelwood, Benedetta Gallo",
       "formato": "Copertina rigida",
       "prezzo": "9,90 €",
@@ -455,7 +473,7 @@
     },
     {
       "asin": "8820076861",
-      "titolo": "La meccanica dell'amore",
+      "titolo": "La meccanica dell&#039;amore",
       "autore": "Alexene Farol Follmuth, Roberta Verde",
       "formato": "Copertina flessibile",
       "prezzo": "17,95 €",
@@ -500,7 +518,7 @@
     },
     {
       "asin": "8806219677",
-      "titolo": "L'arte della gioia",
+      "titolo": "L&#039;arte della gioia",
       "autore": "Goliarda Sapienza",
       "formato": "Copertina flessibile",
       "prezzo": "15,10 €",
@@ -530,7 +548,7 @@
       "titolo": "Nel buio della mente",
       "autore": "Paul Tremblay, Anna Ricci",
       "formato": "Copertina flessibile",
-      "prezzo": null,
+      "prezzo": "9,90 €",
       "copertina": "https://m.media-amazon.com/images/I/41Yb2CkTNNL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8850254210"
     },
@@ -539,7 +557,7 @@
       "titolo": "Violent life",
       "autore": "Fannie Heather",
       "formato": "Copertina flessibile",
-      "prezzo": "16,05 €",
+      "prezzo": "16,90 €",
       "copertina": "https://m.media-amazon.com/images/I/51m-R8umhUL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/B0F3RSV3HH"
     },
@@ -602,7 +620,7 @@
       "titolo": "Obsidian",
       "autore": "Jennifer L. Armentrout",
       "formato": "Copertina flessibile",
-      "prezzo": null,
+      "prezzo": "7,51 €",
       "copertina": "https://m.media-amazon.com/images/I/51OnXFpxlLL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/880979804X"
     },
@@ -726,7 +744,7 @@
     {
       "asin": "B0FBFWFWVD",
       "titolo": "Domino",
-      "autore": "Alessia D'Ambrosio",
+      "autore": "Alessia D&#039;Ambrosio",
       "formato": "Formato Kindle",
       "prezzo": "2,99 €",
       "copertina": "https://m.media-amazon.com/images/I/41YyPUMN0iL._SL500_.jpg",
@@ -752,10 +770,10 @@
     },
     {
       "asin": "8804779977",
-      "titolo": "Mrs. Nash's ashes",
+      "titolo": "Mrs. Nash&#039;s ashes",
       "autore": "Sarah Adler, Manuela Piemonte",
       "formato": "Copertina flessibile",
-      "prezzo": "16,00 €",
+      "prezzo": "15,20 €",
       "copertina": "https://m.media-amazon.com/images/I/41vJxGiqGeL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8804779977"
     },
@@ -788,7 +806,7 @@
     },
     {
       "asin": "B00R82NQAE",
-      "titolo": "L'apprendista assassino (Trilogia dei Lungavista Vol. 1)",
+      "titolo": "L&#039;apprendista assassino (Trilogia dei Lungavista Vol. 1)",
       "autore": "Robin Hobb, Paola Bruna Cartoceti",
       "formato": "Formato Kindle",
       "prezzo": "11,99 €",
@@ -800,7 +818,7 @@
       "titolo": "Le schegge",
       "autore": "Bret Easton Ellis, Giuseppe Culicchia",
       "formato": "Copertina flessibile",
-      "prezzo": "16,15 €",
+      "prezzo": "16,00 €",
       "copertina": "https://m.media-amazon.com/images/I/416SuheutvL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8806262874"
     },
@@ -818,7 +836,7 @@
       "titolo": "Stelle e ottone. The hidden society (Vol. 1)",
       "autore": "Jude Archer",
       "formato": "Copertina rigida",
-      "prezzo": "22,80 €",
+      "prezzo": "22,69 €",
       "copertina": "https://m.media-amazon.com/images/I/51VXUqAs2sL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/B0CDFBFRGS"
     },
@@ -836,7 +854,7 @@
       "titolo": "Ombre di desiderio. The Luna duet (Vol. 1)",
       "autore": "Pepper Winters, Francesca Rosa Ravallese",
       "formato": "Copertina flessibile",
-      "prezzo": "15,10 €",
+      "prezzo": "16,43 €",
       "copertina": "https://m.media-amazon.com/images/I/51Hw-WwImNL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8892892576"
     },
@@ -845,7 +863,7 @@
       "titolo": "Trilogia della città di K. Il grande quaderno-La prova-La terza menzogna",
       "autore": "Agota Kristof, Armando Marchi",
       "formato": "Copertina flessibile",
-      "prezzo": "13,77 €",
+      "prezzo": "13,90 €",
       "copertina": "https://m.media-amazon.com/images/I/41AAbH35zzL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8806219308"
     },
@@ -860,7 +878,7 @@
     },
     {
       "asin": "8822784448",
-      "titolo": "L'incanto della biblioteca d'agrifoglio",
+      "titolo": "L&#039;incanto della biblioteca d&#039;agrifoglio",
       "autore": "K. A. Linde, Lorena Marrocco",
       "formato": "Copertina rigida",
       "prezzo": "12,90 €",
@@ -944,7 +962,7 @@
       "titolo": "Lezioni di chimica",
       "autore": "Bonnie Garmus, Anna Rusconi",
       "formato": "Copertina flessibile",
-      "prezzo": null,
+      "prezzo": "8,00 €",
       "copertina": "https://m.media-amazon.com/images/I/410YAV50lFL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8817158178"
     },
@@ -971,13 +989,13 @@
       "titolo": "Quel che nasconde il fiume",
       "autore": "Isabel Ibañez, Maurizio Bartocci",
       "formato": "Copertina flessibile",
-      "prezzo": "21,90 €",
+      "prezzo": "20,80 €",
       "copertina": "https://m.media-amazon.com/images/I/51EVRFoFvfL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8804787635"
     },
     {
       "asin": "B0CV2PJMKR",
-      "titolo": "Where the dark stands still. La foresta dell'amore eterno",
+      "titolo": "Where the dark stands still. La foresta dell&#039;amore eterno",
       "autore": "A. B. Poranek, Maria Laura Capobianco",
       "formato": "Copertina rigida",
       "prezzo": "22,80 €",
@@ -998,7 +1016,7 @@
       "titolo": "Match point",
       "autore": "Katherine Reilly, Emma Celi Grassilli",
       "formato": "Copertina flessibile",
-      "prezzo": "15,64 €",
+      "prezzo": "14,83 €",
       "copertina": "https://m.media-amazon.com/images/I/41GACEcXURL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8817190969"
     },
@@ -1043,7 +1061,7 @@
       "titolo": "Tomorrow, and tomorrow, and tomorrow. Ediz. italiana",
       "autore": "Gabrielle Zevin, Elisa Banfi",
       "formato": "Copertina flessibile",
-      "prezzo": null,
+      "prezzo": "16,89 €",
       "copertina": "https://m.media-amazon.com/images/I/51R7wU7x70L._SL500_.jpg",
       "link": "https://www.amazon.it/dp/884293433X"
     },
@@ -1088,7 +1106,7 @@
       "titolo": "Teddy",
       "autore": "Jason Rekulak, Will Staehle",
       "formato": "Copertina flessibile",
-      "prezzo": "16,90 €",
+      "prezzo": "16,32 €",
       "copertina": "https://m.media-amazon.com/images/I/51A2fGSsVFL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8809959698"
     },
@@ -1116,7 +1134,7 @@
       "autore": null,
       "formato": null,
       "prezzo": null,
-      "copertina": "https://m.media-amazon.com/images/I/https://m.media-amazon.com/images/G/01/x-locale/communities/wishlist/no_image_2x._SL500_.png._SL500_.jpg",
+      "copertina": "https://m.media-amazon.com/images/G/01/x-locale/communities/wishlist/no_image_2x._SL500_.png",
       "link": "https://www.amazon.it/dp/B09MWL7Z28"
     },
     {
@@ -1124,7 +1142,7 @@
       "titolo": "Un fato così ingiusto e solitario. Cursebreakers (Vol. 1)",
       "autore": "Brigid Kemmerer, Matteo Curtoni",
       "formato": "Copertina rigida",
-      "prezzo": "17,07 €",
+      "prezzo": "15,70 €",
       "copertina": "https://m.media-amazon.com/images/I/51u6Yhz7CQL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/880474488X"
     },
@@ -1139,10 +1157,10 @@
     },
     {
       "asin": "885542002X",
-      "titolo": "L'allodola. Il fiorentino (Vol. 1)",
+      "titolo": "L&#039;allodola. Il fiorentino (Vol. 1)",
       "autore": "Sylvain Reynard, Annalisa Gressani",
       "formato": "Copertina flessibile",
-      "prezzo": "16,44 €",
+      "prezzo": "16,25 €",
       "copertina": "https://m.media-amazon.com/images/I/41SPhnCfXeL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/885542002X"
     },
@@ -1169,7 +1187,7 @@
       "titolo": "Caldo come il fuoco. The dark elements (Vol. 1)",
       "autore": "Jennifer L. Armentrout",
       "formato": "Copertina flessibile",
-      "prezzo": null,
+      "prezzo": "23,49 €",
       "copertina": "https://m.media-amazon.com/images/I/51BvXEKxPiL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8869052109"
     },
@@ -1184,7 +1202,7 @@
     },
     {
       "asin": "8822738012",
-      "titolo": "Questa nostra stupida storia d'amore",
+      "titolo": "Questa nostra stupida storia d&#039;amore",
       "autore": "Mariana Zapata, Mariafelicia Maione",
       "formato": "Copertina flessibile",
       "prezzo": "4,95 €",
@@ -1196,7 +1214,7 @@
       "titolo": "Non mi piaci ma ti amo-Nessuno tranne te-Tutto ma non il mio tailleur",
       "autore": "Cecile Bertod",
       "formato": "Copertina rigida",
-      "prezzo": null,
+      "prezzo": "7,92 €",
       "copertina": "https://m.media-amazon.com/images/I/51bK0vBgIzL._SL500_.jpg",
       "link": "https://www.amazon.it/dp/8822702603"
     },
@@ -1205,7 +1223,7 @@
       "titolo": "Ti aspettavo",
       "autore": "Armentrout Jennifer L. (J. Lynn), Ilaria Katerinov",
       "formato": "Copertina rigida",
-      "prezzo": null,
+      "prezzo": "8,00 €",
       "copertina": "https://m.media-amazon.com/images/I/51t4niGRt4L._SL500_.jpg",
       "link": "https://www.amazon.it/dp/884292363X"
     },

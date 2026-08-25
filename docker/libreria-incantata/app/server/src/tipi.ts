@@ -39,5 +39,7 @@ export interface BibliotecaPayload {
   lettrice: string;
   scaffali: Scaffale[];
   desideri: Libro[];
+  /** Quando la wishlist è stata riletta da Amazon; null se mai riuscito. */
+  desideriAggiornati?: string | null;
   mock: boolean;
 }

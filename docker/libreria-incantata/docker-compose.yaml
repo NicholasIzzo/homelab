@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: libreria-incantata:0.7.0 # tag fisso: mai :latest in produzione
+    image: libreria-incantata:0.8.0 # tag fisso: mai :latest in produzione
     container_name: libreria-incantata
     restart: unless-stopped
     ports:
@@ -16,6 +16,9 @@ services:
       GOODREADS_SHELF: "to-read"
       # Nome sull'insegna; vuoto = usa quello del profilo Goodreads.
       LETTRICE: ""
+      # Wishlist Amazon riletta dal vivo; vuoto = solo il file di riserva.
+      AMAZON_WISHLIST: "MPM4BFSYOHU7"
+      AMAZON_ORE: "6"
       # MOCK=1 per dati finti senza Internet.
       MOCK: ""
     read_only: true

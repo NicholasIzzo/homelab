@@ -15,10 +15,14 @@ Three.js e server Fastify in un'unica immagine Docker).
   lo normalizza e lo tiene in cache 30 min. Quando lei aggiunge un libro su
   Goodreads, ricompare da solo. Niente generi nell'RSS → gli scaffali tematici
   sono dedotti da titolo/serie/autore con parole chiave (`server/src/scaffali.ts`).
-- **Desideri** (wishlist Amazon, "da comprare") → statici in
-  [`data/desideri.json`](data/desideri.json), **135 titoli**. Amazon blocca il
-  fetch automatico, quindi la lista è una fotografia da aggiornare a mano
-  (vedi sotto).
+- **Desideri** (wishlist Amazon, "da comprare") → **riletti dal vivo** ogni 6 ore
+  (`server/src/amazon.ts`). La pagina serve solo il guscio: i libri arrivano a
+  lotti da un endpoint interno con un gettone di paginazione, che va rincorso
+  finché non porta novità. Le richieste devono somigliare a quelle di un
+  browser, altrimenti Amazon risponde con una pagina di cortesia e nessun
+  articolo. [`data/desideri.json`](data/desideri.json) resta come **riserva**:
+  serve al primo avvio e quando Amazon non risponde, così una lista ferma non
+  diventa mai una lista vuota.
 
 Le copertine passano **sempre** dal proxy `/api/cover/:id` (stesso-origine):
 un'immagine cross-origin senza header CORS non è usabile come texture WebGL.
@@ -159,13 +163,16 @@ ARM64 se un domani la sposti.
 
 ## Aggiornare la wishlist Amazon
 
-Amazon serve un anti-bot (503) alle richieste automatiche: la
-[`data/desideri.json`](data/desideri.json) va rigenerata a mano leggendo la
-wishlist con un browser reale. **Attenzione**: la pagina mostra solo i primi 10
-titoli e ne carica altri a scorrimento; lo scorrimento però non scatta se la
-scheda non è visibile. Conviene seguire il `showMoreUrl` con il suo
-`paginationToken`, lotto dopo lotto, finché non arrivano più elementi nuovi.
-Lista attuale: `MPM4BFSYOHU7`, 135 titoli (fotografia del 2026-08-16).
+Non serve fare nulla: il server la rilegge da solo. Per rigenerare il file di
+riserva (utile ogni tanto, così anche un riavvio parte aggiornato):
+
+```bash
+cd app/server && npm run build
+node -e "import(./dist/amazon.js).then(async m => { … })"   # vedi cronologia git
+```
+
+Se un giorno Amazon cambia il markup, il sintomo è nei log
+(`wishlist Amazon non riletta`) e l app continua a servire la riserva.
 
 
 ## Portare i propri libri (EPUB)

@@ -6,8 +6,12 @@ export interface Config {
   goodreadsUserId: string;
   /** Scaffale Goodreads da leggere (di norma "to-read"). */
   goodreadsShelf: string;
-  /** Percorso del JSON con i desideri Amazon. */
+  /** Percorso del JSON con i desideri Amazon: serve da riserva. */
   desideriPath: string;
+  /** Lista Amazon da rileggere dal vivo; vuoto = solo il file statico. */
+  wishlistId: string;
+  /** Ogni quante ore ricontrollare la wishlist. */
+  wishlistOre: number;
   /** Nome mostrato sull'insegna della biblioteca. */
   lettrice: string;
   /** Forza i dati finti anche con Goodreads raggiungibile (sviluppo UI). */
@@ -28,6 +32,8 @@ export function loadConfig(): Config {
     goodreadsUserId: (process.env["GOODREADS_USER_ID"] ?? "130636342").trim(),
     goodreadsShelf: (process.env["GOODREADS_SHELF"] ?? "to-read").trim(),
     desideriPath: process.env["DESIDERI_PATH"] ?? "",
+    wishlistId: (process.env["AMAZON_WISHLIST"] ?? "MPM4BFSYOHU7").trim(),
+    wishlistOre: Number(process.env["AMAZON_ORE"] ?? 6),
     lettrice: process.env["LETTRICE"] ?? "",
     mockMode: process.env["MOCK"] === "1",
     pubblica: process.env["PUBBLICA"] === "1",

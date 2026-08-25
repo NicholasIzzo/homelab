@@ -14,7 +14,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: libreria-incantata:0.7.0 # stessa immagine dell'istanza di casa
+    image: libreria-incantata:0.8.0 # stessa immagine dell'istanza di casa
     container_name: libreria-demo
     restart: unless-stopped
     ports:
@@ -23,6 +23,8 @@ services:
     environment:
       # Dati finti: nessun libro reale, nessun nome reale.
       MOCK: "1"
+      # nessuna wishlist reale nella demo pubblica
+      AMAZON_WISHLIST: ""
       # Limite di richieste per IP: protegge banda di casa e proxy copertine.
       PUBBLICA: "1"
       LETTRICE: "una biblioteca di prova"
