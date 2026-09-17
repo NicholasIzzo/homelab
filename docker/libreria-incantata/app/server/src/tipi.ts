@@ -38,6 +38,8 @@ export interface BibliotecaPayload {
   /** Nome del profilo Goodreads, per personalizzare l'insegna. */
   lettrice: string;
   scaffali: Scaffale[];
+  /** Quando lo scaffale è stato riletto da Goodreads; null se mai riuscito. */
+  libriAggiornati?: string | null;
   desideri: Libro[];
   /** Quando la wishlist è stata riletta da Amazon; null se mai riuscito. */
   desideriAggiornati?: string | null;

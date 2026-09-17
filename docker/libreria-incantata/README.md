@@ -12,8 +12,9 @@ Three.js e server Fastify in un'unica immagine Docker).
 
 - **Da leggere** → feed RSS pubblico dello scaffale Goodreads `to-read`
   (`goodreads.com/review/list_rss/<id>?shelf=to-read`). Il server lo scarica,
-  lo normalizza e lo tiene in cache 30 min. Quando lei aggiunge un libro su
-  Goodreads, ricompare da solo. Niente generi nell'RSS → gli scaffali tematici
+  lo normalizza e lo **rilegge da solo ogni 30 min**, non alla prima richiesta
+  scaduta: quando lei aggiunge un libro su Goodreads ricompare da solo, e
+  nessuno resta ad aspettare il caricamento. Niente generi nell'RSS → gli scaffali tematici
   sono dedotti da titolo/serie/autore con parole chiave (`server/src/scaffali.ts`).
 - **Desideri** (wishlist Amazon, "da comprare") → **riletti dal vivo** ogni 6 ore
   (`server/src/amazon.ts`). La pagina serve solo il guscio: i libri arrivano a
@@ -173,6 +174,26 @@ node -e "import(./dist/amazon.js).then(async m => { … })"   # vedi cronologia 
 
 Se un giorno Amazon cambia il markup, il sintomo è nei log
 (`wishlist Amazon non riletta`) e l app continua a servire la riserva.
+
+### Perché la lettura è più contorta del necessario
+
+Tre trappole trovate misurando, non ragionando:
+
+1. **`fetch` di node viene respinto.** A parità di intestazioni e di macchina,
+   `fetch` ha incassato 503 su tutte le richieste mentre il modulo `https` e
+   curl passavano quasi sempre: Amazon distingue il client sotto il livello
+   delle intestazioni. Da qui `richiesta()` su `node:https`.
+2. **L endpoint dei lotti pretende coerenza.** Dichiarare
+   `Sec-Fetch-Site: same-origin` senza `Referer` è una combinazione che un
+   browser non produce mai, e veniva rifiutata **sistematicamente** (6 su 6)
+   mentre la prima pagina passava. Con Referer e cookie di sessione: 135
+   articoli in 16 secondi.
+3. **Un 200 non basta.** Capita una pagina di cortesia da 4 KB, senza libri.
+   Per questo si riprova finché non si estrae qualcosa, e un elenco che si
+   dimezza di colpo viene scartato invece di sostituire quello buono: una
+   wishlist troncata spacciata per completa sarebbe peggio di una ferma.
+
+Per vedere i tentativi uno per uno: `AMAZON_DEBUG=1`.
 
 
 ## Portare i propri libri (EPUB)

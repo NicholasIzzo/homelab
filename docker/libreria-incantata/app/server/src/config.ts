@@ -6,6 +6,8 @@ export interface Config {
   goodreadsUserId: string;
   /** Scaffale Goodreads da leggere (di norma "to-read"). */
   goodreadsShelf: string;
+  /** Ogni quanti minuti rileggere lo scaffale Goodreads. */
+  goodreadsMinuti: number;
   /** Percorso del JSON con i desideri Amazon: serve da riserva. */
   desideriPath: string;
   /** Lista Amazon da rileggere dal vivo; vuoto = solo il file statico. */
@@ -31,6 +33,7 @@ export function loadConfig(): Config {
     publicDir: process.env["PUBLIC_DIR"] ?? "",
     goodreadsUserId: (process.env["GOODREADS_USER_ID"] ?? "130636342").trim(),
     goodreadsShelf: (process.env["GOODREADS_SHELF"] ?? "to-read").trim(),
+    goodreadsMinuti: Number(process.env["GOODREADS_MINUTI"] ?? 30),
     desideriPath: process.env["DESIDERI_PATH"] ?? "",
     wishlistId: (process.env["AMAZON_WISHLIST"] ?? "MPM4BFSYOHU7").trim(),
     wishlistOre: Number(process.env["AMAZON_ORE"] ?? 6),

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: libreria-incantata:0.8.0 # tag fisso: mai :latest in produzione
+    image: libreria-incantata:0.8.1 # tag fisso: mai :latest in produzione
     container_name: libreria-incantata
     restart: unless-stopped
     ports:
@@ -14,6 +14,8 @@ services:
       # Lista pubblica Goodreads (id dalla URL) e scaffale da mostrare.
       GOODREADS_USER_ID: "130636342"
       GOODREADS_SHELF: "to-read"
+      # Ogni quanti minuti rileggere lo scaffale: il feed RSS è leggero.
+      GOODREADS_MINUTI: "30"
       # Nome sull'insegna; vuoto = usa quello del profilo Goodreads.
       LETTRICE: ""
       # Wishlist Amazon riletta dal vivo; vuoto = solo il file di riserva.

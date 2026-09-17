@@ -30,6 +30,16 @@ async function aggiornaDesideri(): Promise<void> {
     // le copertine del file di riserva restano valide per i libri già visti
     for (const [k, v] of desiderata.copertine) if (!nuovi.copertine.has(k)) nuovi.copertine.set(k, v);
     const prima = desiderata.desideri.length;
+
+    // Un crollo improvviso non è una wishlist svuotata, è una raccolta finita
+    // a metà: meglio tenersi l'elenco di ieri che cancellarle mezza lista.
+    if (prima > 20 && nuovi.desideri.length < prima * 0.5) {
+      app.log.warn(
+        `wishlist sospetta: ${nuovi.desideri.length} titoli contro ${prima}, scartata`,
+      );
+      return;
+    }
+
     desiderata = nuovi;
     desideriAggiornati = new Date().toISOString();
     app.log.info(`wishlist Amazon riletta: ${nuovi.desideri.length} titoli (prima ${prima})`);
@@ -38,15 +48,22 @@ async function aggiornaDesideri(): Promise<void> {
   }
 }
 
-// Cache del catalogo Goodreads: lo scaffale cambia di rado, niente martellate.
-const CATALOGO_TTL_MS = 30 * 60 * 1000;
+/**
+ * Il catalogo Goodreads, con lo stesso trattamento dei desideri: riletto da
+ * solo a intervalli invece che alla prima richiesta scaduta. Così un libro
+ * aggiunto allo scaffale compare senza che nessuno debba aspettare il
+ * caricamento, e se Goodreads non risponde si continua a servire l'ultimo
+ * elenco buono.
+ */
 interface Snapshot {
   lettrice: string;
   libri: Libro[];
   copertine: Map<string, string>;
-  at: number;
 }
 let cache: Snapshot | null = null;
+let libriAggiornati: string | null = null;
+/** Rilettura in corso: le richieste in arrivo la aspettano invece di duplicarla. */
+let letturaInCorso: Promise<void> | null = null;
 
 /** Titolo per una copertina, cercando fra libri e desideri (per il mock SVG). */
 function titoloDi(id: string, libri: Libro[]): string {
@@ -57,26 +74,41 @@ function titoloDi(id: string, libri: Libro[]): string {
   );
 }
 
+async function aggiornaCatalogo(): Promise<void> {
+  if (cfg.mockMode) return;
+  if (letturaInCorso) return letturaInCorso;
+  letturaInCorso = (async () => {
+    try {
+      const cat = await scaricaCatalogo(cfg.goodreadsUserId, cfg.goodreadsShelf);
+      const prima = cache?.libri.length ?? 0;
+      cache = { lettrice: cat.lettrice, libri: cat.libri, copertine: cat.copertine };
+      libriAggiornati = new Date().toISOString();
+      app.log.info(`scaffale Goodreads riletto: ${cat.libri.length} libri (prima ${prima})`);
+    } catch (err) {
+      // senza cache non c'è niente da servire: lo segnaliamo come errore, e la
+      // prossima richiesta riproverà invece di restare su un buco
+      if (cache) app.log.warn({ err }, "Goodreads irraggiungibile: resta l'elenco precedente");
+      else app.log.error({ err }, "Goodreads irraggiungibile e nessun elenco in memoria");
+    } finally {
+      letturaInCorso = null;
+    }
+  })();
+  return letturaInCorso;
+}
+
 async function getCatalogo(): Promise<Snapshot> {
   if (cfg.mockMode) {
     const m = catalogoMock();
-    return { lettrice: m.lettrice, libri: m.libri, copertine: new Map(), at: Date.now() };
+    return { lettrice: m.lettrice, libri: m.libri, copertine: new Map() };
   }
-  if (cache && Date.now() - cache.at < CATALOGO_TTL_MS) return cache;
-  try {
-    const cat = await scaricaCatalogo(cfg.goodreadsUserId, cfg.goodreadsShelf);
-    // fondiamo le copertine dei desideri, così /api/cover le trova tutte.
-    const copertine = new Map(cat.copertine);
-    for (const [k, v] of desiderata.copertine) copertine.set(k, v);
-    cache = { lettrice: cat.lettrice, libri: cat.libri, copertine, at: Date.now() };
-    return cache;
-  } catch (err) {
-    if (cache) {
-      app.log.warn({ err }, "Goodreads irraggiungibile: servo l'ultima cache");
-      return cache;
-    }
-    throw err;
-  }
+  if (!cache) await aggiornaCatalogo();
+  if (!cache) throw new Error("catalogo Goodreads non disponibile");
+  return cache;
+}
+
+/** Copertina di un libro o di un desiderio: le due mappe vivono separate. */
+function copertinaDi(id: string, cat: Snapshot): string | undefined {
+  return cat.copertine.get(id) ?? desiderata.copertine.get(id);
 }
 
 // Esposta a Internet: un tetto alle richieste per IP. Il catalogo Goodreads
@@ -102,6 +134,7 @@ app.get("/api/biblioteca", async (): Promise<BibliotecaPayload> => {
   return {
     lettrice: cfg.lettrice || cat.lettrice || "la tua biblioteca",
     scaffali: costruisciScaffali(cat.libri),
+    libriAggiornati,
     desideri: desiderata.desideri,
     desideriAggiornati,
     mock: cfg.mockMode,
@@ -115,7 +148,7 @@ app.get<{ Params: { id: string } }>("/api/cover/:id", async (req, reply) => {
   const { id } = req.params;
   const cat = await getCatalogo();
 
-  const remota = cat.copertine.get(id) ?? desiderata.copertine.get(id);
+  const remota = copertinaDi(id, cat);
   if (!remota) {
     return reply
       .header("content-type", "image/svg+xml")
@@ -159,10 +192,16 @@ if (cfg.publicDir) {
 try {
   await app.listen({ host: cfg.host, port: cfg.port });
   app.log.info(`Libreria Incantata avviata (mock: ${cfg.mockMode}, desideri: ${desiderata.desideri.length})`);
-  // Non si blocca l'avvio per Amazon: l'app parte con il file incluso e la
-  // lista si aggiorna appena possibile, poi a intervalli regolari.
+  // Nessuna delle due letture blocca l'avvio: l'app parte subito (con il file
+  // dei desideri incluso) e le due ruote si riempiono appena possibile, poi si
+  // rinfrescano da sole. Passi diversi perché le sorgenti lo sono: Goodreads è
+  // un feed RSS leggero, la wishlist va raccolta a lotti dalle pagine Amazon.
+  void aggiornaCatalogo();
   void aggiornaDesideri();
+  const minuti = Math.max(1, cfg.goodreadsMinuti);
+  setInterval(() => void aggiornaCatalogo(), minuti * 60_000).unref();
   setInterval(() => void aggiornaDesideri(), Math.max(1, cfg.wishlistOre) * 3600_000).unref();
+  app.log.info(`riletture automatiche: Goodreads ogni ${minuti} min, wishlist ogni ${cfg.wishlistOre} h`);
 } catch (err) {
   app.log.error(err);
   process.exit(1);
